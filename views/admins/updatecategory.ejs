@@ -1,0 +1,51 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<h1>Edit category</h1>
+<div class="form-container">
+  <form enctype="multipart/form-data" id="category-form" class="form" action="/admin/update-category" method="post">
+    <label for="category-name">Category Name</label>
+    <input type="text" value="<%= category._id %>" name="id" hidden>
+    <input 
+      type="text" 
+      id="category-name" 
+      name="name" 
+      placeholder="Enter category name" 
+      value="<%= category.name %>" 
+      required>
+    
+    <label for="category-description">Description</label>
+    <textarea 
+      id="category-description" 
+      name="description" 
+      placeholder="Enter description" 
+      required><%= category.description %></textarea>
+    
+    <label for="category-image">Category Image</label>
+    <input 
+      type="file" 
+      id="category-image" 
+      name="image_url">
+    
+    <% if (category.image_url) { %>
+      <div>
+        <p>Current Image:</p>
+        <img 
+          src="<%= category.image_url %>" 
+          alt="Category Image" 
+          style="max-width: 25px; height: auto; margin-bottom: 10px;">
+      </div>
+    <% } %>
+
+    <label for="is-listed">Visibility</label>
+    <select id="is-listed" name="is_listed">
+      <option value="true" <%= category.is_listed ? 'selected' : '' %>>List</option>
+      <option value="false" <%= !category.is_listed ? 'selected' : '' %>>Unlist</option>
+    </select>
+    
+    <button type="submit" class="btn-submit">Update Category</button>
+  </form>
+</div>
+
+
+
+<%- include('../partials/admin/footer') %>

@@ -19,8 +19,12 @@ const userSchema = new mongoose.Schema({
   },
   googleId: {
     type: String,
-    unique: true, // Ensure googleId is unique, but allow it to be null or undefined
-    sparse: true, // Allows googleId to be null or undefined without causing duplicate errors
+    unique: true, 
+    sparse: true, 
+  },
+  status: {
+     type: String, 
+    default: "active" ,
   },
   createdAt: {
     type: Date,

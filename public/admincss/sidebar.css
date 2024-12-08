@@ -1,0 +1,446 @@
+ /* General Reset */
+ * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-size: 10px; /* 1 rem = 10px */
+  }
+  
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1.6rem;
+    background-color: #f9f9f9;
+  }
+  
+  /* Header Section */
+  header {
+    background-color: #ffffff;
+    color: #333;
+    padding: 10px 20px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .navimg {
+    width: 160px;
+    height: 60px;
+    margin: 0 0 0 45px;
+  }
+  
+  nav {
+    height: 60px;
+    background-color: #f1f1f1;
+    display: flex;
+    align-items: center;
+  }
+  
+  /* Horizontal Rule */
+  hr {
+    margin: 0;
+    border: none;
+    border-top: 1px solid #e0e0e0;
+  }
+  
+  /* Main Layout */
+  .adminmain {
+    display: flex;
+    min-height: 100vh;
+  }
+  
+  /* Sidebar */
+  .divsidebar {
+    background-color: #f7f7f7;
+    height: 100vh;
+    width: 260px;
+    color: #333;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .divsidebar h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    color: #555;
+  }
+  
+  .divsidebar ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .divli {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding: 10px 15px;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .divli:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.15);
+  }
+  
+  .divli a {
+    font-size: 1.4rem;
+    color: #333;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  
+  .divli i {
+    font-size: 1.6rem;
+    color: #555;
+  }
+  
+  /* Logout Button */
+  .logout-button {
+    margin-top: auto;
+    padding: 10px 15px;
+    font-size: 1.4rem;
+    color: #ffffff;
+    background-color: #d9534f;
+    border: none;
+    border-radius: 5px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .logout-button:hover {
+    background-color: #c9302c;
+  }
+  
+  .logout-button i {
+    font-size: 1.6rem;
+  }
+
+
+
+  .user-management {
+    margin-top: 20px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+    margin-left: 40px;
+    display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+
+.add-category {
+  align-self: flex-end; /* Aligns the button to the right */
+  margin-bottom: 10px; /* Optional: Adds some space between the button and the table */
+}
+
+
+.search-bar input {
+    width: 1000px;
+    padding: 10px;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    outline: none;
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.user-table {
+    width: 1150px;
+    border-collapse: collapse;
+
+}
+
+.user-table thead th {
+    font-size: 1.4rem;
+    text-align: left;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.user-table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.user-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.user-table tbody td {
+    font-size: 1.4rem;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.block-button1, .block-button , .edit-button, .delete-button {
+    font-size: 1.2rem;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.block-button {
+    background-color: #28a745;
+    color: #ffffff;
+}
+.block-button1{
+  background-color: #100000;
+  color: #ffffff;
+}
+
+.unblock-button {
+    background-color: #dc3545;
+    color: #ffffff;
+}
+
+.edit-button {
+    background-color: #f0ad4e;
+    color: #ffffff;
+    margin-right: 5px;
+}
+
+.delete-button {
+    background-color: #d9534f;
+    color: #ffffff;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.pagination-button {
+    background-color: #007bff;
+    color: #ffffff;
+    padding: 10px 15px;
+    font-size: 1.4rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination-button:hover {
+    background-color: #0056b3;
+}
+
+.page-info {
+  font-size: 1.4rem;
+}
+
+.add-button,.add-category{
+  background-color: #16c14f;
+  color: #ffffff;
+  font-size: 10px;
+  width: 90px;
+  height: 30px;
+  border: none;
+  border-radius: 5px;
+  margin-right: 1px;
+}
+/* Style for Search Bar and Add Button */
+.search-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px; /* Space between search bar and table */
+}
+
+.search-bar {
+  width: 70%;  /* Adjust width to make it smaller */
+  padding: 8px;
+  font-size: 1.4rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.add-button {
+  background-color: #28a745;
+  color: white;
+  font-size: 1.4rem;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 110px;
+  height: 38px;
+  margin-right: 65px;
+}
+
+.add-button:hover {
+  background-color: #218838;
+}
+
+
+
+
+
+
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+  border-radius: 8px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* Form Elements */
+.label {
+  margin-top: 10px;
+  display: block;
+  font-weight: bold;
+  color: #000;
+}
+
+h2 {
+  color: #000;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px;
+  margin: 5px 0 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Button Styles */
+.modal-btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.modal-btn:hover {
+  background-color: #45a049;
+}
+
+
+/* add category */
+
+.form-container {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 1150px;
+  padding: 20px;
+  margin: 20px;
+  height: 700px;
+}
+
+/* Form Header */
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+}
+
+/* Form Label */
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  color: #555;
+}
+
+/* Form Inputs */
+#category-name,
+input[type="file"],
+textarea,
+select {
+  width: 800px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+/* Textarea Styling */
+textarea {
+  height: 80px;
+  resize: none;
+}
+input[type="file"]{
+  height: 50px;
+}
+
+/* Buttons */
+.form-container button {
+  width: 800px;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: #fff;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+#category-form{
+  margin-top: 10px;
+}
+

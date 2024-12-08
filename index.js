@@ -4,6 +4,7 @@ const path = require("path");
 const mongoose = require("./db/connect");
 const env = require("dotenv").config();
 const UserRoutes = require("./routes/user");
+const AdminRoutes = require("./routes/admin")
 const session = require("express-session");
 const nocache = require("nocache");
 const passport = require("./config/passport");
@@ -40,11 +41,12 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Routes setup
 app.use("/", UserRoutes);
+app.use("/admin",AdminRoutes)
 
 // Error handling route
-app.use((req, res) => {
-  res.render('users/error');
-});
+// app.use((req, res) => {
+//   res.render('users/error');
+// });
 
 // MongoDB connection and error handling
 mongoose().catch(err => {

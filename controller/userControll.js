@@ -84,6 +84,7 @@ let postsignup = async (req,res)=>{
             type: 'signup', 
             expiresAt,
         });
+        
         await otpRecord.save();
 
 
@@ -190,12 +191,13 @@ let postlogin = async (req,res)=>{
         const {username,password} = req.body;
         const user = await User.findOne({username})
         if(!user) return res.render('users/login',{message:"user not exist"})
-
-
             const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.render('users/signup', { message : 'Password does not match' });
         }
+         if(user.status == "blocked"){
+            return res.render('users/login', { message : 'User is blocked' });
+         }
         console.log(req.body);
         
         req.session.user = true

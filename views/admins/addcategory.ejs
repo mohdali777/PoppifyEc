@@ -1,0 +1,26 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<h1>add category</h1>
+<div class="form-container">
+  
+  <form enctype="multipart/form-data" id="category-form" class="form" action="/admin/add-category" method="post">
+    <label for="category-name">Category Name</label>
+    <input type="text" id="category-name" name="name" placeholder="Enter category name" required>
+
+    <label for="category-description">Description</label>
+    <textarea id="category-description" name="description" placeholder="Enter description" required></textarea>
+
+    <label for="category-image">Category Image</label>
+    <input type="file" id="category-image" name="image_url" >
+
+    <label for="is-listed">Visibility</label>
+    <select id="is-listed" name="is_listed">
+      <option value="true">List</option>
+      <option value="false">Unlist</option>
+    </select>
+    <button type="submit" class="btn-submit">Add Category</button>
+  </form>
+</div>
+
+
+<%- include('../partials/admin/footer') %>

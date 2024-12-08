@@ -1,0 +1,73 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+
+<div class="user-management">
+  <button class="add-category" onclick="addcategory()">Add Category</button>
+  <!-- Category Table -->
+  <table class="user-table">
+    <thead>
+      <tr>
+        <th>Category Name</th>
+        <th style="margin-left: 10px;">  </th>
+        <th>Description</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Loop through categories array and display each category -->
+      <% categories.forEach((category) => { %>
+        <tr>
+          <td><%= category.name %> </td>
+          <td><img src="<%= category.image_url %>" alt="<%= category.name %>" width="25px"></td>
+          <td><%= category.description %></td>
+          <td>
+            <button class="edit-button" onclick="Editcategory('<%= category._id %>')" > Edit</button>
+            <button class="delete-button" onclick="deletecategory('<%= category._id %>')" >Delete</button>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+</div>
+  <script>
+function addcategory(){
+fetch("/admin/add-category",{method:"GET"}).then((response)=>{
+if(response.ok) window.location.href = "/admin/add-category"
+}).catch((err)=>{
+console.log(err);
+
+})
+}
+
+function deletecategory(categoryId) {
+  if (confirm('Are you sure you want to delete this category?')) {
+    fetch(`/admin/deletecategory/${categoryId}`, { method: 'POST' })
+      .then((response) => {
+        if (response.ok) {
+          window.location.reload(); 
+        } else {
+          alert('Failed to delete category. Please try again.');
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert('An error occurred. Please check the console for details.');
+      });
+  }
+}
+function Editcategory(categoryId) {
+    fetch(`/admin/editcategory/${categoryId}`, { method: "GET" })
+        .then((response) => {
+            if (response.ok) {
+                window.location.href = `/admin/editcategory/${categoryId}`;
+            }
+        })
+        .catch((err) => {
+            console.log('Error navigating to edit category page:', err);
+        });
+}
+
+
+
+  </script>
+<%- include('../partials/admin/footer') %>
