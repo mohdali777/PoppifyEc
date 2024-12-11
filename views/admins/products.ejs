@@ -1,0 +1,59 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+ 
+    <link rel="stylesheet" href="/admincss/product.css">
+      <div class="admin-dashboard">
+        <header class="dashboard-header">
+          <h1>Product Management</h1>
+          <button class="add-product-btn" onclick="addproducts()">Add Product</button>
+        </header>
+        <div class="product-grid">
+          <!-- Dynamically Render Products -->
+          <% products.forEach(product => { %>
+          <div class="product-card">
+            <img src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" class="product-image">
+            <h2 class="product-name"><%= product.name %></h2>
+            <p class="product-price">$<%= product.price %></p>
+            <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
+            <div class="edsp">
+                <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>
+                <span class="stock-status <%= product.stockStatus === 'Low Stock' ? 'low-stock' : product.stockStatus === 'Out of Stock' ? 'out-of-stock' : 'published' %>">
+                  <%= product.stockStatus %>
+                </span>
+                <img  onclick="deleteproduct('<%= product._id %>')" style="margin-top: 25px; width: 20px; height: 20px;" src="/images/fi-sr-trash.png" alt="trash" >
+            </div>  
+          </div>
+          <% }) %>
+        </div>
+      </div>
+    
+  <script>
+    function addproducts (){
+        fetch("/admin/addproducts",{method:"GET"}).then((response)=>{
+  if(response.ok) window.location.href = "/admin/addproducts"
+        }).catch((err)=>{
+            console.log(err);
+            
+        })
+    }
+
+    function editproduct(productId) {
+    // Directly redirect to the edit page
+    window.location.href = `/admin/editproduct/${productId}`;
+}
+async function deleteproduct(productId) {
+    
+    if(confirm("delte product")){
+        try {
+            const response = await fetch(`/admin/deleteproduct/${productId}`,{method:"POST"})
+             if (response.ok) window.location.reload()
+        } catch (error) {
+            console.log(error);
+            
+        }
+     
+    }
+}
+  </script>
+
+<%- include('../partials/admin/footer') %>

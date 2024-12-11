@@ -1,4 +1,6 @@
 const {OTP,User} = require("../model/user/usermodel")
+const{Product} = require("../model/admin/adminmodel")
+const {Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const nodemailer = require('nodemailer');
 const env = require("dotenv")
@@ -19,7 +21,15 @@ let verifyOtp = async (req,res)=>{
    }
 
    let home = async (req,res)=>{
-   res.render("users/home")
+    try {
+        const products = await Product.find({}).limit(4);
+        const categories = await Category.find({})
+        res.render("users/home",{products,categories})
+    } catch (error) {
+        console.log(error);
+        
+    }
+   
    }
 
    let loginsign = async (req,res)=>{
@@ -206,8 +216,19 @@ let postlogin = async (req,res)=>{
             res.status(500).send(`${err} error found`)
         }
     }
+    const productdeatails = async (req,res)=>{
+        try {
+            const productId = req.params.productId;
+            const products = await Product.findById(productId)
+            res.render("users/productdeatails",{products})
+        } catch (error) {
+            console.log(error);
+            
+        }
+   
+    }
 
 
 
 
-module.exports = {login,signup,forget,verifyOtp,newpassword,postsignup,postlogin,home,postverifyotp,resendOtp,loginsign,signlogin}
+module.exports = {login,signup,forget,verifyOtp,newpassword,postsignup,postlogin,home,postverifyotp,resendOtp,loginsign,signlogin,productdeatails}

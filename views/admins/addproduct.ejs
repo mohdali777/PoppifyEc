@@ -1,0 +1,155 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+
+
+<link rel="stylesheet" href="/admincss/addproduct.css">
+
+<form class="add-product-form" action="/admin/add-product" method="post" enctype="multipart/form-data">
+    <label for="product-name">Product Name</label>
+    <input type="text" id="product-name" class="custom-width" placeholder="Enter product name" name="name" required>
+
+    <label for="description">Description</label>
+    <textarea id="description" class="custom-width" placeholder="Enter description" name="description" required></textarea>
+
+    <label for="image-upload">Upload Product Images</label>
+    <input type="file" id="image-upload" class="custom-width" accept="image/*" name="images" multiple onchange="openCropper(event)">
+
+    <!-- Cropper Modal -->
+    <div id="cropper-modal" style="display:none; position:fixed; top:10%; left:10%; width:80%; background:white; z-index:1000; padding:20px; border:1px solid #ccc;">
+        <div style="text-align:center;">
+            <img id="cropper-image" style="max-width:100%; max-height:500px;" />
+        </div>
+        <button id="crop-button" >Crop</button>
+        <button onclick="closeCropper()">Cancel</button>
+    </div>
+
+    <div id="image-preview" class="image-preview-container"></div>
+
+    <label for="category">Category</label>
+    <select id="category" class="custom-width" name="category" required>
+        <option value="">Select a category</option>
+        <% categories.forEach(category => { %>
+            <option value="<%= category._id %>"><%= category.name %></option>
+        <% }) %>
+    </select>
+
+    <label for="price">Base Price</label>
+    <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" required>
+
+    <label for="quantity">Quantity</label>
+    <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
+
+    <label for="brand">Brand</label>
+    <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" required>
+
+    <label>Variants</label>
+    <select id="size" class="custom-width" name="size">
+        <option value="">Select Variant</option>
+        <option value="64 GB">64 GB</option>
+        <option value="128 GB">128 GB</option>
+        <option value="256 GB">256 GB</option>
+        <option value="512 GB">512 GB</option>
+        <option value="1 TB">1 TB</option>
+    </select>
+
+    <label>Color</label>
+    <div class="color-options">
+        <input class="radioadd" type="radio" name="color" id="red" value="red" required>
+        <label for="red" class="color-circle red"></label>
+        <input class="radioadd" type="radio" name="color" id="black" value="black">
+        <label for="black" class="color-circle black"></label>
+        <input class="radioadd" type="radio" name="color" id="blue" value="blue">
+        <label for="blue" class="color-circle blue"></label>
+        <input class="radioadd" type="radio" name="color" id="green" value="green">
+        <label for="green" class="color-circle green"></label>
+    </div>
+
+    <button type="submit" class="submit-btn">Add Product</button>
+</form>
+
+
+<script>
+    let imageFiles = []; // Array to store the selected files
+    let cropper; // Variable to store Cropper instance
+    let croppedImages = []; // Array to store cropped images
+
+    // Open cropper modal when file is selected
+    function openCropper(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const cropperImage = document.getElementById('cropper-image');
+            cropperImage.src = e.target.result;
+            document.getElementById('cropper-modal').style.display = 'block';
+
+            // Initialize the Cropper.js instance
+            if (cropper) cropper.destroy(); // Destroy previous cropper instance if it exists
+            cropper = new Cropper(cropperImage, {
+                aspectRatio: NaN, // Set aspect ratio to 1:1 (Square)
+                viewMode: 1, // Restrict cropping to image boundaries
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Close cropper modal
+    function closeCropper() {
+        document.getElementById('cropper-modal').style.display = 'none';
+    }
+
+    // Handle cropping and save the cropped image
+    document.getElementById('crop-button').addEventListener('click', function() {
+        const croppedCanvas = cropper.getCroppedCanvas();
+        croppedCanvas.toBlob(blob => {
+            // Convert the cropped image to a Blob and add to the croppedImages array
+            croppedImages.push(blob);
+
+            // Display the cropped image in preview
+            const previewContainer = document.getElementById('image-preview');
+            const img = document.createElement('img');
+            img.src = URL.createObjectURL(blob);
+            img.style.width = '100px';
+            img.style.margin = '5px';
+            img.style.border = '1px solid #ddd';
+            previewContainer.appendChild(img);
+        });
+
+        closeCropper();
+    });
+
+    // Handle form submission
+    document.querySelector('.add-product-form').addEventListener('submit', function(e) {
+        e.preventDefault(); // Prevent default form submission
+
+        const formData = new FormData();
+
+        // Append form fields
+        formData.append('name', document.getElementById('product-name').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('category', document.getElementById('category').value);
+        formData.append('price', document.getElementById('price').value);
+        formData.append('quantity', document.getElementById('quantity').value);
+        formData.append('brand', document.getElementById('brand').value);
+        formData.append('size', document.getElementById('size').value);
+        formData.append('color', document.querySelector('input[name="color"]:checked').value);
+
+        // Append cropped images
+        croppedImages.forEach((file, index) => {
+            formData.append('images', file);
+        });
+
+        // Send the form data to the server
+        fetch('/admin/add-product', {
+            method: 'POST',
+            body: formData,
+        }).then((response) => {
+            if (response.ok) window.location.reload();
+        })
+        .catch(error => console.error('Error:', error));
+    });
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+<%- include('../partials/admin/footer') %>

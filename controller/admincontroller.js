@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt")
 const {User} = require("../model/user/usermodel")
 const { serializeUser } = require("passport")
 const { Category } = require("../model/admin/adminmodel");
+const {Product} = require("../model/admin/adminmodel")
 
 let getlogin = async(req,res)=>{
 res.render("admins/signin")
@@ -237,10 +238,92 @@ const deleteCategory = async (req, res) => {
     }
   }
   
+  const products = async (req,res)=>{
+    try {
+      const products = await Product.find({});
+
+    // Send a success response or redirect
+    res.render('admins/products',{products}); 
+    } catch (error) {
+      console.log(error);
+      
+    }
+    
+    
+  }
 
 
+const addproductsget = async (req,res)=> {
+  try {
+    const categories = await Category.find();
+    res.render("admins/addproduct",{categories})
+  } catch (error) {
+    console.log(err);
+    res.status(500).send('Server Error');
+  }
 
 
+}
+
+const addproductpost = async (req, res) => {
+  try {
+    // Extract data from the request body
+    const { name, description, category, price, quantity, brand, size, color } = req.body;
+    console.log(req.files);
+    
+    const image = req.files.map(file => file.filename);
+    console.log(image);
+    
+    const newProduct = new Product({
+      name,
+      description,
+      category,
+      price,
+      quantity,
+      brand,
+      size: size || [],  // Make sure size is an array, default to an empty array if not provided
+      color,
+      image,  // Save the array of image file paths
+    });
+
+    // Save the new product to the database
+    await newProduct.save();
+    const products = await Product.find({});
+
+
+    // Send a success response or redirect
+    res.render('admins/products',{products});  // Redirect to product list after adding the product
+  } catch (error) {
+    console.error('Error saving product:', error);
+    res.status(500).send('Server Error');  // Send an error response if something goes wrong
+  }
+};
+
+const geteditproducts = async (req,res)=>{
+try {
+  const productId = req.params.productId;
+  const product = await Product.findById(productId)
+  const categories = await Category.find({})
+  res.render("admins/updateproduct",{product,categories})
+} catch (error) {
+  console.log(error);
+  
+}
+}
+
+const deleteproduct = async (req,res)=>{
+  try {
+    productId = req.params.productId;
+    await Product.findByIdAndDelete(productId);
+    const products = await Product.find({});
+    res.render('admins/products',{products}); 
+  } catch (error) {
+    console.log(error);
+    
+  }
+
+
+}
 
 
 
@@ -260,4 +343,9 @@ module.exports = {getlogin,
     addcategory,
     deleteCategory,
     editcategory,
-    updatecategory}
+    updatecategory,
+  products,
+addproductsget,
+addproductpost,
+geteditproducts,
+deleteproduct}

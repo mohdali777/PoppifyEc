@@ -1,14 +1,614 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>
-        home
-    </h1>
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<div class="container header_container">
+    <div class="header_filter">
+      <a href="#" class="header_filter_link">Woman’s Fashion</a>
+      <a href="#" class="header_filter_link">Men’s Fashion</a>
+      <a href="#" class="header_filter_link">Electronics</a>
+      <a href="#" class="header_filter_link">Home & Lifestyle</a>
+      <a href="#" class="header_filter_link">Medicine</a>
+      <a href="#" class="header_filter_link">Sports & Outdoor</a>
+      <a href="#" class="header_filter_link">Baby’s & Toys</a>
+      <a href="#" class="header_filter_link">Groceries & Pets</a>
+      <a href="#" class="header_filter_link">Health & Beauty</a>
+    </div>
+    <img src=".\images\Frame 560.png" alt="" class="header_img" />
+  </div>
+
+
+
+  <div class="container py-5">
+    <div class="section_category">
+      <p class="section_category_p" style="color: red; font-size: 14px;">Today's</p>
+    </div>
+    <div class="section_header">
+      <h3 class="section_title" style="font-size: 23px;">Flash Sale</h3>
+      <p id="demo"></p>
+    </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      <% products.forEach(product => { %>
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">
+              -40%
+            </div>
+            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>')">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                <%= product.name %>
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.price %></h5>
+              <div class="text-warning">
+                <% for (let i = 0; i < product.rating; i++) { %>
+                  <i class="bi bi-star-fill"></i>
+                <% } %>
+                <% for (let i = product.rating; i < 5; i++) { %>
+                  <i class="bi bi-star"></i>
+                <% } %>
+                <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+      <button type="button" class="btn btn-danger btn-lg">View All Products</button>
+    </div>
+  </div>
+
+<!-- viewproduct -->
+ <!-- categories -->
+ <section class="section">
+  <div class="container">
+    <div class="section_category">
+      <p class="section_category_p">categories</p>
+    </div>
+    <div class="section_header">
+      <h3 class="section_title">Browse by Category</h3>
+    </div>
+    <div class="categories">
+      <% categories.forEach(category => { %>
+        <div class="category">
+          <img src="<%= category.image_url %>" alt="<%= category.name %>" class="category_icon"  />
+          <p class="category_name"><%= category.name %></p>
+        </div>
+      <% }); %>
+    </div>
+  </div>
+</section>
+
+
+<!-- thismonth start -->
+  <div class="container py-5">
+    <div class="section_category">
+        <p class="section_category_p  " style="color: red; font-size: 14px;">This Month </p>
+      </div>
+      <div class="section_header">
+        <h3 class="section_title" style="font-size: 23px;">Best Selling Products</h3>
+        <p id="demo"></p>
+      </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      <!-- Card 1 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+          <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <i class="bi bi-heart" style="font-size: 15px;"></i>
+            </button>
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <i class="bi bi-eye" style="font-size: 15px;"></i>
+            </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;" >
+<button type="button" class="btn btn-danger btn-lg">View All Products</button>
+</div>
+</div>
+
+<!-- this month end -->
+<!-- speaker ads     -->
+<section class="section">
+    <div class="container">
+      <div class="trending">
+        <div class="trending_content">
+          <p class="trending_p">categories</p>
+          <h2 class="trending_title">Enhance Your Music 
+            <br> Experience</h2>
+          <a href="#" class="trending_btn">Buy Now!</a>
+        </div>
+        <img src="./images/speaker.png" alt="" class="trending_img" />
+      </div>
+    </div>
+  </section>
+
+
+  <!-- explore -->
+  <div class="container py-5">
+    <div class="section_category">
+        <p class="section_category_p  " style="color: red; font-size: 14px;">This Month </p>
+      </div>
+      <div class="section_header">
+        <h3 class="section_title" style="font-size: 23px;">Best Selling Products</h3>
+        <p id="demo"></p>
+      </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      <!-- Card 1 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+          <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <i class="bi bi-heart" style="font-size: 15px;"></i>
+            </button>
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <i class="bi bi-eye" style="font-size: 15px;"></i>
+            </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="col">
+        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+          </div>
+          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+          </div>
+          <div class="card-body text-center" style="text-align: start;">
+            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+              Wireless DualSense Controller
+            </p>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <div class="text-warning">
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+              <i class="bi bi-star-fill"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+<!-- new row -->
+    <div class="row row-cols-1 row-cols-md-4 g-4 mt-2">
+        <!-- Card 1 -->
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                Wireless DualSense Controller
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+              <div class="text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Card 2 -->
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+              <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-heart" style="font-size: 15px;"></i>
+                </button>
+                <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-eye" style="font-size: 15px;"></i>
+                </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                Wireless DualSense Controller
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+              <div class="text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Card 3 -->
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+              <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-heart" style="font-size: 15px;"></i>
+                </button>
+                <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-eye" style="font-size: 15px;"></i>
+                </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                Wireless DualSense Controller
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+              <div class="text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Card 4 -->
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+              <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
+            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-heart" style="font-size: 15px;"></i>
+                </button>
+                <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+                  <i class="bi bi-eye" style="font-size: 15px;"></i>
+                </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                Wireless DualSense Controller
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+              <div class="text-warning">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+<div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;" >
+<button type="button" class="btn btn-danger btn-lg">View All Products</button>
+</div>
+</div>
+
+
+<!-- last part -->
+<section class="section">
+    <div class="container">
+      <div class="section_category">
+        <p class="section_category_p">Featured</p>
+      </div>
+      <div class="section_header">
+        <h3 class="section_title">New Arrivals</h3>
+      </div>
+      <div class="gallery">
+        <div class="gallery_item gallery_item_1">
+          <img
+            src="./images/gallery/gallery-1.png"
+            alt=""
+            class="gallery_item_img" />
+          <div class="gallery_item_content">
+            <div class="gallery_item_title">Playstation 5</div>
+            <p class="gallery_item_p">
+              Lorem ipsum dolor sit amet consectetur adipisicing.
+            </p>
+            <a href="#" class="gallery_item_link">SHOP NOW</a>
+          </div>
+        </div>
+        <div class="gallery_item gallery_item_2">
+          <img
+            src="./images/gallery/gallery-2.png"
+            alt=""
+            class="gallery_item_img" />
+          <div class="gallery_item_content">
+            <div class="gallery_item_title">Playstation 5</div>
+            <p class="gallery_item_p">
+              Lorem ipsum dolor sit amet consectetur adipisicing.
+            </p>
+            <a href="#" class="gallery_item_link">SHOP NOW</a>
+          </div>
+        </div>
+        <div class="gallery_item gallery_item_3">
+          <img
+            src="./images/gallery/gallery-3.png"
+            alt=""
+            class="gallery_item_img" />
+          <div class="gallery_item_content">
+            <div class="gallery_item_title">Playstation 5</div>
+            <p class="gallery_item_p">
+              Lorem ipsum dolor sit amet consectetur adipisicing.
+            </p>
+            <a href="#" class="gallery_item_link">SHOP NOW</a>
+          </div>
+        </div>
+        <div class="gallery_item gallery_item_4">
+          <img
+            src="./images/gallery/gallery-4.png"
+            alt=""
+            class="gallery_item_img" />
+          <div class="gallery_item_content">
+            <div class="gallery_item_title">Playstation 5</div>
+            <p class="gallery_item_p">
+              Lorem ipsum dolor sit amet consectetur adipisicing.
+            </p>
+            <a href="#" class="gallery_item_link">SHOP NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container services_container">
+      <div class="service">
+        <img src="./images/icons/service-1.png" alt="" class="service_img" />
+        <h3 class="service_title">FAST AND FREE DELIVERY</h3>
+        <p class="service_p">Lorem ipsum dolor sit amet consectetur.</p>
+      </div>
+      <div class="service">
+        <img src="./images/icons/service-2.png" alt="" class="service_img" />
+        <h3 class="service_title">24/7 SUPPORT</h3>
+        <p class="service_p">Lorem ipsum dolor sit amet consectetur.</p>
+      </div>
+      <div class="service">
+        <img src="./images/icons/service-3.png" alt="" class="service_img" />
+        <h3 class="service_title">MONEY BACK GUARANTY</h3>
+        <p class="service_p">Lorem ipsum dolor sit amet consectetur.</p>
+      </div>
+    </div>
+  </section>
     <a href="/signout">signout</a>
-</body>
-</html>
+
+
+    <script>
+      function productdeatails (productId){
+  fetch(`/productdeatails/${productId}`,{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = `/productdeatails/${productId}`
+  }).catch((err)=>{
+console.log(err);
+
+  })
+      }
+    </script>
+
+    <%- include('../partials/user/footer') %>

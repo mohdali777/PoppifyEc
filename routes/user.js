@@ -26,6 +26,7 @@ router.get("/google", passport.authenticate("google", {
 
     }
   );
+  router.get("/productdeatails/:productId",userControl.productdeatails)
   router.get("/resend-otp",userControl.resendOtp)
   router.get("/signout",(req,res)=>{
    req.session.destroy();
