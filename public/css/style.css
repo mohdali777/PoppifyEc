@@ -680,3 +680,53 @@ h2 {
 .color-option input[type="radio"]:not(:checked) + label {
   border: 1px solid #ddd;
 }
+
+
+#stock-status {
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 5px;
+  text-align: center;
+  width: 100%;
+}
+
+/* Style for 'Low stock' message */
+#stock-status.low-stock {
+  color: #FFA500; /* Orange for low stock */
+  background-color: #FFF4E6; /* Light orange background */
+  border: 1px solid #FFA500;
+}
+
+/* Style for 'Finished' message */
+#stock-status.finished {
+  color: #FF0000; /* Red for finished stock */
+  background-color: #FFEBEB; /* Light red background */
+  border: 1px solid #FF0000;
+}
+
+/* Style for normal stock - if quantity is sufficient */
+#stock-status.normal {
+  color: #28a745; /* Green for available stock */
+  background-color: #e8f5e9; /* Light green background */
+  border: 1px solid #28a745;
+}
+#button_product:disabled {
+  background-color: #dcdcdc; /* Light gray color */
+  color: #a9a9a9; /* Dimmed text color */
+  cursor: not-allowed; /* Change cursor to indicate no interaction */
+  border: 1px solid #ccc; /* Light border to indicate it's inactive */
+}
+
+/* Enable button appearance */
+#button_product {
+  background-color: #4CAF50; /* Green for normal button */
+  color: white;
+  cursor: pointer; /* Normal cursor when the button is active */
+  border: 1px solid #4CAF50;
+}
+
+#button_product:hover {
+  background-color: #45a049; /* Slightly darker green when hovered */
+}

@@ -12,11 +12,18 @@
         <div class="productdeatailsimg">
             <img src="/uploads/<%= products.image[0] %>"alt="" >
         </div>
+
         <div class="productdeatails">
           <div class="fontprdeatails">
             <h3><%= products.name%></h3>
             <p class="product-rating">⭐⭐⭐⭐⭐</p>
             <h4 id="price">₹<%= products.variants[0].price %></h4>
+        
+              <p id="quantityid"> </p>
+              <p id="stock-status"> </p>
+
+         
+          
             <h5><%= products.description%> </h5>
           </div>
          <hr>
@@ -43,36 +50,37 @@
           <label for="size">Size</label>
           <select id="size" name="size" required>
             <% products.variants.forEach(variant => { %>
-              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" ><%= variant.variant %></option>
+              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" ><%= variant.variant %></option>
             <% }); %>
           </select>
           <label for="quantity">Quantity</label>
           <input type="number" id="quantity" name="quantity" min="1" value="1" required>
         
-          <input type="button" value="Buy Now" onclick="buyNow()">
+          <input type="button" value="Buy Now" id="button_product" >
         </form>
          <img src="\images\Frame 911.png" alt="" srcset="">
         </div>
     </div>
     <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;" >
-        <button type="button" class="btn btn-danger btn-lg">View All Reviews</button>
+        <button type="button" class="btn btn-danger btn-lg" id="btnfor-product">View All Reviews</button>
         </div>
 </div>
 
 <div class="container py-5">
-    <div class="section_category">
-        <p class="section_category_p  " style="color: red; font-size: 14px;">Related Products</p>
-      </div>
-      <div class="section_header">
-        <p id="demo"></p>
-      </div>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
-      <!-- Card 1 -->
+  <div class="section_category">
+    <p class="section_category_p" style="color: red; font-size: 14px;">Related Products </p>
+  </div>
+  <div class="section_header">
+    <p id="demo"></p>
+  </div>
+
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    <% category.forEach(product => { %>
       <div class="col">
         <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
           <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
           <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
+            <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
             <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
@@ -84,117 +92,25 @@
           </div>
           <div class="card-body text-center" style="text-align: start;">
             <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
-              Wireless DualSense Controller
+              <%= product.name %>
             </p>
-            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
+            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.price %></h5>
             <div class="text-warning">
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
+              <% for (let i = 0; i < 5; i++) { %>
+                <i class="bi bi-star-fill"></i>
+              <% } %>
             </div>
           </div>
         </div>
       </div>
-
-      <!-- Card 2 -->
-      <div class="col">
-        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
-            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
-          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
-          </div>
-          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-heart" style="font-size: 15px;"></i>
-              </button>
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-eye" style="font-size: 15px;"></i>
-              </button>
-          </div>
-          <div class="card-body text-center" style="text-align: start;">
-            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
-              Wireless DualSense Controller
-            </p>
-            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
-            <div class="text-warning">
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 3 -->
-      <div class="col">
-        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
-            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
-          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
-          </div>
-          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-heart" style="font-size: 15px;"></i>
-              </button>
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-eye" style="font-size: 15px;"></i>
-              </button>
-          </div>
-          <div class="card-body text-center" style="text-align: start;">
-            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
-              Wireless DualSense Controller
-            </p>
-            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
-            <div class="text-warning">
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Card 4 -->
-      <div class="col">
-        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
-            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
-          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
-          </div>
-          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-heart" style="font-size: 15px;"></i>
-              </button>
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                <i class="bi bi-eye" style="font-size: 15px;"></i>
-              </button>
-          </div>
-          <div class="card-body text-center" style="text-align: start;">
-            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
-              Wireless DualSense Controller
-            </p>
-            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹120</h5>
-            <div class="text-warning">
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-              <i class="bi bi-star-fill"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-<div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;" >
-<button type="button" class="btn btn-danger btn-lg">View All Products</button>
-</div>
+    <% }); %>
   </div>
+
+  <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+    <button type="button" class="btn btn-danger btn-lg">View All Products</button>
+  </div>
+</div>
+
   <script>
   const zoomWrappers = document.querySelectorAll(".productdeatailsimg");
 
@@ -219,11 +135,30 @@ zoomWrappers.forEach(wrapper => {
 });
 const sizeSelect = document.getElementById('size');
 const priceElement = document.getElementById('price');
+const quantityElement = document.getElementById("quantityid")
+const stockStatusElement = document.getElementById("stock-status")
+const button = document.getElementById("button_product")
 sizeSelect.addEventListener('change', function () {
   const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
   const price = selectedOption.getAttribute('data-price');
+  const quantity = selectedOption.getAttribute('data-quantity');
   if (price) {
     priceElement.textContent = `₹${price}`;
+  }
+  if (quantity) {
+    quantityElement.textContent = `${quantity}`;
+  }
+  if (quantity == 0) {
+    stockStatusElement.textContent = "Out Of Stock";
+    stockStatusElement.style.color = "red"; // Optional: Add color for low stock
+    button.disabled = true;
+
+  } else if (quantity < 5) {
+    stockStatusElement.textContent = "Low Stock";
+    stockStatusElement.style.color = "orange";
+    button.disabled = false;
+  } else {
+    stockStatusElement = " "; // Hide status if quantity is sufficient
   }
 });
   </script>

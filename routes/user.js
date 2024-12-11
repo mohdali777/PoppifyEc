@@ -20,7 +20,7 @@ router.get("/google", passport.authenticate("google", {
     passport.authenticate("google", {
       failureRedirect: "/login"
     }),userControl.google);
-  router.get("/productdeatails/:productId",userControl.productdeatails)
+  router.get("/productdeatails/:productId/:category",userControl.productdeatails)
   router.get("/resend-otp",userControl.resendOtp)
   router.get("/signout",(req,res)=>{
    req.session.destroy();

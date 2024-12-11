@@ -37,9 +37,6 @@
     <label for="price">Base Price</label>
     <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" required>
 
-    <label for="quantity">Quantity</label>
-    <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
-
     <label for="brand">Brand</label>
     <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" required>
 
@@ -48,22 +45,24 @@
     <div class="variant-row">
         <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
         <input type="number" name="price" placeholder="Price" required>
+        <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
+        <label>Select Colors:</label>
+        <div class="color-options">
+            <input type="checkbox" name="colors" id="red" value="red">
+            <label for="red" class="color-circle red"></label>
+            <input type="checkbox" name="colors" id="black" value="black">
+            <label for="black" class="color-circle black"></label>
+            <input type="checkbox" name="colors" id="blue" value="blue">
+            <label for="blue" class="color-circle blue"></label>
+            <input type="checkbox" name="colors" id="green" value="green">
+            <label for="green" class="color-circle green"></label>
+        </div>
         <button type="button" onclick="removeVariant(this)">Remove</button>
     </div>
 </div>
 <button type="button" onclick="addVariant()">Add Variant</button>
 
-<label>Select Colors:</label>
-<div class="color-options">
-    <input type="checkbox" name="colors" id="red" value="red">
-    <label for="red" class="color-circle red"></label>
-    <input type="checkbox" name="colors" id="black" value="black">
-    <label for="black" class="color-circle black"></label>
-    <input type="checkbox" name="colors" id="blue" value="blue">
-    <label for="blue" class="color-circle blue"></label>
-    <input type="checkbox" name="colors" id="green" value="green">
-    <label for="green" class="color-circle green"></label>
-</div>
 
     <button type="submit" class="submit-btn">Add Product</button>
 </form>
@@ -83,6 +82,19 @@
     row.innerHTML = `
         <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
         <input type="number" name="price" placeholder="Price" required>
+          <label for="quantity">Quantity</label>
+        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
+        <label>Select Colors:</label>
+        <div class="color-options">
+            <input type="checkbox" name="colors" id="red" value="red">
+            <label for="red" class="color-circle red"></label>
+            <input type="checkbox" name="colors" id="black" value="black">
+            <label for="black" class="color-circle black"></label>
+            <input type="checkbox" name="colors" id="blue" value="blue">
+            <label for="blue" class="color-circle blue"></label>
+            <input type="checkbox" name="colors" id="green" value="green">
+            <label for="green" class="color-circle green"></label>
+        </div>
         <button type="button" onclick="removeVariant(this)">Remove</button>
     `;
     container.appendChild(row);
@@ -158,13 +170,23 @@ selectedColors.forEach(color => formData.append('colors[]', color));
 
 
 const variants = [];
-    document.querySelectorAll('.variant-row').forEach(row => {
-        const variant = row.querySelector('input[name="variant"]').value;
-        const price = row.querySelector('input[name="price"]').value;
-        if (variant && price) {
-            variants.push({ variant, price: parseFloat(price) }); // Store as object
-        }
-    });
+document.querySelectorAll('.variant-row').forEach(row => {
+    const variant = row.querySelector('input[name="variant"]').value;
+    const price = row.querySelector('input[name="price"]').value;
+    const quantity = row.querySelector('input[name="quantity"]').value;
+
+    const colorInputs = row.querySelectorAll('input[name="colors"]:checked');
+    const colors = Array.from(colorInputs).map(input => input.value); // Get values of checked boxes
+
+    if (variant && price && quantity && colors.length > 0) {
+        variants.push({ 
+            variant, 
+            price: parseFloat(price), 
+            quantity: parseInt(quantity), 
+            colors 
+        });
+    }
+});
     formData.append('variants', JSON.stringify(variants)); // Add as a JSON string
 
         croppedImages.forEach((file, index) => {

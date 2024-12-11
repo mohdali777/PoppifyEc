@@ -227,8 +227,10 @@ let postlogin = async (req,res)=>{
     const productdeatails = async (req,res)=>{
         try {
             const productId = req.params.productId;
+            const categoryid = req.params.category;
             const products = await Product.findById(productId)
-            res.render("users/productdeatails",{products})
+            const category = await Product.find({category:categoryid}).skip(1).limit(4)
+            res.render("users/productdeatails",{products,category})
         } catch (error) {
             console.log(error);
             

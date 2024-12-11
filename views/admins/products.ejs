@@ -13,7 +13,7 @@
           <div class="product-card">
             <img src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" class="product-image">
             <h2 class="product-name"><%= product.name %></h2>
-            <p class="product-price">$<%= product.price %></p>
+            <p class="product-price"><%= product.price %></p>
             <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
             <div class="edsp">
                 <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>

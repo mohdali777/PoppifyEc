@@ -33,8 +33,8 @@
             <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">
               -40%
             </div>
-            <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-              <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>')">
+            <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
             </div>
             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
               <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
@@ -135,7 +135,7 @@
       <div class="col">
         <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
             <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
-          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+          <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
             <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
@@ -166,7 +166,7 @@
       <div class="col">
         <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
             <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
-          <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
+          <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
             <img class="card-img-top" src="/images/dualsense-controller-product-thumbnail-01-en-14sep21.png" alt="Controller" style="width: 172px; height: 152px; object-fit: contain;">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
@@ -601,9 +601,13 @@
 
 
     <script>
-      function productdeatails (productId){
-  fetch(`/productdeatails/${productId}`,{method:"GET"}).then((response)=>{
- if(response.ok) window.location.href = `/productdeatails/${productId}`
+      function productdeatails (productId,category){
+        console.log("............");
+        console.log(productId);
+        console.log("............");
+        
+  fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
   }).catch((err)=>{
 console.log(err);
 

@@ -88,13 +88,10 @@ const productSchema = new mongoose.Schema({
     {
         variant: { type: String, required: true }, // e.g., "64 GB"
         price: { type: Number, required: true, min: 0 }, // e.g., 100
+        quantity:{type:Number,required:true,min:0},
+        colors:{type:[String],default:[]}
     }
 ],
-  quantity: {
-    type: Number,
-    required: true,  // Quantity is required
-    min: 0,          // Quantity must be a positive integer
-  },
   createdAt: {
     type: Date,
     default: Date.now,  // Automatically set the date when the product is created
