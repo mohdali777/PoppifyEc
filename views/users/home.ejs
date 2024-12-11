@@ -48,7 +48,7 @@
               <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
                 <%= product.name %>
               </p>
-              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.price %></h5>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.variants[0].price %></h5>
               <div class="text-warning">
                 <% for (let i = 0; i < product.rating; i++) { %>
                   <i class="bi bi-star-fill"></i>
@@ -597,7 +597,7 @@
       </div>
     </div>
   </section>
-    <a href="/signout">signout</a>
+   
 
 
     <script>

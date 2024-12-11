@@ -268,11 +268,12 @@ const addproductsget = async (req,res)=> {
 const addproductpost = async (req, res) => {
   try {
     // Extract data from the request body
-    const { name, description, category, price, quantity, brand, size, color } = req.body;
+    const { name, description, category, price, quantity, brand, variants, colors } = req.body;
     console.log(req.files);
     
     const image = req.files.map(file => file.filename);
     console.log(image);
+    const parsevariants = JSON.parse(variants)
     
     const newProduct = new Product({
       name,
@@ -281,9 +282,10 @@ const addproductpost = async (req, res) => {
       price,
       quantity,
       brand,
-      size: size || [],  // Make sure size is an array, default to an empty array if not provided
-      color,
+      variants: parsevariants, // Default to empty array if not provided
+      colors: Array.isArray(colors) ? colors : [],
       image,  // Save the array of image file paths
+      
     });
 
     // Save the new product to the database

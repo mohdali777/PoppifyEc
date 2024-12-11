@@ -16,7 +16,7 @@
           <div class="fontprdeatails">
             <h3><%= products.name%></h3>
             <p class="product-rating">⭐⭐⭐⭐⭐</p>
-            <h4>₹<%= products.price%></h4>
+            <h4 id="price">₹<%= products.variants[0].price %></h4>
             <h5><%= products.description%> </h5>
           </div>
          <hr>
@@ -42,13 +42,10 @@
         
           <label for="size">Size</label>
           <select id="size" name="size" required>
-            <option value="XS">XS</option>
-            <option value="S">S</option>
-            <option value="M">M</option>
-            <option value="L">L</option>
-            <option value="XL">XL</option>
+            <% products.variants.forEach(variant => { %>
+              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" ><%= variant.variant %></option>
+            <% }); %>
           </select>
-        
           <label for="quantity">Quantity</label>
           <input type="number" id="quantity" name="quantity" min="1" value="1" required>
         
@@ -198,4 +195,36 @@
 <button type="button" class="btn btn-danger btn-lg">View All Products</button>
 </div>
   </div>
+  <script>
+  const zoomWrappers = document.querySelectorAll(".productdeatailsimg");
+
+zoomWrappers.forEach(wrapper => {
+    const img = wrapper.querySelector("img");
+
+    wrapper.addEventListener("mousemove", (e) => {
+        const rect = wrapper.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width;
+        const y = (e.clientY - rect.top) / rect.height;
+
+        img.style.transformOrigin = `${x * 100}% ${y * 100}%`;
+    });
+
+    wrapper.addEventListener("mouseenter", () => {
+        img.classList.add("zoomed");
+    });
+
+    wrapper.addEventListener("mouseleave", () => {
+        img.classList.remove("zoomed");
+    });
+});
+const sizeSelect = document.getElementById('size');
+const priceElement = document.getElementById('price');
+sizeSelect.addEventListener('change', function () {
+  const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+  const price = selectedOption.getAttribute('data-price');
+  if (price) {
+    priceElement.textContent = `₹${price}`;
+  }
+});
+  </script>
 <%- include('../partials/user/footer') %>

@@ -110,6 +110,7 @@
 hr{
   margin: 0;
 }
+
 .image_container{
   width: 805px;
   height: 781px;
@@ -571,12 +572,23 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
 }
 .productdeatailsimg img{
   width: 446px;
   height: 315px;
+  object-fit: cover;
+  transform-origin: center center;
+  transition: transform 0.2s ease;
  
 }
+
+.productdeatailsimg img.zoomed {
+  transform: scale(2); /* Adjust zoom level */
+}
+/* "end" */
 .ulproductdeatails {
   display: flex;
   flex-direction: column;

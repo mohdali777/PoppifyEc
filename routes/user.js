@@ -19,13 +19,7 @@ router.get("/google", passport.authenticate("google", {
   router.get("/google/callback", 
     passport.authenticate("google", {
       failureRedirect: "/login"
-    }), 
-    (req, res) => {
-    req.session.user = req.user ;
-      res.render("users/home"); 
-
-    }
-  );
+    }),userControl.google);
   router.get("/productdeatails/:productId",userControl.productdeatails)
   router.get("/resend-otp",userControl.resendOtp)
   router.get("/signout",(req,res)=>{

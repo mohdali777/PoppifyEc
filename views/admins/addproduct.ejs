@@ -30,7 +30,7 @@
     <select id="category" class="custom-width" name="category" required>
         <option value="">Select a category</option>
         <% categories.forEach(category => { %>
-            <option value="<%= category._id %>"><%= category.name %></option>
+            <option value="<%= category.name %>"><%= category.name %></option>
         <% }) %>
     </select>
 
@@ -43,27 +43,27 @@
     <label for="brand">Brand</label>
     <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" required>
 
-    <label>Variants</label>
-    <select id="size" class="custom-width" name="size">
-        <option value="">Select Variant</option>
-        <option value="64 GB">64 GB</option>
-        <option value="128 GB">128 GB</option>
-        <option value="256 GB">256 GB</option>
-        <option value="512 GB">512 GB</option>
-        <option value="1 TB">1 TB</option>
-    </select>
-
-    <label>Color</label>
-    <div class="color-options">
-        <input class="radioadd" type="radio" name="color" id="red" value="red" required>
-        <label for="red" class="color-circle red"></label>
-        <input class="radioadd" type="radio" name="color" id="black" value="black">
-        <label for="black" class="color-circle black"></label>
-        <input class="radioadd" type="radio" name="color" id="blue" value="blue">
-        <label for="blue" class="color-circle blue"></label>
-        <input class="radioadd" type="radio" name="color" id="green" value="green">
-        <label for="green" class="color-circle green"></label>
+  <label>Variants:</label>
+<div id="variant-container">
+    <div class="variant-row">
+        <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
+        <input type="number" name="price" placeholder="Price" required>
+        <button type="button" onclick="removeVariant(this)">Remove</button>
     </div>
+</div>
+<button type="button" onclick="addVariant()">Add Variant</button>
+
+<label>Select Colors:</label>
+<div class="color-options">
+    <input type="checkbox" name="colors" id="red" value="red">
+    <label for="red" class="color-circle red"></label>
+    <input type="checkbox" name="colors" id="black" value="black">
+    <label for="black" class="color-circle black"></label>
+    <input type="checkbox" name="colors" id="blue" value="blue">
+    <label for="blue" class="color-circle blue"></label>
+    <input type="checkbox" name="colors" id="green" value="green">
+    <label for="green" class="color-circle green"></label>
+</div>
 
     <button type="submit" class="submit-btn">Add Product</button>
 </form>
@@ -75,6 +75,25 @@
     let croppedImages = []; // Array to store cropped images
 
     // Open cropper modal when file is selected
+
+    function addVariant() {
+    const container = document.getElementById('variant-container');
+    const row = document.createElement('div');
+    row.classList.add('variant-row');
+    row.innerHTML = `
+        <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
+        <input type="number" name="price" placeholder="Price" required>
+        <button type="button" onclick="removeVariant(this)">Remove</button>
+    `;
+    container.appendChild(row);
+}
+
+function removeVariant(button) {
+    button.parentElement.remove(); // Remove the row
+}
+
+
+
     function openCropper(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -133,10 +152,21 @@
         formData.append('price', document.getElementById('price').value);
         formData.append('quantity', document.getElementById('quantity').value);
         formData.append('brand', document.getElementById('brand').value);
-        formData.append('size', document.getElementById('size').value);
-        formData.append('color', document.querySelector('input[name="color"]:checked').value);
 
-        // Append cropped images
+const selectedColors = Array.from(document.querySelectorAll('input[name="colors"]:checked')).map(el => el.value);
+selectedColors.forEach(color => formData.append('colors[]', color)); 
+
+
+const variants = [];
+    document.querySelectorAll('.variant-row').forEach(row => {
+        const variant = row.querySelector('input[name="variant"]').value;
+        const price = row.querySelector('input[name="price"]').value;
+        if (variant && price) {
+            variants.push({ variant, price: parseFloat(price) }); // Store as object
+        }
+    });
+    formData.append('variants', JSON.stringify(variants)); // Add as a JSON string
+
         croppedImages.forEach((file, index) => {
             formData.append('images', file);
         });

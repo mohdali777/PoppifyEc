@@ -71,7 +71,10 @@ textarea.custom-width {
     gap: 10px;
     align-items: center;
 }
-
+.color-options input{
+    width: 20px;
+    margin-top: auto;
+}
 .color-circle {
     display: inline-block;
     width: 20px;
@@ -86,7 +89,19 @@ textarea.custom-width {
     color: #0056b3;
     margin-top: 5px;
 }
-
+.variant-options{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.variant-options input{
+    width: 20px;
+    margin-top: auto;
+}
+.variant-options input{
+    width: 20px;
+    margin-top: auto;
+}
 .color-circle.red {
     background-color: red;
 }

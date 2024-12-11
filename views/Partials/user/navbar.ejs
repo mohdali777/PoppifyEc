@@ -1,46 +1,62 @@
 <div class="top_nav">
-    <div class="container top_nav_container">
-      <div class="top_nav_wrapper">
-        <p class="tap_nav_p">
-          Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!
-        </p>
-        <a href="#" class="top_nav_link">SHOP NOW</a>
-      </div>
+  <div class="container top_nav_container">
+    <div class="top_nav_wrapper">
+      <p class="tap_nav_p">
+        Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!
+      </p>
+      <a href="#" class="top_nav_link">SHOP NOW</a>
     </div>
-<header>
-<nav >
-<img class="navimg" src=/images/Screenshot_2024-11-15_143407-removebg-preview.png alt="poppify" >
-  <ul class="navul">
-    <li><a href="#">Home</a></li>
-    <li><a href="#">Contact</a></li>
-    <li><a href="#">About</a></li>
-    <li><a href="#">Sign Up</a></li>
-  </ul>
-<div class="search-productnav">
-  <div class="input-group" style="width: 300px;">
-    <input type="text" class="form-control" placeholder="What are you looking for?">
-    <span class="input-group-text" style="background-color: transparent; border: none;">
-      <i class="bi bi-search" style="font-size: 20px;"></i>
-    </span>
   </div>
-  
+</div>
+<header>
+<nav>
+<img class="navimg" src="/images/Screenshot_2024-11-15_143407-removebg-preview.png" alt="poppify">
+<ul class="navul">
+  <li><a href="#">Home</a></li>
+  <li><a href="#">Contact</a></li>
+  <li><a href="#">About</a></li>
+  <li><a href="#">Sign Up</a></li>
+</ul>
+<div class="search-productnav">
+<div class="input-group" style="width: 300px;">
+  <input type="text" class="form-control" placeholder="What are you looking for?">
+  <span class="input-group-text" style="background-color: transparent; border: none;">
+    <i class="bi bi-search" style="font-size: 20px;"></i>
+  </span>
+</div>
 </div>
 <div class="icons-productnav">
-  <ul>
-    <li>  
-      <i class="bi bi-heart" style="font-size: 20px; "></i>
-    </li>
-    <li>
-      <i class="bi bi-bag" style="font-size: 20px;"></i>
-    </li>
-    <li>
-      <i class="bi bi-person" style="font-size: 22px;"></i> 
-    </li>
-  </ul>
-  <a href="#"><i class="cart"></i></a>
-  <a href="#"><i class="user"></i></a>
+<ul>
+  <li>
+    <i class="bi bi-heart" style="font-size: 20px;"></i>
+  </li>
+  <li>
+    <i class="bi bi-bag" style="font-size: 20px;"></i>
+  </li>
+  <li style="position: relative;">
+    <i class="bi bi-person" style="font-size: 22px; cursor: pointer;" onclick="toggleDropdown()"></i> 
+    <!-- Dropdown Menu -->
+    <div class="dropdown-menu" style="display: none; position: absolute; top: 30px; right: 0; background: #2b2b2b; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); width: 200px; padding: 10px;">
+      <!-- Close Button -->
+      <div style="text-align: right;">
+        <i class="bi bi-x" style="font-size: 18px; cursor: pointer; color: #fff;" onclick="toggleDropdown()"></i>
+      </div>
+      <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">Manage My Account</a>
+      <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Order</a>
+      <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Cancellations</a>
+      <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Reviews</a>
+      <a href="/signout" style="display: block; color: #fff; padding: 10px; text-decoration: none;">Logout</a>
+    </div>
+  </li>
+</ul>
 </div>
-
 </nav>
 <hr>
 </header>
+
+<script>
+function toggleDropdown() {
+  const dropdown = document.querySelector('.dropdown-menu');
+  dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+</script>

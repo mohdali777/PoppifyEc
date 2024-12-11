@@ -53,8 +53,7 @@ const productSchema = new mongoose.Schema({
     required: true,  // Description is required
   },
   category: {
-    type: mongoose.Schema.Types.ObjectId, // Reference to the Category model
-    ref: 'Category',  // The name of your Category model
+    type: String, // Reference to the Category model                // The name of your Category model
     required: true,  // Category is required
   },
   price: {
@@ -85,10 +84,12 @@ const productSchema = new mongoose.Schema({
     type: [String],  // Array of colors the product is available in
     default: [],     // Default is an empty array
   },
-  sizes: {
-    type: [String],  // Array of available sizes for the product
-    default: [],     // Default is an empty array
-  },
+  variants: [
+    {
+        variant: { type: String, required: true }, // e.g., "64 GB"
+        price: { type: Number, required: true, min: 0 }, // e.g., 100
+    }
+],
   quantity: {
     type: Number,
     required: true,  // Quantity is required

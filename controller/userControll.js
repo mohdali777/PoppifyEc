@@ -38,6 +38,14 @@ let verifyOtp = async (req,res)=>{
    let signlogin = async(req,res)=>{
    res.redirect("/login")
    }
+
+   const google = async(req,res)=>{
+    const products = await Product.find({}).limit(4);
+    const categories = await Category.find({})
+    req.session.user = req.user 
+    res.render("users/home",{products,categories})
+      
+   }
    
 
 //    otp genarate function
@@ -231,4 +239,4 @@ let postlogin = async (req,res)=>{
 
 
 
-module.exports = {login,signup,forget,verifyOtp,newpassword,postsignup,postlogin,home,postverifyotp,resendOtp,loginsign,signlogin,productdeatails}
+module.exports = {login,signup,forget,verifyOtp,newpassword,postsignup,postlogin,home,postverifyotp,resendOtp,loginsign,signlogin,productdeatails,google}
