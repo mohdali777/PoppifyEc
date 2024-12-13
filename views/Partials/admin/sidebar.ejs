@@ -61,9 +61,21 @@
             </li>
         </ul>
         <!-- Logout Button -->
-        <button class="logout-button">
+        <button class="logout-button" onclick="logout()">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
     </div>
     <div class="divsection">
+
+
+        <script>
+            function logout(){
+                fetch("/admin/logout",{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = "/admin/logout";
+                }).catch((err)=>{
+console.log(err);
+
+                })
+            }
+        </script>
   

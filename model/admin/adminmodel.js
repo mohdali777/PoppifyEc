@@ -80,15 +80,11 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,  // Brand name is required
   },
-  colors: {
-    type: [String],  // Array of colors the product is available in
-    default: [],     // Default is an empty array
-  },
   variants: [
     {
-        variant: { type: String, required: true }, // e.g., "64 GB"
-        price: { type: Number, required: true, min: 0 }, // e.g., 100
-        quantity:{type:Number,required:true,min:0},
+        variant: { type: String, required:false }, // e.g., "64 GB"
+        price: { type: Number, required:false,min: 0 }, // e.g., 100
+        quantity:{type:Number,required:false,min:0},
         colors:{type:[String],default:[]}
     }
 ],

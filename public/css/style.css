@@ -568,7 +568,7 @@ h2 {
 .productdeatailsimg{
   width: 500px;
   height: 600px;
-  background-color: #F5F5F5;
+  /* background-color: #F5F5F5; */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -577,8 +577,8 @@ h2 {
   cursor: crosshair;
 }
 .productdeatailsimg img{
-  width: 446px;
-  height: 315px;
+  width: auto;
+  height: auto;
   object-fit: cover;
   transform-origin: center center;
   transition: transform 0.2s ease;
@@ -730,3 +730,51 @@ h2 {
 #button_product:hover {
   background-color: #45a049; /* Slightly darker green when hovered */
 }
+
+.reviews-container {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.review {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+.review h3 {
+  margin: 0;
+  color: #333;
+}
+
+.review p {
+  margin: 5px 0;
+}
+
+.breadcrumbss {
+  display: inline-flex;
+  gap: 5px;
+  font-size: 14px;
+  color: #555;
+  margin-left: 45px;
+}
+
+.breadcrumbss a {
+  text-decoration: none;
+  color: #8d8dad;
+}
+
+.breadcrumbss a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbss span {
+  font-weight: 500;
+  color: gray;
+  margin-top: 13px;
+}
+

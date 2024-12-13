@@ -6,10 +6,19 @@
      <div class="image_container">
      <img class="navimg1" src="/images/shopping-concept-close-up-portrait-young-beautiful-attractive-redhair-girl-smiling-looking-camera (1).png" alt="">
      </div>
+     
      <div class="form_container">
+        
       <form action="/admin/login" method="post" id="adminformsignin">
+        <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+        color: #d32f2f; /* Red color for error messages */
+        font-weight: 500; /* Medium weight */
+        text-align: center; /* Center align */
+        margin-top: 5px;"><%= message %></p> <% } %>
        <h1>Enter to Admin</h1>
        <h5>Enter your details below</h5>
+    
+
        <input type="text" placeholder="username" name="username" id="username_adminsignin">
        <br>
        <input type="password" placeholder="Password" name="password" id="password_adminsignin">

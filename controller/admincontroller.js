@@ -1,18 +1,43 @@
-const Admin = require("../model/admin/adminmodel")
+const {Admin} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const {User} = require("../model/user/usermodel")
 const { serializeUser } = require("passport")
 const { Category } = require("../model/admin/adminmodel");
 const {Product} = require("../model/admin/adminmodel")
+const mongoose = require('mongoose')
 
 let getlogin = async(req,res)=>{
-res.render("admins/signin")
+res.render("admins/signin",{message:false})
 }
-let usermanageside = async(req,res)=>{
-    const users = await User.find(); 
-    res.render("admins/users",{users})
-}
+let usermanageside = async (req, res) => {
+  try {
+      const page = parseInt(req.query.page) || 1; // Current page number (default: 1)
+      const limit = 10; // Number of users per page
+      const skip = (page - 1) * limit; // Calculate number of users to skip
 
+      // Fetch paginated users
+      const users = await User.find().skip(skip).limit(limit).lean();
+
+      // Count total users for pagination
+      const totalUsers = await User.countDocuments();
+
+      // Render the template with pagination data
+      res.render("admins/users", {
+          users,
+          currentPage: page,
+          totalPages: Math.ceil(totalUsers / limit),
+      });
+  } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).send("Internal Server Error");
+  }
+};
+
+
+const logout = (req,res)=>{
+ req.session.destroy();
+ res.redirect("/admin/login")
+}
 let postlogin = async(req,res)=>{
     try {
         const {username,password} = req.body;
@@ -20,14 +45,14 @@ let postlogin = async(req,res)=>{
         
         const admin = await Admin.findOne({username})
         if(!admin){
-            return res.render("admins/signin")
+            return res.render("admins/signin",{message:"usernot Found"})
         }
-        // const isMatch = await bcrypt.compare(password, admin.password);
-        const isMatch = password == admin.password
+        const isMatch = await bcrypt.compare(password, admin.password);
+        // const isMatch = password == admin.password
         console.log(isMatch);
         
         if (!isMatch) {
-            return res.render('admins/signin');
+            return res.render('admins/signin',{message:"Password dosen't Match"});
         } 
         req.session.admin = true;
         res.render("admins/adminhome")
@@ -69,8 +94,10 @@ const adduser = async (req, res) => {
         await newUser.save();
 
         // Fetch updated list of users and render
-        const users = await User.find();
-        res.render("admins/users", { users, message: "User added successfully!" });
+        // const users = await User.find();
+        // res.render("admins/users", { users, message: "User added successfully!"});
+        res.redirect("/admin/usermangement")
+        
     } catch (err) {
         console.error(err);
         res.render("admins/users", { message: "Error adding user. Please try again later." });
@@ -82,7 +109,8 @@ const deleteuser = async(req,res)=>{
         const user = req.params.userid;
         await User.findByIdAndDelete(user)
         const users = await User.find({})
-        res.render("admins/users",{users,message:"user deleted successfully"})
+        // res.render("admins/users",{users,message:"user deleted successfully"})
+        res.redirect("/admin/usermangement")
     }catch(err){
 console.log(err)
 res.status(500).send("failed to delete")
@@ -95,8 +123,7 @@ const edituser = async (req,res)=>{
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password,saltRounds)
         await User.updateOne({_id:id},{$set:{email,password:hashedPassword}})
-        const users = await User.find();
-        res.render("admins/users",{users,message:"user added successfully"})
+        res.redirect("/admin/usermangement")
     }catch(err){
         console.log(err)
         res.status(500).send("failed to edit",err)
@@ -255,7 +282,7 @@ const deleteCategory = async (req, res) => {
 
 const addproductsget = async (req,res)=> {
   try {
-    const categories = await Category.find();
+    const categories = await Category.find({is_listed:true});
     res.render("admins/addproduct",{categories})
   } catch (error) {
     console.log(err);
@@ -272,8 +299,10 @@ const addproductpost = async (req, res) => {
     console.log(req.files);
     
     const image = req.files.map(file => file.filename);
-    console.log(image);
+    // console.log(image);
     const parsevariants = JSON.parse(variants)
+    console.log(parsevariants);
+    
     
     const newProduct = new Product({
       name,
@@ -303,9 +332,11 @@ const addproductpost = async (req, res) => {
 
 const geteditproducts = async (req,res)=>{
 try {
-  const productId = req.params.productId;
-  const product = await Product.findById(productId)
-  const categories = await Category.find({})
+  const productId = new mongoose.Types.ObjectId(req.params.productId);
+  const product = await Product.findOne({_id:productId})
+  const categories = await Category.find({is_listed:true})
+  console.log(product.image);
+  
   res.render("admins/updateproduct",{product,categories})
 } catch (error) {
   console.log(error);
@@ -326,6 +357,63 @@ const deleteproduct = async (req,res)=>{
 
 
 }
+
+const removeimage = async(req,res) =>{
+
+  try {
+    const productId = req.params.productid;
+    const imageid = req.params.image;
+    console.log(productId,imageid);
+     await Product.updateOne({_id:productId},{$pull:{image:imageid}})
+  } catch (error) {
+    
+    console.log(error);
+    
+  }
+
+ 
+}
+const updateproduct = async (req, res) => {
+  try {
+    console.log(req.body);
+    
+    const { name, description, category, price,  brand, variants, id } = req.body;
+
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
+      return res.status(404).send("Product not found");
+    }
+    const parsevariants = variants ? JSON.parse(variants) : existingProduct.variants;
+
+    const images = req.files ? req.files.map(file => file.filename) : [];
+    console.log('----------------');
+    console.log(images);
+    console.log('----------------');
+    
+   
+
+    // Prepare updated fields
+    const updatedProduct = {
+      name: name || existingProduct.name,
+      description: description || existingProduct.description,
+      category: category || existingProduct.category,
+      price: price || existingProduct.price,
+      brand: brand || existingProduct.brand,
+      variants: parsevariants || existingProduct.variants,
+    };
+
+    // Update the product in the database
+    await Product.updateOne({ _id: id }, { $set: updatedProduct,$push: { image: { $each: images } } });
+
+    // Fetch updated product list
+    const products = await Product.find({});
+    res.render("admins/products", { products });
+  } catch (error) {
+    console.error("Error updating product:", error);
+    res.status(500).send("Error updating product");
+  }
+};
+
 
 
 
@@ -350,4 +438,7 @@ module.exports = {getlogin,
 addproductsget,
 addproductpost,
 geteditproducts,
-deleteproduct}
+deleteproduct,
+removeimage,
+updateproduct,
+logout}

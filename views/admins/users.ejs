@@ -54,7 +54,7 @@
   <div class="modal-content">
       <span class="close" onclick="closeAddUserModal()">&times;</span>
       <h2>Add User</h2>
-      <form id="addUserForm" method="POST" action="/admin/add-user">
+      <form id="addUserForm" method="POST" action="/admin/add-user" style="width: 370px; height: 530px; margin: 0px 40px;">
           <label class="label" for="addusername">username</label>
           <input type="text" id="addusername" name="username" required>
           <label class="label" for="addEmail">Email:</label>
@@ -71,7 +71,7 @@
   <div class="modal-content">
       <span class="close" onclick="closeEditUserModal()">&times;</span>
       <h2>Edit User</h2>
-      <form id="editUserForm" method="POST" action="/admin/edit-user">
+      <form id="editUserForm" method="POST" action="/admin/edit-user" style="width: 370px; height: 530px; margin: 0px 40px;">
           <input type="hidden" id="editUserId" name="id">
           <label class="label" for="editEmail">Email:</label>
           <input type="email" id="editEmail" name="email" required>
@@ -81,6 +81,18 @@
       </form>
   </div>
 </div>
+<div class="pagination">
+  <% if (currentPage > 1) { %>
+    <a href="/admin/usermangement?page=<%= currentPage - 1 %>">Previous</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/admin/usermangement?page=<%= i %>" class="<%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="/admin/usermangement?page=<%= currentPage + 1 %>">Next</a>
+  <% } %>
+</div>
+
   <script>
     function openAddUserModal() {
             document.getElementById('addUserModal').style.display = 'block';

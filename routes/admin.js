@@ -2,19 +2,22 @@ const express = require("express")
 const router = express.Router();
 const AdminRoutes = require("../controller/admincontroller")
 const upload = require("../helpers/multer")
+const session = require("../middleware/adminsession");
+const { Session } = require("express-session");
 
-router.get("/login",AdminRoutes.getlogin)
-router.get("/home",AdminRoutes.gethome)
-router.get("/usermangement",AdminRoutes.usermanageside)
-router.get("/dash",(req,res)=>{
+router.get("/login",session.islogin,AdminRoutes.getlogin)
+router.get("/home",session.sessionCheck,AdminRoutes.gethome)
+router.get("/usermangement",session.sessionCheck,AdminRoutes.usermanageside)
+router.get("/dash",session.sessionCheck,(req,res)=>{
 res.render("admins/adminhome")
 })
-router.get("/product",AdminRoutes.products)
-router.get("/category",AdminRoutes.category)
-router.get("/add-category",AdminRoutes.categorybutton)
+router.get("/product",session.sessionCheck,AdminRoutes.products)
+router.get("/category",session.sessionCheck,AdminRoutes.category)
+router.get("/add-category",session.sessionCheck,AdminRoutes.categorybutton)
 router.get("/editcategory/:categoryId",AdminRoutes.editcategory)
-router.get("/addproducts", AdminRoutes.addproductsget)
+router.get("/addproducts",session.sessionCheck,AdminRoutes.addproductsget)
 router.get("/editproduct/:productId",AdminRoutes.geteditproducts)
+router.get("/logout",AdminRoutes.logout)
 
 
 router.post("/login",AdminRoutes.postlogin)
@@ -28,7 +31,8 @@ router.post("/deletecategory/:categoryId",AdminRoutes.deleteCategory)
 router.post("/update-category",upload.single("image_url"),AdminRoutes.updatecategory)
 router.post("/add-product",upload.array("images"),AdminRoutes.addproductpost)
 router.post("/deleteproduct/:productId",AdminRoutes.deleteproduct)
-
+router.post("/removeimage/:image/:productid",AdminRoutes.removeimage)
+router.post("/update-product",upload.array("images"),AdminRoutes.updateproduct)
 
 
 

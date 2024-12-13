@@ -424,3 +424,27 @@ button:hover {
   margin-top: 10px;
 }
 
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination a {
+  margin: 0 5px;
+  padding: 8px 12px;
+  text-decoration: none;
+  background: #f1f1f1;
+  border: 1px solid #ddd;
+  color: #333;
+  cursor: pointer;
+}
+
+.pagination a.active {
+  background: #4CAF50;
+  color: white;
+}
+
+.pagination a:hover {
+  background: #ddd;
+}

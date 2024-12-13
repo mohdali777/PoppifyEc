@@ -3,7 +3,8 @@ const{Product} = require("../model/admin/adminmodel")
 const {Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const nodemailer = require('nodemailer');
-const env = require("dotenv")
+const env = require("dotenv");
+const { category } = require("./admincontroller");
 const login = async (req,res)=> {
     res.render("users/login",{message:null})
 }
@@ -22,13 +23,18 @@ let verifyOtp = async (req,res)=>{
 
    let home = async (req,res)=>{
     try {
-        const products = await Product.find({}).limit(4);
-        const categories = await Category.find({})
-        res.render("users/home",{products,categories})
-    } catch (error) {
-        console.log(error);
-        
-    }
+        // Fetch only the listed categories
+        const categories = await Category.find({ is_listed: true });
+
+        const listedCategoryNames = categories.map(category => category.name);
+
+        const products = await Product.find({ category: { $in: listedCategoryNames } }).limit(4);
+        const productss = await Product.find({ category: { $in: listedCategoryNames } }).skip(4);
+        res.render("users/home", { products, categories, productss });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("An error occurred while loading the home page.");
+      }
    
    }
 
@@ -40,10 +46,12 @@ let verifyOtp = async (req,res)=>{
    }
 
    const google = async(req,res)=>{
-    const products = await Product.find({}).limit(4);
-    const categories = await Category.find({})
-    req.session.user = req.user 
-    res.render("users/home",{products,categories})
+    const categories = await Category.find({ is_listed: true });
+    const listedCategoryNames = categories.map(category => category.name);
+    const products = await Product.find({ category: { $in: listedCategoryNames } }).limit(4);
+    const productss = await Product.find({ category: { $in: listedCategoryNames } }).skip(4);
+    req.session.user = true;
+    res.render("users/home", { products, categories, productss });
       
    }
    
@@ -89,9 +97,13 @@ let postsignup = async (req,res)=>{
     try{
         const {username,email,password} = req.body;
         let user = await User.findOne({email})
+        let name = await User.findOne({username})
         if(user){
             console.log("error");
            return res.render("users/login",{message:"user exist"})
+        }
+        if(name){
+            return res.render("users/signup",{message:"Username Exist"})
         }
 
         const otp = genarateotp();
@@ -229,7 +241,7 @@ let postlogin = async (req,res)=>{
             const productId = req.params.productId;
             const categoryid = req.params.category;
             const products = await Product.findById(productId)
-            const category = await Product.find({category:categoryid}).skip(1).limit(4)
+            const category = await Product.find({category:categoryid}).limit(4)
             res.render("users/productdeatails",{products,category})
         } catch (error) {
             console.log(error);

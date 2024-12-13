@@ -133,23 +133,48 @@ function removeVariant(button) {
 
     // Handle cropping and save the cropped image
     document.getElementById('crop-button').addEventListener('click', function() {
-        const croppedCanvas = cropper.getCroppedCanvas();
-        croppedCanvas.toBlob(blob => {
-            // Convert the cropped image to a Blob and add to the croppedImages array
-            croppedImages.push(blob);
+    const croppedCanvas = cropper.getCroppedCanvas();
+    croppedCanvas.toBlob(blob => {
+        // Convert the Blob into a File and add to the croppedImages array
+        const file = new File([blob], `cropped-image-${croppedImages.length + 1}.jpg`, { type: 'image/jpeg' });
+        croppedImages.push(file); // Add file to array
 
-            // Display the cropped image in preview
-            const previewContainer = document.getElementById('image-preview');
-            const img = document.createElement('img');
-            img.src = URL.createObjectURL(blob);
-            img.style.width = '100px';
-            img.style.margin = '5px';
-            img.style.border = '1px solid #ddd';
-            previewContainer.appendChild(img);
-        });
-
-        closeCropper();
+        // Optionally, display the preview of the image
+        displayImagePreview(file);
     });
+
+    closeCropper(); // Close the cropper modal after cropping
+});
+
+// Function to display preview of the cropped image
+function displayImagePreview(file) {
+    const previewContainer = document.getElementById('image-preview');
+    const imgWrapper = document.createElement('div');
+    imgWrapper.className = 'image-wrapper';
+
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);  // Create an object URL for the file
+    img.className = 'preview-image';
+
+    // Create a remove button for the image
+    const removeButton = document.createElement('button');
+    removeButton.className = 'remove-button';
+    removeButton.textContent = 'Remove';
+    removeButton.title = 'Remove Image';
+
+    removeButton.addEventListener('click', () => {
+        // Remove the file from the croppedImages array
+        const index = croppedImages.indexOf(file);
+        if (index > -1) {
+            croppedImages.splice(index, 1);  // Remove file from array
+        }
+        imgWrapper.remove();  // Remove the image preview from the DOM
+    });
+
+    imgWrapper.appendChild(img);
+    imgWrapper.appendChild(removeButton);
+    previewContainer.appendChild(imgWrapper);
+}
 
     // Handle form submission
     document.querySelector('.add-product-form').addEventListener('submit', function(e) {
@@ -187,6 +212,10 @@ document.querySelectorAll('.variant-row').forEach(row => {
         });
     }
 });
+
+if (variants.length === 0) {
+    variants = [];
+}
     formData.append('variants', JSON.stringify(variants)); // Add as a JSON string
 
         croppedImages.forEach((file, index) => {

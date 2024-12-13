@@ -40,13 +40,46 @@ textarea.custom-width {
     margin-top: 10px;
 }
 
-.image-preview-container img {
+/* .image-preview-container img {
     max-width: 100px; /* Adjust as needed */
-    height: auto;
+    /* height: auto;
     border: 1px solid #ccc;
     border-radius: 5px;
+} */ */
+
+.image-wrapper {
+    display: inline-block;
+    position: relative;
+    margin: 5px;
+    width: 100px; /* Set a fixed width to match the image size */
+    height: auto;
+    background-color: #d00;
 }
 
+.preview-image {
+    max-width: 100px;
+    height: 120px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.remove-button {
+    top: 0;
+    right: 0;
+    background-color: #f00;
+    color: #fff;
+    font-size: 12px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.remove-button:hover {
+    background-color: #d00;
+    transform: scale(1.1);
+}
 
 /* Size Options */
 .size-options button {
