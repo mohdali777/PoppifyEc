@@ -15,8 +15,13 @@
   <h4>Opps. It happens to the best of us. Input your email 
       <br>
      address to fix the issue.</h4>
-     <form action="">
-      <input type="email" placeholder="Enter email">
+     <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+    color: #d32f2f; /* Red color for error messages */
+    font-weight: 500; /* Medium weight */
+    text-align: center; /* Center align */
+    margin-top: 5px;"><%= message %></p> <% } %>
+     <form action="/forgetpass" method="post">
+      <input type="email" placeholder="Enter email" name="email">
       <br>
       <button>Submit</button>
      </form> 

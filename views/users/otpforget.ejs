@@ -1,0 +1,65 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+<div class="main">
+
+  <!-- image_container -->
+<div class="image_container">
+<img class="navimg1" src=".\images\shopping-concept-close-up-portrait-young-beautiful-attractive-redhair-girl-smiling-looking-camera (1).png" alt="">
+</div>
+
+<!-- image_container end -->
+ <!-- verify otp -->
+
+<div class="forgetpass">
+  <h1>Otp Verification</h1>
+  <h4>Copy the verification code in your authy 
+      <br>
+      application to verify this account recovery.</h4>
+     <form action="/verify-otp-forget" method="post" class="verifyotp">
+      <input type="text" placeholder="ENTER OTP" style="text-align: center;" id="otp" name="otp" minlength="6" >
+      <br>
+      <p id="timer"></p>
+      <% if (message) { %> <p class="message"><%= message %></p> <% } %>
+      <button>Submit</button>
+      <p class="pforotp" >Didn't receive the OTP? <a id="resend-link" class="aforotp" href="/resend-otp">Resend OTP</a></p> <span id="resend-timer"  style=" font-size: 15px;
+      color: gray;
+      margin-left: 238px;
+      font-style: italic">(10 seconds)</span>
+      
+    
+     </form> 
+</div>
+
+<!-- forgetpass -->
+</div>
+
+
+<script>
+  const resendLink = document.getElementById('resend-link');
+  const resendTimer = document.getElementById('resend-timer');
+
+  let countdown = 10; // 10 seconds
+  resendLink.style.pointerEvents = "none"; // Disable the link
+  resendLink.style.color = "gray"; // Change appearance to indicate it's disabled
+
+  function updateTimer() {
+    if (countdown > 0) {
+      resendTimer.textContent = `(${countdown} seconds)`; // Update the timer near the link
+      countdown--;
+    } else {
+      resendTimer.textContent = ''; // Clear the timer
+      resendLink.style.pointerEvents = "auto"; // Enable the link
+      resendLink.style.color = "blue"; // Restore normal appearance
+      clearInterval(timerInterval); // Stop the timer
+    }
+  }
+
+  // Start the countdown
+  const timerInterval = setInterval(updateTimer, 1000);
+
+  // Initial display
+  updateTimer();
+</script>
+
+<%- include('../partials/user/footer') %>
+

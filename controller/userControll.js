@@ -14,12 +14,8 @@ let signup = async (req,res)=>{
 let forget = async (req,res)=>{
     res.render("users/forget")
    }
-let verifyOtp = async (req,res)=>{
-    res.render("users/verifyotp")
-   }
-   let newpassword = async (req,res)=>{
-    res.render("users/newpassword")
-   }
+
+
 
    let home = async (req,res)=>{
     try {
@@ -42,8 +38,15 @@ let verifyOtp = async (req,res)=>{
    res.redirect("/signup")
    }
    let signlogin = async(req,res)=>{
+    console.log(req.session.username);
+    
    res.redirect("/login")
    }
+   const forgetPass = async (req,res)=>{
+    res.render("users/forget",{message:false})
+   }
+
+   
 
    const google = async(req,res)=>{
     const categories = await Category.find({ is_listed: true });
@@ -172,7 +175,10 @@ let postverifyotp = async(req,res)=>{
         await OTP.deleteOne({ email });
 
         req.session.user = true;
+        req.session.username = username;
         console.log('OTP verified, redirecting to home...');
+        
+        
         res.redirect("/home");
 
     } catch (err) {
@@ -231,7 +237,11 @@ let postlogin = async (req,res)=>{
         console.log(req.body);
         
         req.session.user = true
+        req.session.username = username;
+        console.log(req.session.username);
             res.redirect('/home')
+            console.log(req.session.username);
+            
         }catch(err){
             res.status(500).send(`${err} error found`)
         }
@@ -250,7 +260,118 @@ let postlogin = async (req,res)=>{
    
     }
 
+    const forgetpasspost = async (req,res)=>{
+        try {
+            const{email} = req.body;
+            const emailcheck = await User.findOne({email});
+            if(!emailcheck){
+                return res.render("users/forget",{message:"user not exist"})
+            } 
+
+            const otp = genarateotp();
+            const expiresAt = new Date(Date.now() + 10 * 60 * 1000); 
+            const otpRecord = new OTP({
+                email,
+                otp,
+                type: 'signup', 
+                expiresAt,
+            });
+            
+            await otpRecord.save();
+    
+    
+            const emailsent = await otpTransport(email,otp)
+            if (!emailsent) {
+                return res.render("users/login", { message: "Failed to send OTP" });
+            }
+            console.log("otp sent",otp);
+            req.session.email = email;
+            res.render("users/otpforget", { message: null});
+
+        } catch (error) {
+            console.log(err);
+            
+        }
+     
+    }
+
+    let postverifyotpforget = async(req,res)=>{
+        try {
+            const {  otp } = req.body; // OTP entered by the user
+            console.log(otp);
+            const email = req.session.email; 
+            const otpRecord = await OTP.findOne({ email, otp, type: 'signup' }); // Find OTP record
+    
+            console.log("Received OTP:", otp);
+            console.log("Stored OTP Record:", otpRecord);
+           
+            
+    
+            // Check if OTP exists and is not expired
+            if (!otpRecord) {
+                return res.render("users/verifyotp", { message: "Invalid OTP or OTP expired." });
+            }
+    
+            // Check if OTP has expired
+            if (otpRecord.expiresAt < Date.now()) {
+                return res.render("users/verifyotp", { message: "OTP has expired. Please request a new one." });
+            }
+    
+            res.render("users/newpassword",{email})
+    
+        } catch (err) {
+            console.error(err);
+            res.render("users/verifyotp", { message: "An error occurred during OTP verification. Please try again." });
+        }
+    }
+
+    const newpassword = async (req,res)=>{
+        try {
+            const {password,email} = req.body;
+ const saltRounds = 10;
+ const hashedPassword = await bcrypt.hash(password,saltRounds)
+ await User.updateOne({email:email},{$set:{password:hashedPassword}})
+ res.render("users/login",{message:"password Changed Successfully"})
+        } catch (error) {
+            console.log(error);
+            
+        }
+ 
+    }
+
+
+    const manageAccount = async (req,res)=>{
+        try {
+            const username = req.session.username;
+            const user = await User.findOne({username})
+             res.render("users/accountdeatails",{user})
+        } catch (error) {
+            console.log(error);
+            
+        }
+   
+    }
+    const addressbook = async (req,res)=>{
+        res.render("users/addressbook")
+       }
 
 
 
-module.exports = {login,signup,forget,verifyOtp,newpassword,postsignup,postlogin,home,postverifyotp,resendOtp,loginsign,signlogin,productdeatails,google}
+module.exports = {login,
+    signup,
+    forget,
+    newpassword,
+    postsignup,
+    postlogin,
+    home,
+    postverifyotp,
+    resendOtp,
+    loginsign,
+    signlogin,
+    productdeatails,
+    google,
+manageAccount,
+addressbook,
+forgetPass,
+forgetpasspost,
+postverifyotpforget}

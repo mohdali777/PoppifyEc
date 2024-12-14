@@ -66,9 +66,43 @@ const otpSchema = new mongoose.Schema({
 // Expire OTP automatically after the specified time
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
+const AddressSchema = new mongoose.Schema({
+  name:{
+    type:String,
+    trim: true,
+    required:true,
+  },
+  companyname:{
+    type:String,
+  },
+  streetaddress:{
+    type:String,
+    required:true,
+  },
+  appartment:{
+    type:String,
+    required:true,
+  },
+  city:{
+    type:String,
+    required:true,
+  },
+  phone:{
+    type:Number,
+    required:true,
+  },
+  email:{
+    type:String,
+    required:true,
+  },
+},
+ { timestamps: true } ,
+)
+
 // Models
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP', otpSchema);
+const Address = mongoose.model("Address",AddressSchema)
 
 // Export the models
-module.exports = { User, OTP };
+module.exports = { User, OTP ,Address};

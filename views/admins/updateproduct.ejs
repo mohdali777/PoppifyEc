@@ -49,31 +49,6 @@
     <label for="brand">Brand</label>
     <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" value="<%=product.brand%>" required>
 
-  <!-- <label>Variants:</label>
-<div id="variant-container">
-    <div class="variant-row">
-        <% product.variants.forEach(variant=>{ %>
-        <input type="text" name="variants" placeholder="Variant (e.g., 64 GB)" value="<%=variant.variant%>" id="variantId" required>
-        <input type="number" name="price" placeholder="Price" value="<%=variant.price%>" required>
-        <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" value="<%=variant.quantity%>" required>
-        
-        <label>Select Colors:</label>
-
-      
-        
-            <% ['red', 'black', 'blue', 'green'].forEach(color => { %>
-                <div class="color-options">
-                <input type="checkbox" name="colors" id="<%= color %>" value="<%= color %>" <%= variant.colors.includes(color) ? 'checked' : '' %>>
-                <label for="<%= color %>" class="color-circle <%= color %>"></label>
-            </div>
-            <% }) %>
-       
-        <% }) %>
-        <button type="button" onclick="removeVariant(this)">Remove</button>
-    </div>
-</div>
-<button type="button" onclick="addVariant()">Add Variant</button> -->
 <label>Variants:</label>
 <div id="variant-container">
     <div class="variant-row">
@@ -245,25 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('price', document.getElementById('price').value);
         formData.append('brand', document.getElementById('brand').value);
         formData.append('id', productIdd);
-
-        // Handle variants
-        // const variants = [];
-        // document.querySelectorAll('.variant-row').forEach(row => {
-        //     const variant = row.querySelectorAll('input[name="variants"]').value;
-        //     const price = row.querySelector('input[name="price"]').value;
-        //     const quantity = row.querySelector('input[name="quantity"]').value;
-        //     const colors = Array.from(row.querySelectorAll('input[name="colors"]:checked')).map(input => input.value);
-
-        //     if (variant && price && quantity && colors.length) {
-        //         variants.push({
-        //             variant,
-        //             price: parseFloat(price),
-        //             quantity: parseInt(quantity),
-        //             colors
-        //         });
-        //     }
-        // });
-        // formData.append('variants', JSON.stringify(variants));
         const variants = [];
 document.querySelectorAll('.variant-row').forEach(row => {
     const variant = row.querySelector('input[name="variant"]').value;

@@ -17,9 +17,9 @@
             <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
             <div class="edsp">
                 <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>
-                <span class="stock-status <%= product.stockStatus === 'Low Stock' ? 'low-stock' : product.stockStatus === 'Out of Stock' ? 'out-of-stock' : 'published' %>">
+                <!-- <span class="stock-status <%= product.stockStatus === 'Low Stock' ? 'low-stock' : product.stockStatus === 'Out of Stock' ? 'out-of-stock' : 'published' %>">
                   <%= product.stockStatus %>
-                </span>
+                </span> -->
                 <img  onclick="deleteproduct('<%= product._id %>')" style="margin-top: 25px; width: 20px; height: 20px;" src="/images/fi-sr-trash.png" alt="trash" >
             </div>  
           </div>

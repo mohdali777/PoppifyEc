@@ -778,3 +778,114 @@ h2 {
   margin-top: 13px;
 }
 
+.divcontainer-usermanagement{
+  display: flex;
+  height: 1000px;
+}
+
+.divsidebar-user{
+  width: 170px;
+  margin-top: 50px;
+}
+.divsidebar-user h4{
+  margin-top: 100px;
+
+}
+.divsidebar-user a{
+text-decoration: none;
+color: #000000;
+}
+.divsidebar-user ul{
+  margin-top: 10px;
+list-style: none;
+font-size: 14px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+
+}
+.divsidebar-user ul a{
+  color: #00000074;
+  font-size: 14px;
+ 
+  }
+
+.divsidebar-user a:hover{
+ color: red;
+}
+.divsidebar-user a:focus{
+ color: red;
+}
+
+
+.form-container-accountdetails {
+  max-width: 838px;
+  margin: 50px 120px;
+  padding: 30px;
+  border-radius: 8px;
+  text-align: left;
+  height: auto;
+}
+
+/* Title styling */
+.form-title-accountdetails {
+  color: #e74c3c; /* Red color for the title */
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+/* Form group styling */
+.form-group-accountdetails {
+  margin-bottom: 20px;
+}
+
+.form-group-accountdetails label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-group-accountdetails input {
+  width: 330px;
+  height: 50px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #f5f5f5;
+  color: #999;
+  font-size: 14px;
+}
+
+/* Button container */
+.form-buttons-accountdetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Cancel button styling */
+.cancel-btn-accountdetails {
+  background: none;
+  border: none;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 40px;
+}
+
+/* Save button styling */
+.save-btn-accountdetails {
+  background-color: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 40px;
+}
+
+.save-btn-accountdetails:hover {
+  background-color: #d62c1a; /* Darker red on hover */
+}

@@ -1,0 +1,31 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+<div class="container-sm">
+<%- include('../partials/user/sidebaruser') %>
+
+
+<div class="form-container-accountdetails">
+    <h2 class="form-title-accountdetails">Edit Your Profile</h2>
+    <form action="#" method="POST" style="margin-top: 40px;">
+      <div class="form-group-accountdetails">
+        <label for="username-accountdetails">Username</label>
+        <input type="text" id="username-accountdetails" name="username" placeholder="Username" value="<%= user.username %>">
+      </div>
+      <div class="form-group-accountdetails">
+        <label for="email-accountdetails" ></label>
+        <input type="email" id="email-accountdetails" name="email"  value="<%= user.email %>">
+      </div>
+      <div class="form-group-accountdetails">
+        <label for="phone-accountdetails">Phone</label>
+        <input type="text" id="phone-accountdeatails" name="phone" placeholder="Phone" value="<%= user.username %>">
+      </div>
+      <div class="form-buttons-accountdetails">
+        <button type="button" class="cancel-btn-accountdetails">Cancel</button>
+        <button type="submit" class="save-btn-accountdetails">Save Changes</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+</div>
+<%- include('../partials/user/footer') %>

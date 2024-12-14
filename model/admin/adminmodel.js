@@ -65,11 +65,6 @@ const productSchema = new mongoose.Schema({
     type: [String],  // URL to the image
     required: true,  // Image URL is required
   },
-  stockStatus: {
-    type: String,
-    enum: ['In Stock', 'Low Stock', 'Out of Stock'],
-    default: 'In Stock',  // Default is In Stock
-  },
   ratings: {
     type: Number,
     min: 0,

@@ -212,7 +212,6 @@ sizeSelect.addEventListener('change', function () {
   } else if (quantity <= 5) {
     stockStatusElement.textContent = "Low Stock";
     stockStatusElement.style.color = "orange";
-    quantityElement.style.display = 'block'
     button.disabled = false;
   } else {
     stockStatusElement.textContent = ""; // Clear status

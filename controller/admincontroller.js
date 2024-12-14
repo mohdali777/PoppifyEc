@@ -48,7 +48,6 @@ let postlogin = async(req,res)=>{
             return res.render("admins/signin",{message:"usernot Found"})
         }
         const isMatch = await bcrypt.compare(password, admin.password);
-        // const isMatch = password == admin.password
         console.log(isMatch);
         
         if (!isMatch) {
@@ -92,10 +91,6 @@ const adduser = async (req, res) => {
             password: hashedpassword
         });
         await newUser.save();
-
-        // Fetch updated list of users and render
-        // const users = await User.find();
-        // res.render("admins/users", { users, message: "User added successfully!"});
         res.redirect("/admin/usermangement")
         
     } catch (err) {
@@ -109,7 +104,6 @@ const deleteuser = async(req,res)=>{
         const user = req.params.userid;
         await User.findByIdAndDelete(user)
         const users = await User.find({})
-        // res.render("admins/users",{users,message:"user deleted successfully"})
         res.redirect("/admin/usermangement")
     }catch(err){
 console.log(err)
@@ -134,7 +128,6 @@ const blockUser = async (req, res) => {
     try {
         const { userid } = req.params;
 
-        // Set status to "blocked"
         const user = await User.findByIdAndUpdate(userid, { status: "blocked" });
 
         if (!user) {
@@ -386,12 +379,6 @@ const updateproduct = async (req, res) => {
     const parsevariants = variants ? JSON.parse(variants) : existingProduct.variants;
 
     const images = req.files ? req.files.map(file => file.filename) : [];
-    console.log('----------------');
-    console.log(images);
-    console.log('----------------');
-    
-   
-
     // Prepare updated fields
     const updatedProduct = {
       name: name || existingProduct.name,

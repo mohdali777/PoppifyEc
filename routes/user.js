@@ -9,8 +9,7 @@ const { Session } = require("express-session")
 // getMethods
 router.get("/login",sessions.islogin,userControl.login)
 router.get("/signup",sessions.islogin,userControl.signup)
-router.get("/forget",userControl.forget)
-router.get("/verifyOtp",userControl.verifyOtp)
+router.get("/forgetpass",userControl.forgetPass)
 router.get("/newpassword",userControl.newpassword)
 router.get("/home",sessions.sessionCheck,userControl.home)
 router.get("/google", passport.authenticate("google", {
@@ -28,11 +27,16 @@ router.get("/google", passport.authenticate("google", {
   })
   router.get("/login-sign",userControl.loginsign)
   router.get("/sign-login",userControl.signlogin)
-
+  router.get("/accountmangement",userControl.manageAccount)
+  router.get("/addressbook",userControl.addressbook)
+ 
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)
 router.post("/verify-otp",userControl.postverifyotp)
+router.post("/forgetpass",userControl.forgetpasspost)
+router.post("/verify-otp-forget",userControl.postverifyotpforget)
+router.post("/newpassword",userControl.newpassword)
 
 
 
