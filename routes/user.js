@@ -27,9 +27,11 @@ router.get("/google", passport.authenticate("google", {
   })
   router.get("/login-sign",userControl.loginsign)
   router.get("/sign-login",userControl.signlogin)
-  router.get("/accountmangement",userControl.manageAccount)
-  router.get("/addressbook",userControl.addressbook)
- 
+  router.get("/accountmangement",sessions.sessionCheck,userControl.manageAccount)
+  router.get("/addressbook",sessions.sessionCheck,userControl.addressbook)
+  router.get("/cart",userControl.getCart)
+  router.get("/check-out",userControl.checkOut)
+  router.get("/myorders",userControl.getOrdersPage)
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)
@@ -37,6 +39,13 @@ router.post("/verify-otp",userControl.postverifyotp)
 router.post("/forgetpass",userControl.forgetpasspost)
 router.post("/verify-otp-forget",userControl.postverifyotpforget)
 router.post("/newpassword",userControl.newpassword)
+router.post("/changedeatails",userControl.changedeatails)
+router.post("/addresspost",userControl.addresspost)
+router.post("/add-to-Cart",userControl.addtocartPost)
+router.post("/update-cart",userControl.updateCart)
+router.post("/delete-cart-item",userControl.deletecart)
+router.post("/place-order",userControl.placeOrder)
+
 
 
 

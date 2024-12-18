@@ -730,6 +730,16 @@ h2 {
 #button_product:hover {
   background-color: #45a049; /* Slightly darker green when hovered */
 }
+#button_cart:disabled {
+  background-color: #dcdcdc; /* Light gray color */
+  color: #a9a9a9; /* Dimmed text color */
+  cursor: not-allowed; /* Change cursor to indicate no interaction */
+  border: 1px solid #ccc; /* Light border to indicate it's inactive */
+}
+#button_cart:hover {
+  background-color: #45a049; /* Slightly darker green when hovered */
+}
+
 
 .reviews-container {
   max-width: 800px;
@@ -888,4 +898,162 @@ gap: 10px;
 
 .save-btn-accountdetails:hover {
   background-color: #d62c1a; /* Darker red on hover */
+}
+
+.table-responsive {
+  margin-bottom: 20px;
+}
+.cart-total {
+  border: 1px solid #ddd;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+}
+.btn-checkout {
+  background-color: #dc3545;
+  color: white;
+  font-weight: bold;
+}
+.btn-checkout:hover {
+  background-color: #bb2d3b;
+}
+
+
+/* Container for the Order Page */
+/* General Container Styling */
+.container-order-page {
+  max-width: 1000px;
+  margin: 30px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Heading and Order Info */
+h2.heading-order-page {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.order-info-order-page {
+  color: #555;
+  margin-bottom: 20px;
+}
+
+/* Order Card Styling */
+.order-card-order-page {
+  display: flex;
+  flex-direction: column; /* Stack children vertically */
+  align-items: flex-start; /* Align items to the left */
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.order-details-order-page {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.order-details-order-page h3 {
+  font-size: 18px;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.order-details-order-page p {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Order Status */
+.order-status-order-page span {
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 5px;
+}
+
+.completed-order-page {
+  background: #e0fbe0;
+  color: #4caf50;
+}
+
+.cancelled-order-page {
+  background: #fde2e2;
+  color: #f44336;
+}
+
+.in-progress-order-page {
+  background: #fff3cd;
+  color: #ff9800;
+}
+
+/* Buttons */
+.btn-order-page {
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-view-products-order-page {
+  background-color: #007bff;
+}
+
+.btn-view-products-order-page:hover {
+  background-color: #0056b3;
+}
+
+.btn-cancel-order-page {
+  background-color: #f44336;
+}
+
+.btn-cancel-order-page:hover {
+  background-color: #d32f2f;
+}
+
+.btn-return-order-page {
+  background-color: #4caf50;
+}
+
+.btn-return-order-page:hover {
+  background-color: #388e3c;
+}
+
+/* Products Container */
+.products-container-order-page {
+  width: 100%;
+  display: none; /* Initially hide products */
+  margin-top: 15px;
+  border-top: 1px solid #ddd;
+  padding-top: 10px;
+}
+
+.products-container-order-page.active {
+  display: block; /* Show when active */
+}
+
+/* Product Card Styling */
+.product-card-order-page {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.product-card-order-page img {
+  width: 70px;
+  height: 70px;
+  margin-right: 15px;
+  object-fit: cover;
+}
+
+.product-details-order-page {
+  flex: 1;
 }

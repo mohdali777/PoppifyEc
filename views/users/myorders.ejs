@@ -1,0 +1,99 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+
+<div class="container-order-page">
+    <h2 class="heading-order-page">My Orders</h2>
+    <p class="order-info-order-page">You have <%= orders.length %> items in your order</p>
+
+    <% orders.forEach(order => { %>
+    <div class="order-card-order-page">
+        <!-- Order Details (Left Side) -->
+        <div class="order-details-order-page">
+            <h3>Order Total: $<%= order.totalPrice %></h3>
+            <p>Payment Method: <strong><%= order.paymentMethod %></strong></p>
+            <p>Status: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
+        </div>
+
+        <!-- Billing Address (Right Side) -->
+        <div class="billing-address-order-page">
+            <h4>Billing Address</h4>
+            <p>123 Main Street</p>
+            <p>Springfield, IL, 62704</p>
+            <p>USA</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="order-actions-order-page">
+            <% if (order.orderStatus === 'Pending' || order.orderStatus === 'Processing') { %>
+                <button class="btn-order-page btn-cancel-order-page" onclick="handleCancel('<%= order._id %>')">Cancel Order</button>
+            <% } %>
+            <button class="btn-order-page btn-view-products-order-page" onclick="toggleProducts(this)">View Products</button>
+        </div>
+
+        <!-- Products Container (Initially Hidden) -->
+        <div class="products-container-order-page">
+            <% order.cartItems.forEach(item => { %>
+            <div class="product-card-order-page">
+                <img src="/uploads/<%= item.productId.image[0] || 'placeholder.jpg' %>" 
+                     alt="<%= item.productId.name || 'Product' %>" />
+                <div class="product-details-order-page">
+                    <h4><%= item.productId.name %></h4>
+                    <p>Quantity: <%= item.quantity %> - $<%= item.price %> per unit</p>
+                    <p>Total: $<%= item.total %></p>
+
+                    <!-- Return Button for Each Product -->
+                    <% if (order.orderStatus === 'Delivered') { %>
+                        <button class="btn-order-page btn-return-product-page" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>')">Return Product</button>
+                    <% } %>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    </div>
+    <% }); %>
+</div>
+
+<script>
+    // Function to toggle product details visibility
+    function toggleProducts(button) {
+        const productsContainer = button.closest('.order-card-order-page').querySelector('.products-container-order-page');
+        productsContainer.classList.toggle('active');
+        button.textContent = productsContainer.classList.contains('active') ? "Hide Products" : "View Products";
+    }
+
+    // Function to handle order cancellation
+    async function handleCancel(orderId) {
+        if (confirm('Are you sure you want to cancel this order?')) {
+            const response = await fetch(`/orders/${orderId}/cancel`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload(); // Refresh the page to reflect changes
+            } else {
+                alert('Failed to cancel the order. Please try again.');
+            }
+        }
+    }
+
+    // Function to handle product return
+    async function handleReturn(orderId, productId) {
+        if (confirm('Are you sure you want to return this product?')) {
+            const response = await fetch(`/orders/${orderId}/return/${productId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                location.reload(); // Refresh the page to reflect changes
+            } else {
+                alert('Failed to return the product. Please try again.');
+            }
+        }
+    }
+</script>
+
+<%- include('../partials/user/footer') %>

@@ -28,8 +28,12 @@
             </div>
             <h4 id="price">₹<%= (products.price - (products.price * 0.10)).toFixed(2) %></h4>
 
-              <p id="quantityid" style="display: none;"> </p>
-              <p id="stock-status"> </p>
+              <p id="quantityid"  style="   font-size: 1rem;
+              font-weight: bold;
+              color: #333; /* Dark grey for the text */
+              margin-top: 10px;
+              text-align: center;"> </p>
+              <p id="stock-status" > </p>
 
             <h5><%= products.description%> </h5>
           </div>
@@ -57,13 +61,14 @@
           <label for="size">Size</label>
           <select id="size" name="size" required>
             <% products.variants.forEach(variant => { %>
-              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" ><%= variant.variant %></option>
+              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" ><%= variant.variant %> </option>
             <% }); %>
           </select>
           <label for="quantity">Quantity</label>
           <input type="number" id="quantity" name="quantity"  value="1" required>
         
           <input type="button" value="Buy Now" id="button_product" >
+          <input type="button" value="Add to Cart" id="button_cart" style="background-color: red;" onclick="addtocart('<%= products._id%>')">
         </form>
          <img src="\images\Frame 911.png" alt="" srcset="">
         </div>
@@ -182,6 +187,7 @@ const quantityElement = document.getElementById("quantityid");
 const stockStatusElement = document.getElementById("stock-status");
 const button = document.getElementById("button_product");
 const ogprice = document.getElementById("originalprice");
+const button1 = document.getElementById("button_cart");
 
 sizeSelect.addEventListener('change', function () {
   const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
@@ -209,14 +215,17 @@ sizeSelect.addEventListener('change', function () {
     stockStatusElement.textContent = "Out Of Stock";
     stockStatusElement.style.color = "red";
     button.disabled = true;
+    button1.disabled = true;
   } else if (quantity <= 5) {
     stockStatusElement.textContent = "Low Stock";
     stockStatusElement.style.color = "orange";
     button.disabled = false;
+    button1.disabled = false;
   } else {
     stockStatusElement.textContent = ""; // Clear status
     stockStatusElement.style.color = ""; // Reset color
     button.disabled = false;
+    button1.disabled = false;
   }
 });
 
@@ -238,5 +247,53 @@ document.getElementById("quantity").addEventListener('input', function () {
       buyButton.disabled = true;
     }
   });
+
+  function addtocart(productId){
+    const priceText = priceElement.textContent.trim(); // Get the text and trim any extra spaces
+    const price = parseFloat(priceText.replace('₹', '').trim()); 
+    console.log(price);
+  const selectedQuantity = document.getElementById("quantity").value;
+  console.log(selectedQuantity);
+  const variantElement = document.getElementById("size");
+    if (!variantElement) {
+        console.error('Variant select element not found!');
+        return;
+    }
+    if (variantElement.selectedIndex === -1) {
+        console.error('No variant selected!');
+        return;
+    }
+    const selectedVariant = variantElement.options[variantElement.selectedIndex];
+    const variantName = selectedVariant.value;
+    const totalquantity = parseInt(selectedVariant.getAttribute("data-quantity"), 10);
+  
+  const cart = {
+    productId :productId ,
+    price:price,
+    quantity:selectedQuantity,
+    variant:variantName,
+    totalquantity:totalquantity
+  }
+
+  fetch('/add-to-cart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(cart)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Product added to cart successfully!');
+    } else {
+      alert('Failed to add product to cart. Please try again.');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('Something went wrong. Please try again later.');
+  });
+}
   </script>
 <%- include('../partials/user/footer') %>

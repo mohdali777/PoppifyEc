@@ -1,43 +1,98 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
 <div class="container-sm">
-<%- include('../partials/user/sidebaruser') %>
+  <%- include('../partials/user/sidebaruser') %>
 
+  <div class="form-container-accountdetails">
+    <h2 class="form-title-accountdetails">Edit Your Address</h2>
+    <form action="/addresspost" method="POST" style="margin-top: 40px;">
+      
+      <div class="form-group-accountdetails">
+        <label for="name-accountdetails">Full Name</label>
+        <input 
+          type="text" 
+          id="name-accountdetails" 
+          name="name" 
+          placeholder="Full Name" 
+          value="<%= address ? address.name : '' %>" 
+          required
+        >
+      </div>
 
-<div class="form-container-accountdetails">
-    <h2 class="form-title-accountdetails">Edit Your Profile</h2>
-    <form action="#" method="POST" style="margin-top: 40px;">
       <div class="form-group-accountdetails">
-        <label for="username-accountdetails">Username</label>
-        <input type="text" id="username-accountdetails" name="username" placeholder="Username">
+        <label for="companyname-accountdetails">Company Name</label>
+        <input 
+          type="text" 
+          id="companyname-accountdetails" 
+          name="companyname" 
+          placeholder="Company Name"
+          value="<%= address ? address.companyname : '' %>"
+        >
       </div>
+
       <div class="form-group-accountdetails">
-        <label for="company-accountdetails">Company Name</label>
-        <input type="text" id="company-accountdetails" name="company"  placeholder="Company Name">
+        <label for="streetaddress-accountdetails">Street Address</label>
+        <input 
+          type="text" 
+          id="streetaddress-accountdetails" 
+          name="streetaddress" 
+          placeholder="Street Address" 
+          value="<%= address ? address.streetaddress : '' %>"
+          required
+        >
       </div>
+
       <div class="form-group-accountdetails">
-        <label for="StreetAddress-accountdetails">Street Address</label>
-        <input type="text" id="StreetAddress-accountdeatails" name="phone" placeholder="Street Address">
+        <label for="appartment-accountdetails">Apartment</label>
+        <input 
+          type="text" 
+          id="appartment-accountdetails" 
+          name="appartment" 
+          placeholder="Apartment" 
+          value="<%= address ? address.appartment : '' %>"
+          required
+        >
       </div>
+
       <div class="form-group-accountdetails">
-        <label for="Apartment-accountdetails">Apartment</label>
-        <input type="text" id="Apartment-accountdeatails" name="phone" placeholder="Apartment">
+        <label for="city-accountdetails">City/Town</label>
+        <input 
+          type="text" 
+          id="city-accountdetails" 
+          name="city" 
+          placeholder="City/Town" 
+          value="<%= address ? address.city : '' %>"
+          required
+        >
       </div>
-      <div class="form-group-accountdetails">
-        <label for="phone-accountdetails">Town/City</label>
-        <input type="text" id="Town/City-accountdeatails" name="phone" placeholder="Town/City">
-      </div>
+
       <div class="form-group-accountdetails">
         <label for="phone-accountdetails">Phone Number</label>
-        <input type="text" id="PhoneNumber-accountdeatails" name="phone" placeholder="Phone Number">
+        <input 
+          type="text" 
+          id="phone-accountdetails" 
+          name="phone" 
+          placeholder="Phone Number" 
+          value="<%= address ? address.phone : '' %>"
+          required
+        >
       </div>
+
       <div class="form-group-accountdetails">
-        <label for="phone-accountdetails">Email</label>
-        <input type="text" id="Email-accountdeatails" name="phone" placeholder="Email">
+        <label for="email-accountdetails">Email</label>
+        <input 
+          type="email" 
+          id="email-accountdetails" 
+          name="email" 
+          placeholder="Email" 
+          value="<%= address ? address.email : '' %>"
+          required
+        >
       </div>
+
       <div class="form-buttons-accountdetails">
         <button type="button" class="cancel-btn-accountdetails">Cancel</button>
-        <button type="submit" class="save-btn-accountdetails">Save Changes</button>
+        <button type="submit" class="save-btn-accountdetails">Save Address</button>
       </div>
     </form>
   </div>

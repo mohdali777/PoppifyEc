@@ -31,7 +31,7 @@
     <i class="bi bi-heart" style="font-size: 20px;"></i>
   </li>
   <li>
-    <i class="bi bi-bag" style="font-size: 20px;"></i>
+    <i class="bi bi-bag" style="font-size: 20px;" onclick="cartshown()"></i>
   </li>
   <li style="position: relative;">
     <i class="bi bi-person" style="font-size: 22px; cursor: pointer;" onclick="toggleDropdown()"></i> 
@@ -42,7 +42,7 @@
         <i class="bi bi-x" style="font-size: 18px; cursor: pointer; color: #fff;" onclick="toggleDropdown()"></i>
       </div>
       <a href="/accountmangement" style="display: block; color: #fff; padding: 10px; text-decoration: none;">Manage My Account</a>
-      <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Order</a>
+      <a href="/myorders" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Order</a>
       <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Cancellations</a>
       <a href="#" style="display: block; color: #fff; padding: 10px; text-decoration: none;">My Reviews</a>
       <a href="/signout" style="display: block; color: #fff; padding: 10px; text-decoration: none;">Logout</a>
@@ -58,5 +58,13 @@
 function toggleDropdown() {
   const dropdown = document.querySelector('.dropdown-menu');
   dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+}
+function cartshown (){
+  fetch("/cart",{method:"GET"}).then((response)=>{
+if(response.ok) window.location.href = "/cart"
+  }).catch((err)=>{
+console.log(err);
+
+  })
 }
 </script>

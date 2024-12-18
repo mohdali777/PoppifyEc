@@ -1,4 +1,4 @@
-const {OTP,User} = require("../model/user/usermodel")
+const {OTP,User,Address,Cart,Order} = require("../model/user/usermodel")
 const{Product} = require("../model/admin/adminmodel")
 const {Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
@@ -98,7 +98,7 @@ async function otpTransport(email,otp) {
 // siginup post
 let postsignup = async (req,res)=>{
     try{
-        const {username,email,password} = req.body;
+        const {username,email,password,phone} = req.body;
         let user = await User.findOne({email})
         let name = await User.findOne({username})
         if(user){
@@ -129,6 +129,7 @@ let postsignup = async (req,res)=>{
         req.session.email = email;
         req.session.pass = password;
         req.session.username = username;
+        req.session.phone = phone;
         res.render("users/verifyotp", { message: null});
        
     }catch(err){
@@ -162,13 +163,14 @@ let postverifyotp = async(req,res)=>{
         // const { username, password } = req.body;
         const username = req.session.username;
         const password = req.session.pass;
+        const phone = req.session.phone;
         console.log(username,password);
         
         const saltRounds = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         
-        const newUser = new User({ username, email, password: hashedPassword });
+        const newUser = new User({ username, email, password: hashedPassword ,phone});
         await newUser.save();
 
         
@@ -343,20 +345,328 @@ let postlogin = async (req,res)=>{
     const manageAccount = async (req,res)=>{
         try {
             const username = req.session.username;
-            const user = await User.findOne({username})
-             res.render("users/accountdeatails",{user})
+            const usertake = await User.findOne({username})
+            req.session.userId = usertake._id;
+             res.render("users/accountdeatails",{usertake,message:false})
         } catch (error) {
             console.log(error);
             
         }
    
     }
+
+    const changedeatails = async (req, res) => {
+        try {
+            const { id, username, email, phone } = req.body;
+            const usernameCheck = await User.findOne({ username });
+            const emailcheck = await User.findOne({email});
+            if (usernameCheck && usernameCheck._id.toString() !== id) {
+                const usertake = await User.findOne({ _id: id });
+                return res.render("users/accountdeatails", {message: "Username already exists. Please choose another one.",usertake});
+            }
+            if (emailcheck && emailcheck._id.toString() !== id) {
+                const usertake = await User.findOne({ _id: id });
+                return res.render("users/accountdeatails", {message: "email already exists. Please choose another one.",usertake});
+            }
+            await User.updateOne({ _id: id },{ $set: { username, email, phone } });
+            const usertake = await User.findOne({ _id: id });
+            res.render("users/accountdeatails", {usertake,message: "Details updated successfully."});
+    
+        } catch (error) {
+            console.log("Error updating details:", error);
+            res.status(500).send("Internal Server Error");
+        }
+    };
+    
     const addressbook = async (req,res)=>{
-        res.render("users/addressbook")
+        try {
+            const userId = req.session.userId; 
+            console.log(userId);   
+            const user = await User.findById(userId).populate('addresses');
+            if (!user) {
+              return res.status(404).json({ message: 'User not found.' });
+            }
+            const address = user.addresses.length > 0 ? user.addresses[0] : null;
+            res.render("users/addressbook",{address})
+            
+          } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Failed to retrieve addresses.', error });
+          }
        }
+       const addresspost = async (req, res) => {
+        try {
+          const userId = req.session.userId;
+          const { name, companyname, streetaddress, appartment, city, phone, email } = req.body;
+          const user = await User.findById(userId);
+          if (!user) {
+            return res.status(404).json({ message: 'User not found.' });
+          }
+          const address = user.addresses.length > 0 ? user.addresses[0] : null;
+          if (address) {
+            await Address.findByIdAndUpdate(address._id, {
+              name,
+              companyname,
+              streetaddress,
+              appartment,
+              city,
+              phone,
+              email,
+            });
+          } else {
+            const newAddress = new Address({
+              name,
+              companyname,
+              streetaddress,
+              appartment,
+              city,
+              phone,
+              email,
+            });
+            const savedAddress = await newAddress.save();
+            await User.findByIdAndUpdate(userId, { $push: { addresses: savedAddress._id } });
+          }
+          const updatedUser = await User.findById(userId).populate('addresses');
+          const updatedAddress = updatedUser.addresses.length > 0 ? updatedUser.addresses[0] : null;
+      
+          res.render("users/addressbook", { address: updatedAddress });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: 'Failed to update address.', error });
+        }
+      };
 
+      const getCart = async (req, res) => {
+        try {
+          const username = req.session.username;
+          if (!username) {
+            return res.redirect('/login');
+          }
+          const user = await User.findOne({ username });
+          if (!user) {
+            return res.redirect('/login');
+          }
+          const cart = await Cart.findOne({ userId: user._id }).populate('items.productId');
+          if (!cart) {
+            return res.render('users/cart', { cart: { items: [], totalPrice: 0, totalQuantity: 0 } });
+          }
+          res.render('users/cart', {
+            cart, 
+            success: true, 
+          });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      };
+      
+      const addtocartPost = async(req,res)=>{
+        try {
+            console.log(req.body);
+            
+            const { productId, price, quantity,variant,totalquantity} = req.body;
+            const username = req.session.username;
+          const user = await User.findOne({username})
+          const userId = user._id;
+          console.log(userId);
+            let cart = await Cart.findOne({ userId });
+        
+            if (!cart) {
+              cart = new Cart({
+                userId,
+                items: [],
+                totalQuantity: 0,
+                totalPrice: 0,
+              });
+            }
+            if(cart.items.length > 10){
+                return res.json({
+                    success: false,
+                    message: 'You cannot add more than 10 different products to your cart.',
+                  });
+            }
+            const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variant === variant);
+            if (existingItem ) {
+              existingItem.quantity += parseInt(quantity);
+              existingItem.total = existingItem.quantity * existingItem.price;
+            } else {
+              cart.items.push({
+                productId,
+                price,
+                quantity,
+                variant,
+                totalquantity,
+                total: price * quantity,
+              });
+            }
+            cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+            cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
+            await cart.save();
+            res.status(200).json({ success: true, message: 'Product added to cart' });
+          } catch (error) {
+            console.error(error);
+            res.status(500).json({ success: false, message: 'Internal server error' });
+          }
+      }
+      const updateCart = async (req, res) => {
+        try {
+          const { productId, quantity } = req.body;
+          const username = req.session.username ;
+          const user = await User.findOne({username});
+          const userId = user._id;
+          const cart = await Cart.findOne({ userId });
+          if (!cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+          }
+          const item = cart.items.find(item => item.productId.toString() === productId ) ;
+      
+          if (!item) {
+            return res.status(404).json({ success: false, message: 'Product not found in cart' });
+          }
+          item.quantity = quantity;
+          item.total = item.price * quantity;
+          cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+          cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
+          await cart.save();
+          res.json({ success: true, message: 'Cart updated successfully' });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+      };
+      const deletecart = async (req, res) => {
+        try {
+            const { productId } = req.body;
+            const username = req.session.username;
+            const user = await User.findOne({ username });
+            console.log(user);
+            
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'User not found' });
+            }
+            const cart = await Cart.findOne({ userId: user._id });
+    
+            if (!cart) {
+                return res.status(404).json({ success: false, message: 'Cart not found' });
+            }
+            cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+            cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+            cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
+    
+            // Save the updated cart
+            await cart.save();
+    
+            return res.json({ success: true, message: 'Item removed from cart successfully', cart });
+        } catch (error) {
+            console.error(error);
+            return res.status(500).json({ success: false, message: 'Internal server error' });
+        }
+    };
+    const checkOut = async (req, res) => {
+      try {
+          // Step 1: Get username from session
+          const username = req.session.username;
+          if (!username) {
+              console.log("Username is not found in the session");
+              return res.status(400).json({ success: false, message: 'Username is required' });
+          }
+  
+          // Step 2: Fetch the user from the database
+          const user = await User.findOne({ username });
+          if (!user) {
+              console.log(`User with username ${username} not found`);
+              return res.status(404).json({ success: false, message: 'User not found' });
+          }
+  
+          console.log("User found:", user);
+  
+          // Step 3: Fetch the user's cart and populate the items
+          const cart = await Cart.findOne({ userId: user._id }).populate("items.productId");
+          if (!cart) {
+              console.log("Cart not found for user", user._id);
+              return res.status(404).json({ success: false, message: 'Cart not found' });
+          }
+  
+          console.log("Cart found:", cart);
+  
+          // Step 4: Fetch the user's address and check if it exists
+          const userAddress = await User.findById(user._id).populate('addresses');
+          const address = userAddress.addresses && userAddress.addresses.length > 0 ? userAddress.addresses[0] : null;
+  
+          // Step 5: Render checkout page
+          res.render("users/checkout", { cart, address });
+  
+      } catch (error) {
+          console.error("Error during checkout:", error);
+          res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+  };
+  
+    const placeOrder = async (req,res)=>{
+      console.log(req.body);
+      
+      const {paymentMethod, useDefaultAddress, totalPrice,...newAddress} = req.body
+      try {
+        const username = req.session.username;
+        const user = await User.findOne({username}) 
+       console.log(user._id);
+       const cart = await Cart.findOne({ userId: user._id })
+       const cartItems = cart.items;
+       console.log(cartItems);
+       
+        let finalAddress;
+        if(useDefaultAddress){
+          const address = await Address.findOne({_id:useDefaultAddress});
+          finalAddress = address
+        }else{
+            finalAddress = newAddress;
+            
+        }
+       
+        console.log(finalAddress);
 
+        const order = new Order({
+          userId:user._id,
+          paymentMethod,
+          totalPrice,
+          cartItems,
+          address:finalAddress,
+          status:"pending",
+        })
+      await order.save();
+      for (let item of cartItems) {
+        const product = await Product.findById(item.productId);
+        if (product) {
+            product.stock -= item.quantity;
+            if (product.stock < 0) product.stock = 0; 
+            await product.save(); 
+        }
+    }
+    await Cart.updateOne({ userId: user._id }, { $set: { items: [] } });
+    res.status(201).json({ message: "Order placed successfully", order });
+    res.status(201).json({ message: "Order placed successfully", order });
+      } catch (error) {
+        console.log(error);
+        
+      }
 
+    }
+    const getOrdersPage = async (req, res) => {
+      try {
+        const username = req.session.username; // Assuming user is logged in
+        const user = await User.findOne({ username });
+        if (!user) {
+          return res.status(404).send("User not found");
+        }
+        const orders = await Order.find({ userId: user._id }).populate("cartItems.productId");
+    
+        res.render("users/myorders", { orders });
+      } catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong");
+      }
+    };
+    
 module.exports = {login,
     signup,
     forget,
@@ -374,4 +684,12 @@ manageAccount,
 addressbook,
 forgetPass,
 forgetpasspost,
-postverifyotpforget}
+postverifyotpforget,
+changedeatails,
+addresspost,
+getCart,
+addtocartPost,updateCart,
+deletecart,
+checkOut,
+placeOrder,
+getOrdersPage}

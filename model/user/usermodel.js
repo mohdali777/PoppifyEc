@@ -12,6 +12,9 @@ const userSchema = new mongoose.Schema({
     unique: true,
     lowercase: true,
   },
+  phone:{
+  type:String,
+  },
   password: {
     type: String,
     minlength: 8,
@@ -25,7 +28,12 @@ const userSchema = new mongoose.Schema({
   status: {
      type: String, 
     default: "active" ,
-  },
+  },addresses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Address', // Referencing the Address model
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
@@ -99,10 +107,148 @@ const AddressSchema = new mongoose.Schema({
  { timestamps: true } ,
 )
 
+const cartSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User', // Assumes you have a 'User' model
+    required: true,
+  },
+  items: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product', // Assumes you have a 'Product' model
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      variant:{
+      type:String,
+      required:true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      totalquantity:{
+       type :Number,
+       required:true,
+      },
+      total: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+  totalQuantity: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
+  updatedAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+cartSchema.pre('save', function (next) {
+  this.totalQuantity = this.items.reduce((sum, item) => sum + item.quantity, 0);
+  this.totalPrice = this.items.reduce((sum, item) => sum + item.total, 0);
+  next();
+});
+
+const orderSchema = new mongoose.Schema({
+  userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Refers to the User collection
+      required: true
+  },
+  cartItems: [
+    {
+      productId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Product', // Assumes you have a 'Product' model
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+      variant:{
+      type:String,
+      required:true,
+      },
+      price: {
+        type: Number,
+        required: true,
+      },
+      totalquantity:{
+       type :Number,
+       required:true,
+      },
+      total: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+  totalPrice: {
+      type: Number,
+      required: true
+  },
+  paymentMethod: {
+      type: String,
+      enum: ['COD', 'Card', 'UPI', 'NetBanking'],
+      default: 'COD'
+  },
+  address: {
+      firstName: { type: String, required: true },
+      companyName: { type: String },
+      streetAddress: { type: String, required: true },
+      apartment: { type: String },
+      city: { type: String, required: true },
+      phone: { type: String, required: true },
+      email: { type: String, required: true }
+  },
+  orderStatus: {
+      type: String,
+      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      default: 'Pending'
+  },
+  createdAt: {
+      type: Date,
+      default: Date.now
+  },
+  updatedAt: {
+      type: Date,
+      default: Date.now
+  }
+});
+
+// Middleware to auto-update 'updatedAt' on save
+orderSchema.pre('save', function (next) {
+  this.updatedAt = Date.now();
+  next();
+});
+
+
+
+
 // Models
+const Cart = mongoose.model('Cart', cartSchema);
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP', otpSchema);
 const Address = mongoose.model("Address",AddressSchema)
+const Order =  mongoose.model('Order', orderSchema);
 
 // Export the models
-module.exports = { User, OTP ,Address};
+module.exports = { User, OTP ,Address,Cart,Order};

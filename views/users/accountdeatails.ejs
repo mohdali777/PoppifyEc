@@ -6,18 +6,24 @@
 
 <div class="form-container-accountdetails">
     <h2 class="form-title-accountdetails">Edit Your Profile</h2>
-    <form action="#" method="POST" style="margin-top: 40px;">
+    <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+    color: #d32f2f; /* Red color for error messages */
+    font-weight: 500; /* Medium weight */
+    text-align: center; /* Center align */
+    margin-top: 5px;"><%= message %></p> <% } %>
+    <form action="/changedeatails" method="POST" style="margin-top: 40px;">
       <div class="form-group-accountdetails">
+        <input type="text" id="id-accountdetails" name="id" value="<%= usertake._id %>" hidden>
         <label for="username-accountdetails">Username</label>
-        <input type="text" id="username-accountdetails" name="username" placeholder="Username" value="<%= user.username %>">
+        <input type="text" id="username-accountdetails" name="username" placeholder="Username" value="<%= usertake.username %>">
       </div>
       <div class="form-group-accountdetails">
         <label for="email-accountdetails" ></label>
-        <input type="email" id="email-accountdetails" name="email"  value="<%= user.email %>">
+        <input type="email" id="email-accountdetails" name="email"  value="<%= usertake.email %>">
       </div>
       <div class="form-group-accountdetails">
         <label for="phone-accountdetails">Phone</label>
-        <input type="text" id="phone-accountdeatails" name="phone" placeholder="Phone" value="<%= user.username %>">
+        <input type="text" id="phone-accountdeatails" name="phone" placeholder="Phone" value="<%= usertake.phone %>">
       </div>
       <div class="form-buttons-accountdetails">
         <button type="button" class="cancel-btn-accountdetails">Cancel</button>
