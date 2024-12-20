@@ -2,7 +2,11 @@
 <%- include('../partials/admin/sidebar') %>
 <h1>add category</h1>
 <div class="form-container">
-  
+  <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+  color: #d32f2f; /* Red color for error messages */
+  font-weight: 500; /* Medium weight */
+  text-align: center; /* Center align */
+  margin-top: 5px;"><%= message %></p> <% } %>
   <form enctype="multipart/form-data" id="category-form" class="form" action="/admin/add-category" method="post">
     <label for="category-name">Category Name</label>
     <input type="text" id="category-name" name="name" placeholder="Enter category name" required>

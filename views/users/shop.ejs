@@ -1,0 +1,185 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+
+<style>
+    .filter-sort-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-top: 20px;
+        gap: 20px;
+    }
+
+    .filter-section, .search-section, .sort-section {
+        display: flex;
+        flex-direction: column;
+        margin-left: 20px;
+        gap: 10px;
+        
+    }
+
+    .filter-section h3, .search-section h3, .sort-section h3 {
+        margin: 0 0 10px 0;
+        font-size: 1.2rem;
+    }
+
+    .filter-section select, .sort-section select, .search-section input {
+        padding: 10px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .product-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .product-item {
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        text-align: center;
+        background-color: #fff;
+    }
+
+    .product-item h4 {
+        margin: 0 0 10px 0;
+    }
+
+    .product-item p {
+        margin: 5px 0;
+        font-size: 0.9rem;
+    }
+ #searchInput{
+    width: 300px;
+    margin-left: 60px;
+ }
+</style>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+<div class="container header_container">
+    <div class="header_filter">
+        <a href="#" class="header_filter_link">Woman’s Fashion</a>
+        <a href="#" class="header_filter_link">Men’s Fashion</a>
+        <a href="#" class="header_filter_link">Electronics</a>
+        <a href="#" class="header_filter_link">Home & Lifestyle</a>
+        <a href="#" class="header_filter_link">Medicine</a>
+        <a href="#" class="header_filter_link">Sports & Outdoor</a>
+        <a href="#" class="header_filter_link">Baby’s & Toys</a>
+        <a href="#" class="header_filter_link">Groceries & Pets</a>
+        <a href="#" class="header_filter_link">Health & Beauty</a>
+    </div>
+    <img src="./images/Frame 560.png" alt="" class="header_img" />
+</div>
+
+<div class="filter-sort-container">
+    <!-- Search Section -->
+    <div class="search-section">
+        <h3 style="margin-left: 60px;" >Search</h3>
+        <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Search products..." 
+            onkeyup="applyFilters()" 
+        />
+    </div>
+
+    <!-- Sorting Section -->
+    <div class="sort-section">
+        <h3>Sort By</h3>
+        <select id="sortOptions" onchange="applyFilters()">
+            <option value="popularity">Popularity</option>
+            <option value="priceLowToHigh">Price: Low to High</option>
+            <option value="priceHighToLow">Price: High to Low</option>
+            <option value="averageRatings">Average Ratings</option>
+            <option value="featured">Featured</option>
+            <option value="newArrivals">New Arrivals</option>
+            <option value="aToZ">A - Z</option>
+            <option value="zToA">Z - A</option>
+        </select>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row row-cols-1 row-cols-md-4 g-4" id="productList">
+        <!-- Products will be dynamically inserted here -->
+    </div>
+</div>
+
+<script>
+    // Function to fetch products from the server with filters applied
+    function applyFilters() {
+        const searchValue = document.getElementById('searchInput').value.toLowerCase();
+        const sortValue = document.getElementById('sortOptions').value;
+        const url = `/products-shop?sort=${sortValue}&search=${searchValue}`;
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                // Update the product list with the filtered and sorted products
+                const productList = document.getElementById('productList');
+                productList.innerHTML = '';  // Clear the current product list
+                data.products.forEach(product => {
+                    const productItem = document.createElement('div');
+                    productItem.classList.add('col', 'product-item');
+                    productItem.innerHTML = `
+                        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+                            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px; ">
+                                -10%
+                            </div>
+                            <div class="p-3" style ="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px; margin ">
+                                <img class="card-img-top" src="/uploads/${product.image[0]}" alt="${product.name}" style="width: 172px; height: 152px; object-fit: contain;" onclick="productDetails('${product._id}', '${product.category}')">
+                            </div>
+                            <div class="card-body text-center" style="text-align: start;">
+                                <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                                    ${product.name}
+                                </p>
+                                <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹${product.price}</h5>
+                                <div class="text-warning">
+                                    ${renderRatingStars(product.rating)}
+                                    <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    productList.appendChild(productItem);
+                });
+            })
+            .catch(err => console.error(err));
+    }
+
+    // Function to render star ratings
+    function renderRatingStars(rating) {
+        let stars = '';
+        for (let i = 0; i < rating; i++) {
+            stars += '<i class="bi bi-star-fill"></i>';
+        }
+        for (let i = rating; i < 5; i++) {
+            stars += '<i class="bi bi-star"></i>';
+        }
+        return stars;
+    }
+
+    // Function to navigate to product details page
+    function productDetails(productId, category) {
+        console.log("Redirecting to product details...");
+        fetch(`/productdeatails/${productId}/${category}`, { method: "GET" })
+            .then((response) => {
+                if (response.ok) window.location.href = `/productdeatails/${productId}/${category}`;
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }
+
+    window.onload = applyFilters; 
+</script>
+
+<%- include('../partials/user/footer') %>

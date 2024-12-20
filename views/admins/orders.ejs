@@ -1,0 +1,56 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<link rel="stylesheet" href="/admincss/order.css">
+<div class="order-table-container">
+    <h2>Order Management</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Product</th>
+                <th>Date</th>
+                <th>Customer</th>
+                <th>Total</th>
+                <th>Payment</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <% order.forEach(order=>{ %>
+        <tbody>
+            <tr>
+                <td><a href="#"><%= order.orderId %></a></td>
+                <td><%= order.cartItems.length %> Products</td>
+                <td>11</td>
+                <td><%= order.address?.firstName %></td>
+                <td><%= order.totalPrice %></td>
+                <td><%= order.paymentMethod %></td>
+                <% if (order.orderStatus === "Pending" ) { %>
+                <td><span class="status in-progress" style="background-color: #ff9800; color: white;"><%= order.orderStatus %></span></td>
+                <% } else if (order.orderStatus === "Cancelled"){  %>
+                <td><span class="status in-progress" style="background-color: #e84a00; color: white;"><%= order.orderStatus %></span></td>
+              <% } %>
+                <td class="action-icons">
+                    <a href="/admin/order-deatails/<%= order._id%>" style="text-decoration: none;"><i >&#9998;</i></a>
+                    <i>&#128065;</i>
+                    <i>&#128465;</i>
+                </td>
+          
+            </tr>
+        </tbody>
+        <%  }) %>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button>&#8592;</button>
+        <button class="active">01</button>
+        <button>02</button>
+        <button>03</button>
+        <button>04</button>
+        <button>05</button>
+        <button>&#8594;</button>
+    </div>
+</div>
+
+<%- include('../partials/admin/footer') %>

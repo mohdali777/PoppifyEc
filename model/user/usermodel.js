@@ -171,6 +171,7 @@ const orderSchema = new mongoose.Schema({
       ref: 'User', // Refers to the User collection
       required: true
   },
+  orderId: { type: String, unique: true },
   cartItems: [
     {
       productId: {

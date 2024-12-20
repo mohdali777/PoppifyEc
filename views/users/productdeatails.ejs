@@ -285,9 +285,21 @@ document.getElementById("quantity").addEventListener('input', function () {
   .then(response => response.json())
   .then(data => {
     if (data.success) {
-      alert('Product added to cart successfully!');
+      swal({
+  title: "Success!",
+  text: "Product added to cart successfully!",
+  icon: "success", 
+  button: "OK", 
+});
+
     } else {
-      alert('Failed to add product to cart. Please try again.');
+      swal({
+  title: "Error!",
+  text: "Failed to add product to cart. Please try again.",
+  icon: "error", // Use the error icon
+  button: "OK",  // Customize button text
+});
+
     }
   })
   .catch(error => {

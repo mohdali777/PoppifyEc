@@ -9,18 +9,32 @@
     <div class="order-card-order-page">
         <!-- Order Details (Left Side) -->
         <div class="order-details-order-page">
-            <h3>Order Total: $<%= order.totalPrice %></h3>
+            <h3>Order Id: <%= order.orderId%></h3>
+            <h3><%= order.createdAt %></h3>
+            <p>Order Total: <strong>₹<%= order.totalPrice %></strong></p>
             <p>Payment Method: <strong><%= order.paymentMethod %></strong></p>
             <p>Status: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
         </div>
 
-        <!-- Billing Address (Right Side) -->
-        <div class="billing-address-order-page">
-            <h4>Billing Address</h4>
-            <p>123 Main Street</p>
-            <p>Springfield, IL, 62704</p>
-            <p>USA</p>
-        </div>
+        <!-- Billing Address Button -->
+        <button class="btn-order-page" style="background-color: black; " onclick="toggleBillingAddress('<%= order._id %>')">Show Billing Address</button>
+        <br>
+        <!-- Billing Address (Initially Hidden) -->
+        <div id="billing-address-<%= order._id %>" class="billing-address-order-page" 
+            style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; margin-top: 15px;">
+           <h4 style="font-size: 20px; margin-bottom: 12px; color: #333; font-weight: bold;">Billing Address</h4>
+           <div style="display: flex; flex-direction: column; gap: 10px;">
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>First Name:</strong> <%= order.address?.firstName %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>Company Name:</strong> <%= order.address?.companyName %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>Street Address:</strong> <%= order.address?.streetAddress %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>Apartment:</strong> <%= order.address?.apartment %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>City:</strong> <%= order.address?.city %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>Phone:</strong> <%= order.address?.phone %></p>
+               <p style="font-size: 14px; color: #555; margin: 0;"><strong>Email:</strong> <%= order.address?.email %></p>
+           </div>
+       </div>
+       
+
 
         <!-- Action Buttons -->
         <div class="order-actions-order-page">
@@ -38,12 +52,12 @@
                      alt="<%= item.productId.name || 'Product' %>" />
                 <div class="product-details-order-page">
                     <h4><%= item.productId.name %></h4>
-                    <p>Quantity: <%= item.quantity %> - $<%= item.price %> per unit</p>
-                    <p>Total: $<%= item.total %></p>
+                    <p>Quantity: <%= item.quantity %> - ₹<%= item.price %> per unit</p>
+                    <p>Total: ₹<%= item.total %></p>
 
                     <!-- Return Button for Each Product -->
                     <% if (order.orderStatus === 'Delivered') { %>
-                        <button class="btn-order-page btn-return-product-page" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>')">Return Product</button>
+                        <button class="btn-order-page btn-return-product-page" style="background-color: green;" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>')">Return Product</button>
                     <% } %>
                 </div>
             </div>
@@ -61,39 +75,79 @@
         button.textContent = productsContainer.classList.contains('active') ? "Hide Products" : "View Products";
     }
 
-    // Function to handle order cancellation
-    async function handleCancel(orderId) {
-        if (confirm('Are you sure you want to cancel this order?')) {
-            const response = await fetch(`/orders/${orderId}/cancel`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert(result.message);
-                location.reload(); // Refresh the page to reflect changes
-            } else {
-                alert('Failed to cancel the order. Please try again.');
-            }
-        }
+    // Function to toggle billing address visibility
+    function toggleBillingAddress(orderId) {
+        const billingAddress = document.getElementById(`billing-address-${orderId}`);
+        const isHidden = billingAddress.style.display === 'none';
+        billingAddress.style.display = isHidden ? 'block' : 'none';
     }
 
-    // Function to handle product return
-    async function handleReturn(orderId, productId) {
-        if (confirm('Are you sure you want to return this product?')) {
-            const response = await fetch(`/orders/${orderId}/return/${productId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert(result.message);
-                location.reload(); // Refresh the page to reflect changes
-            } else {
-                alert('Failed to return the product. Please try again.');
-            }
-        }
+    // Function to handle order cancellation
+    async function handleCancel(orderId) {
+  const willCancel = await swal({
+    title: "Are you sure?",
+    text: "Do you want to cancel this order? This action cannot be undone.",
+    icon: "warning",
+    buttons: ["No, Keep It", "Yes, Cancel It"], 
+    dangerMode: true, 
+  });
+
+  if (willCancel) {
+    try {
+      const response = await fetch(`/orders-cancel/${orderId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        swal({
+          title: "Order Canceled!",
+          text: result.message || "Your order has been successfully canceled.",
+          icon: "success",
+          button: "OK",
+        }).then(() => {
+          window.location.reload();
+        });
+      } else {
+        swal({
+          title: "Error!",
+          text: "Failed to cancel the order. Please try again.",
+          icon: "error",
+          button: "OK",
+        });
+      }
+    } catch (err) {
+      console.error("Error canceling order:", err);
+      swal({
+        title: "Error!",
+        text: "Something went wrong. Please try again.",
+        icon: "error",
+        button: "OK",
+      });
     }
+  } else {
+    swal("Cancelled", "Your order is safe.", "info");
+  }
+}
+
+
+    // Function to handle product return
+    // async function handleReturn(orderId, productId) {
+    //     if (confirm('Are you sure you want to return this product?')) {
+    //         const response = await fetch(`/orders/${orderId}/return/${productId}`, {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' }
+    //         });
+    //         const result = await response.json();
+    //         if (result.success) {
+    //             alert(result.message);
+    //             location.reload(); // Refresh the page to reflect changes
+    //         } else {
+    //             alert('Failed to return the product. Please try again.');
+    //         }
+    //     }
+    // }
 </script>
 
 <%- include('../partials/user/footer') %>

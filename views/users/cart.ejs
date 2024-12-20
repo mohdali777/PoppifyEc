@@ -33,13 +33,13 @@
                                 value="<%= item.quantity %>" 
                                 min="1" 
                                 id="cart-quantity-<%= item.productId._id %>"  
-                                onchange="updateCart('<%= item.productId._id %>', '<%= item.totalquantity %>')" 
+                                onchange="updateCart('<%= item.productId._id %>', '<%= item.totalquantity %>','<%= item._id %>','<%= item.variant %>')" 
                                 style="width: 60px;">
                         </td>
                         
                         <td>$<%= item.total %></td>
                         <td>
-                            <button class="btn btn-black btn-sm" onclick="deleteCartItem('<%= item.productId._id %>')">
+                            <button class="btn btn-black btn-sm" onclick="deleteCartItem('<%= item.productId._id %>','<%= item.variant %>','<%= item._id %>')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td> <!-- Delete button -->
@@ -73,21 +73,33 @@
 </div>
 
 <script>
-function updateCart(productId,totalquantity) {
+function updateCart(productId,totalquantity,id,variant) {
     const inputElement = document.getElementById(`cart-quantity-${productId}`);
     const quantity = parseInt(inputElement.value);
 
     if (quantity < 1) {
-        alert('Quantity must be at least 1.');
+        swal({
+  title: "Invalid Quantity",
+  text: "Quantity must be at least 1.",
+  icon: "warning", 
+  button: "OK",     
+});
+
         return;
     }
     if (quantity > totalquantity) {
-        alert(`You can only add up to ${totalquantity} items.`);
-        inputElement.value = totalquantity; // Reset to max allowable quantity
-        inputElement.disabled = true; // Disable input field
+        swal({
+  title: "Limit Exceeded",
+  text: `You can only add up to ${totalquantity} items.`,
+  icon: "warning", 
+  button: "OK",    
+});
+
+        inputElement.value = totalquantity; 
+        inputElement.disabled = true; 
         setTimeout(() => {
-            inputElement.disabled = false; // Re-enable input after a delay
-        }, 2000); // Re-enable after 2 seconds (adjust as needed)
+            inputElement.disabled = false; 
+        }, 2000); 
         return;
         return;
     }
@@ -97,13 +109,13 @@ function updateCart(productId,totalquantity) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ productId, quantity }),
+        body: JSON.stringify({ productId, quantity,id,variant }),
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
             alert('Cart updated successfully!');
-            location.reload(); // Reload the page to reflect updated cart
+            location.reload(); 
         } else {
             alert('Failed to update cart.');
         }
@@ -114,32 +126,57 @@ function updateCart(productId,totalquantity) {
     });
 }
 
-function deleteCartItem(productId) {
-    if (!confirm('Are you sure you want to remove this item from the cart?')) {
-        return;
+function deleteCartItem(productId, variant, id) {
+  swal({
+    title: "Are you sure?",
+    text: "Do you really want to remove this item from the cart?",
+    icon: "warning",
+    buttons: ["Cancel", "Yes, Remove It"],
+    dangerMode: true,
+  }).then((willDelete) => {
+    if (!willDelete) {
+      return; 
     }
 
     fetch('/delete-cart-item', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ productId }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ productId, id }),
     })
-    .then(response => response.json())
-    .then(data => {
+      .then(response => response.json())
+      .then(data => {
         if (data.success) {
-            alert('Item removed from cart successfully!');
-            location.reload(); // Reload the page to reflect updated cart
+          swal({
+            title: "Removed!",
+            text: "Item removed from cart successfully!",
+            icon: "success",
+            button: "OK",
+          }).then(() => {
+            location.reload(); 
+          });
         } else {
-            alert(data.message);
+          swal({
+            title: "Error!",
+            text: data.message || "Failed to remove the item from the cart.",
+            icon: "error",
+            button: "OK",
+          });
         }
-    })
-    .catch(error => {
+      })
+      .catch(error => {
         console.error('Error:', error);
-        alert('Something went wrong.');
-    });
+        swal({
+          title: "Error!",
+          text: "Something went wrong. Please try again.",
+          icon: "error",
+          button: "OK",
+        });
+      });
+  });
 }
+
 function proceedtoPayment (){
     fetch("/check-out",{method:"GET"}).then((response)=>{
 if(response.ok) window.location.href = "/check-out"

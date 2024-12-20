@@ -21,9 +21,7 @@ let forget = async (req,res)=>{
     try {
         // Fetch only the listed categories
         const categories = await Category.find({ is_listed: true });
-
         const listedCategoryNames = categories.map(category => category.name);
-
         const products = await Product.find({ category: { $in: listedCategoryNames } }).limit(4);
         const productss = await Product.find({ category: { $in: listedCategoryNames } }).skip(4);
         res.render("users/home", { products, categories, productss });
@@ -32,6 +30,17 @@ let forget = async (req,res)=>{
         res.status(500).send("An error occurred while loading the home page.");
       }
    
+   }
+   const getShop = async (req,res) => {
+    try {
+      const categories = await Category.find({ is_listed: true });
+        const listedCategoryNames = categories.map(category => category.name);
+        const products = await Product.find({ category: { $in: listedCategoryNames } })
+        res.render("users/shop", { products });
+    } catch (error) {
+      console.log(error);
+      
+    }
    }
 
    let loginsign = async (req,res)=>{
@@ -377,65 +386,110 @@ let postlogin = async (req,res)=>{
             res.status(500).send("Internal Server Error");
         }
     };
-    
-    const addressbook = async (req,res)=>{
-        try {
-            const userId = req.session.userId; 
-            console.log(userId);   
-            const user = await User.findById(userId).populate('addresses');
-            if (!user) {
-              return res.status(404).json({ message: 'User not found.' });
-            }
-            const address = user.addresses.length > 0 ? user.addresses[0] : null;
-            res.render("users/addressbook",{address})
-            
-          } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Failed to retrieve addresses.', error });
-          }
-       }
-       const addresspost = async (req, res) => {
-        try {
-          const userId = req.session.userId;
-          const { name, companyname, streetaddress, appartment, city, phone, email } = req.body;
-          const user = await User.findById(userId);
-          if (!user) {
-            return res.status(404).json({ message: 'User not found.' });
-          }
-          const address = user.addresses.length > 0 ? user.addresses[0] : null;
-          if (address) {
-            await Address.findByIdAndUpdate(address._id, {
-              name,
-              companyname,
-              streetaddress,
-              appartment,
-              city,
-              phone,
-              email,
-            });
-          } else {
-            const newAddress = new Address({
-              name,
-              companyname,
-              streetaddress,
-              appartment,
-              city,
-              phone,
-              email,
-            });
-            const savedAddress = await newAddress.save();
-            await User.findByIdAndUpdate(userId, { $push: { addresses: savedAddress._id } });
-          }
-          const updatedUser = await User.findById(userId).populate('addresses');
-          const updatedAddress = updatedUser.addresses.length > 0 ? updatedUser.addresses[0] : null;
-      
-          res.render("users/addressbook", { address: updatedAddress });
-        } catch (error) {
-          console.error(error);
-          res.status(500).json({ message: 'Failed to update address.', error });
+    const savedAddress = async (req,res) => {
+      try {
+        const username = req.session.username; 
+        const userId = await User.findOne({username})
+        console.log(userId);   
+        const user = await User.findById(userId._id).populate('addresses');
+        if (!user) {
+          return res.status(404).json({ message: 'User not found.' });
         }
-      };
+        const address = user.addresses.length > 0 ? user.addresses : null;
+        res.render("users/savedaddress",{address})
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to retrieve addresses.', error });
+      }
+    
+    }
+    const addaddress = async (req,res) => {
+    res.render("users/addaddress")
 
+    }
+    const addaddresspost = async (req, res) => {
+      const { name, companyname, streetaddress, appartment, city, phone, email } = req.body;
+    
+      try {
+        // Create a new address document
+        const newAddress = new Address({
+          name,
+          companyname,
+          streetaddress,
+          appartment,
+          city,
+          phone,
+          email
+        });
+        await newAddress.save();
+        const username = req.session.username;
+        const user = await User.findOne({username})
+        if (!username) {
+          return res.status(400).json({ error: 'User not logged in' });
+        }
+        await User.findByIdAndUpdate(user._id, { $push: { addresses: newAddress._id } });
+        res.redirect("/saved-address")
+      } catch (error) {
+        console.error('Error adding address:', error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+      }
+    };
+    
+    const editaddressGet = async (req, res) => {
+      const { addressId } = req.params; 
+      try {
+        const address = await Address.findById(addressId);
+        if (!address) {
+          return res.status(404).json({ error: 'Address not found' });
+        }
+        res.render("users/editaddress", { address });
+      } catch (error) {
+        console.error("Error fetching address:", error);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    };
+
+    const editaddressPost = async (req,res) => {
+      const { name, companyname, streetaddress, appartment, city, phone, email ,id} = req.body;
+      try {
+        await Address.findByIdAndUpdate(id,{$set:{name, companyname, streetaddress, appartment, city, phone, email}})
+        const username = req.session.username; 
+        const userId = await User.findOne({username})
+        console.log(userId);   
+        const user = await User.findById(userId._id).populate('addresses');
+        if (!user) {
+          return res.status(404).json({ message: 'User not found.' });
+        }
+        const address = user.addresses.length > 0 ? user.addresses : null;
+        res.render("users/savedaddress",{address})
+      } catch (error) {
+        console.error("Error updating address:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+      }
+    }
+    const deleteAddress = async (req, res) => {
+      try {
+        const username = req.session.username;
+        if (!username) {
+          return res.status(400).json({ error: "User not logged in" });
+        }
+        const user = await User.findOne({ username });
+        if (!user) {
+          return res.status(404).json({ error: "User not found" });
+        }
+        const { addressId } = req.params;
+        const deletedAddress = await Address.findByIdAndDelete(addressId);
+        if (!deletedAddress) {
+          return res.status(404).json({ error: "Address not found" });
+        }
+        await User.findByIdAndUpdate(user._id, { $pull: { addresses: addressId } });
+        res.status(200).json({ success: true, message: "Address deleted successfully" });
+      } catch (error) {
+        console.error("Error deleting address:", error);
+        res.status(500).json({ error: "Internal server error" });
+      }
+    };
+    
       const getCart = async (req, res) => {
         try {
           const username = req.session.username;
@@ -460,6 +514,11 @@ let postlogin = async (req,res)=>{
         }
       };
       
+
+
+
+
+
       const addtocartPost = async(req,res)=>{
         try {
             console.log(req.body);
@@ -508,9 +567,15 @@ let postlogin = async (req,res)=>{
             res.status(500).json({ success: false, message: 'Internal server error' });
           }
       }
+
+
+
+
+
+
       const updateCart = async (req, res) => {
         try {
-          const { productId, quantity } = req.body;
+          const { productId, quantity ,id,variant} = req.body;
           const username = req.session.username ;
           const user = await User.findOne({username});
           const userId = user._id;
@@ -518,7 +583,7 @@ let postlogin = async (req,res)=>{
           if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
           }
-          const item = cart.items.find(item => item.productId.toString() === productId ) ;
+          const item = cart.items.find(item => item._id.toString() === id && item.variant === variant ) ;
       
           if (!item) {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
@@ -535,12 +600,12 @@ let postlogin = async (req,res)=>{
         }
       };
       const deletecart = async (req, res) => {
+        console.log(req.body); 
         try {
-            const { productId } = req.body;
+            const { productId ,variant,id} = req.body;
             const username = req.session.username;
             const user = await User.findOne({ username });
-            console.log(user);
-            
+            console.log(user); 
             if (!user) {
                 return res.status(404).json({ success: false, message: 'User not found' });
             }
@@ -549,11 +614,11 @@ let postlogin = async (req,res)=>{
             if (!cart) {
                 return res.status(404).json({ success: false, message: 'Cart not found' });
             }
-            cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+            const item = cart.items.find(item => item._id.toString() === id ) ;
+            console.log(item);
+            cart.items = cart.items.filter(item => item._id.toString() !== id );
             cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
             cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
-    
-            // Save the updated cart
             await cart.save();
     
             return res.json({ success: true, message: 'Item removed from cart successfully', cart });
@@ -564,14 +629,12 @@ let postlogin = async (req,res)=>{
     };
     const checkOut = async (req, res) => {
       try {
-          // Step 1: Get username from session
           const username = req.session.username;
           if (!username) {
               console.log("Username is not found in the session");
               return res.status(400).json({ success: false, message: 'Username is required' });
           }
-  
-          // Step 2: Fetch the user from the database
+ 
           const user = await User.findOne({ username });
           if (!user) {
               console.log(`User with username ${username} not found`);
@@ -579,8 +642,7 @@ let postlogin = async (req,res)=>{
           }
   
           console.log("User found:", user);
-  
-          // Step 3: Fetch the user's cart and populate the items
+
           const cart = await Cart.findOne({ userId: user._id }).populate("items.productId");
           if (!cart) {
               console.log("Cart not found for user", user._id);
@@ -588,13 +650,10 @@ let postlogin = async (req,res)=>{
           }
   
           console.log("Cart found:", cart);
-  
-          // Step 4: Fetch the user's address and check if it exists
           const userAddress = await User.findById(user._id).populate('addresses');
           const address = userAddress.addresses && userAddress.addresses.length > 0 ? userAddress.addresses[0] : null;
-  
-          // Step 5: Render checkout page
-          res.render("users/checkout", { cart, address });
+          const addresses = userAddress.addresses && userAddress.addresses.length > 0 ? userAddress.addresses : null;
+          res.render("users/checkout", { cart, address,addresses });
   
       } catch (error) {
           console.error("Error during checkout:", error);
@@ -611,6 +670,11 @@ let postlogin = async (req,res)=>{
         const user = await User.findOne({username}) 
        console.log(user._id);
        const cart = await Cart.findOne({ userId: user._id })
+       if (!cart || cart.items.length === 0) {
+        console.log("empty cart");
+        
+        return res.status(400).json({ message: "Cart is empty" });
+    }
        const cartItems = cart.items;
        console.log(cartItems);
        
@@ -619,13 +683,13 @@ let postlogin = async (req,res)=>{
           const address = await Address.findOne({_id:useDefaultAddress});
           finalAddress = address
         }else{
-            finalAddress = newAddress;
-            
+            finalAddress = newAddress;     
         }
-       
         console.log(finalAddress);
+        const orderId = `ORD${Date.now()}`;
 
         const order = new Order({
+          orderId,
           userId:user._id,
           paymentMethod,
           totalPrice,
@@ -633,39 +697,100 @@ let postlogin = async (req,res)=>{
           address:finalAddress,
           status:"pending",
         })
-      await order.save();
       for (let item of cartItems) {
         const product = await Product.findById(item.productId);
         if (product) {
-            product.stock -= item.quantity;
-            if (product.stock < 0) product.stock = 0; 
-            await product.save(); 
+            const variant = product.variants.find(v => v.variant === item.variant);
+            if (variant) {
+                variant.quantity -= item.quantity;
+                if (variant.quantity < 0) variant.quantity = 0;
+                await product.save(); 
+            }
         }
     }
-    await Cart.updateOne({ userId: user._id }, { $set: { items: [] } });
+    await Cart.updateOne({ userId: user._id }, { $set: { items: [] ,totalQuantity:0,totalPrice:0} });
+    await order.save();
     res.status(201).json({ message: "Order placed successfully", order });
-    res.status(201).json({ message: "Order placed successfully", order });
+   
       } catch (error) {
         console.log(error);
         
       }
-
     }
+
+
+
+
     const getOrdersPage = async (req, res) => {
       try {
-        const username = req.session.username; // Assuming user is logged in
+        const username = req.session.username; 
         const user = await User.findOne({ username });
         if (!user) {
           return res.status(404).send("User not found");
         }
-        const orders = await Order.find({ userId: user._id }).populate("cartItems.productId");
-    
+        const orders = await Order.find({ userId: user._id }).populate("cartItems.productId");    
         res.render("users/myorders", { orders });
       } catch (error) {
         console.error(error);
         res.status(500).send("Something went wrong");
       }
     };
+
+
+
+
+    const cancelOrder = async (req, res) => {
+      try {
+        console.log(req.params.orderId);       
+          const orderId = req.params.orderId;
+          const order = await Order.findById(orderId);
+          if (!order) {
+              return res.status(404).json({ message: "Order not found" });
+          }
+          if (order.orderStatus === "Cancelled") {
+              return res.status(400).json({ message: "Order has already been cancelled" });
+          }
+          order.orderStatus = "Cancelled";
+          for (let item of order.cartItems) {
+              const product = await Product.findById(item.productId);
+  
+              if (product) {
+                  const variant = product.variants.find(v => v.variant === item.variant);
+                  if (variant) {
+                      variant.quantity += item.quantity; 
+                      await product.save(); 
+                  }
+              }
+          }
+          await order.save();
+          res.status(200).json({ message: "Order cancelled successfully", order });
+      } catch (error) {
+          console.error(error);
+          res.status(500).json({ message: "An error occurred while canceling the order" });
+      }
+  };
+  const sort = async (req,res) => {
+    const { sort, search } = req.query;
+
+    let sortQuery = {};
+    if (sort === 'priceLowToHigh') sortQuery = { 'price': 1 };
+    else if (sort === 'priceHighToLow') sortQuery = { 'price': -1 };
+    else if (sort === 'popularity') sortQuery = { 'popularity': -1 };
+    else if (sort === 'averageRatings') sortQuery = { 'rating': -1 };
+    else if (sort === 'newArrivals') sortQuery = { 'createdAt': -1 };
+    else if (sort === 'aToZ') sortQuery = { 'name': 1 };
+    else if (sort === 'zToA') sortQuery = { 'name': -1 };
+
+    const searchQuery = search ? { name: new RegExp(search, 'i') } : {};
+
+    try {
+        const products = await Product.find(searchQuery).sort(sortQuery);
+        res.json({ products });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+  }
     
 module.exports = {login,
     signup,
@@ -674,6 +799,7 @@ module.exports = {login,
     postsignup,
     postlogin,
     home,
+    getShop,
     postverifyotp,
     resendOtp,
     loginsign,
@@ -681,15 +807,21 @@ module.exports = {login,
     productdeatails,
     google,
 manageAccount,
-addressbook,
 forgetPass,
 forgetpasspost,
 postverifyotpforget,
 changedeatails,
-addresspost,
 getCart,
 addtocartPost,updateCart,
 deletecart,
 checkOut,
 placeOrder,
-getOrdersPage}
+getOrdersPage,
+cancelOrder,
+sort,
+savedAddress,
+addaddress,
+addaddresspost,
+editaddressGet,
+editaddressPost,
+deleteAddress}

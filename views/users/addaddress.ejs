@@ -5,7 +5,7 @@
 
   <div class="form-container-accountdetails">
     <h2 class="form-title-accountdetails">Edit Your Address</h2>
-    <form action="/addresspost" method="POST" style="margin-top: 40px;">
+    <form action="/add-address-post" method="POST" style="margin-top: 40px;">
       
       <div class="form-group-accountdetails">
         <label for="name-accountdetails">Full Name</label>
@@ -14,7 +14,6 @@
           id="name-accountdetails" 
           name="name" 
           placeholder="Full Name" 
-          value="<%= address ? address.name : '' %>" 
           required
         >
       </div>
@@ -26,7 +25,6 @@
           id="companyname-accountdetails" 
           name="companyname" 
           placeholder="Company Name"
-          value="<%= address ? address.companyname : '' %>"
         >
       </div>
 
@@ -37,7 +35,6 @@
           id="streetaddress-accountdetails" 
           name="streetaddress" 
           placeholder="Street Address" 
-          value="<%= address ? address.streetaddress : '' %>"
           required
         >
       </div>
@@ -49,7 +46,6 @@
           id="appartment-accountdetails" 
           name="appartment" 
           placeholder="Apartment" 
-          value="<%= address ? address.appartment : '' %>"
           required
         >
       </div>
@@ -61,7 +57,6 @@
           id="city-accountdetails" 
           name="city" 
           placeholder="City/Town" 
-          value="<%= address ? address.city : '' %>"
           required
         >
       </div>
@@ -73,7 +68,6 @@
           id="phone-accountdetails" 
           name="phone" 
           placeholder="Phone Number" 
-          value="<%= address ? address.phone : '' %>"
           required
         >
       </div>
@@ -85,7 +79,6 @@
           id="email-accountdetails" 
           name="email" 
           placeholder="Email" 
-          value="<%= address ? address.email : '' %>"
           required
         >
       </div>

@@ -5,6 +5,11 @@
   <button class="add-category" onclick="addcategory()">Add Category</button>
   <!-- Category Table -->
   <table class="user-table">
+    <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+    color: #d32f2f; /* Red color for error messages */
+    font-weight: 500; /* Medium weight */
+    text-align: center; /* Center align */
+    margin-top: 5px;"><%= message %></p> <% } %>
     <thead>
       <tr>
         <th>Category Name</th>

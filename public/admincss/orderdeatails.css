@@ -1,0 +1,158 @@
+.container {
+    width: 1150px;
+    margin: 20px 40px;
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 28px;
+    color: #444;
+    margin-bottom: 20px;
+}
+
+/* Order Information Section */
+.order-info {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.order-info p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.order-info strong {
+    color: #222;
+}
+
+/* Product List */
+.products-section {
+    margin: 20px 0;
+}
+
+.products-section h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+.product-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.product-table th, .product-table td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: center;
+}
+
+.product-table th {
+    background-color: #f2f2f2;
+    color: #444;
+}
+
+.product-table img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+/* Billing Address Section */
+.billing-address {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.billing-address h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+.billing-address p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.billing-address strong {
+    color: #333;
+}
+
+/* Status Selector */
+.status-section {
+    margin: 20px 0;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f4f4f4;
+}
+
+.status-section label {
+    font-size: 16px;
+    color: #444;
+    margin-right: 10px;
+}
+
+.status-select {
+    padding: 8px 12px;
+    font-size: 14px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.btn-save-status {
+    background-color: #28a745;
+    color: #fff;
+    padding: 8px 15px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-save-status:hover {
+    opacity: 0.9;
+}
+
+/* Action Buttons */
+.actions {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.btn {
+    padding: 10px 20px;
+    margin: 10px;
+    font-size: 14px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn.cancel {
+    background-color: #dc3545;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}

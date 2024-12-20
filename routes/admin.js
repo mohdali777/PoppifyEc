@@ -18,6 +18,8 @@ router.get("/editcategory/:categoryId",AdminRoutes.editcategory)
 router.get("/addproducts",session.sessionCheck,AdminRoutes.addproductsget)
 router.get("/editproduct/:productId",AdminRoutes.geteditproducts)
 router.get("/logout",AdminRoutes.logout)
+router.get("/order-management",AdminRoutes.orderManagment)
+router.get("/order-deatails/:orderId",AdminRoutes.orderDeatail)
 
 
 router.post("/login",AdminRoutes.postlogin)
@@ -33,6 +35,8 @@ router.post("/add-product",upload.array("images"),AdminRoutes.addproductpost)
 router.post("/deleteproduct/:productId",AdminRoutes.deleteproduct)
 router.post("/removeimage/:image/:productid",AdminRoutes.removeimage)
 router.post("/update-product",upload.array("images"),AdminRoutes.updateproduct)
+router.post("/update-status",AdminRoutes.updateStatus)
+
 
 
 

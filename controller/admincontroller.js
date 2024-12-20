@@ -1,6 +1,6 @@
 const {Admin} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
-const {User} = require("../model/user/usermodel")
+const {User,Order} = require("../model/user/usermodel")
 const { serializeUser } = require("passport")
 const { Category } = require("../model/admin/adminmodel");
 const {Product} = require("../model/admin/adminmodel")
@@ -163,10 +163,10 @@ const unblockUser = async (req, res) => {
 
 const category = async(req,res)=>{
 const categories = await Category.find({})
-res.render("admins/category",{categories})
+res.render("admins/category",{categories,message:false})
 }
 const categorybutton = async(req,res)=>{
-res.render("admins/addcategory")
+res.render("admins/addcategory",{message:false})
 }
 
 const addcategory = async (req, res) => {
@@ -179,8 +179,10 @@ const addcategory = async (req, res) => {
     // Check if the category already exists
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
+      const categories = await Category.find({})
       return res.render("admins/addcategory", {
         message: "Category already exists",
+        categories
       });
     }
 
@@ -377,9 +379,7 @@ const updateproduct = async (req, res) => {
       return res.status(404).send("Product not found");
     }
     const parsevariants = variants ? JSON.parse(variants) : existingProduct.variants;
-
     const images = req.files ? req.files.map(file => file.filename) : [];
-    // Prepare updated fields
     const updatedProduct = {
       name: name || existingProduct.name,
       description: description || existingProduct.description,
@@ -388,11 +388,7 @@ const updateproduct = async (req, res) => {
       brand: brand || existingProduct.brand,
       variants: parsevariants || existingProduct.variants,
     };
-
-    // Update the product in the database
     await Product.updateOne({ _id: id }, { $set: updatedProduct,$push: { image: { $each: images } } });
-
-    // Fetch updated product list
     const products = await Product.find({});
     res.render("admins/products", { products });
   } catch (error) {
@@ -400,13 +396,51 @@ const updateproduct = async (req, res) => {
     res.status(500).send("Error updating product");
   }
 };
+const orderManagment = async (req,res) => {
+  try {
+    const order = await Order.find();
+    res.render("admins/orders",{order})
+  } catch (error) {
+    
+  }
+}
+
+const orderDeatail = async (req,res) => {
+  try {
+    const orderId = req.params.orderId;
+    console.log(orderId);
+    req.session.orderid = orderId;
+    const order = await Order.findById(orderId).populate("cartItems.productId");
+    console.log(order);
+    res.render("admins/orderdeatails",{order})
+  } catch (error) {
+    console.log(error);
+    
+  }
+}
+const updateStatus = async (req,res) => {
+  const { status } = req.body;
+  const orderId = req.session.orderid; 
+  console.log(orderId);
+    try {
+        const order = await Order.findById(orderId); 
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        order.orderStatus = status;
+        await order.save();
+        res.status(200).json({ status: order.orderStatus });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to update order status', error });
+    }  
+}
 
 
 
 
 
-
-module.exports = {getlogin,
+module.exports = {
+    getlogin,
     postlogin,
     gethome,
     usermanageside,
@@ -428,4 +462,7 @@ geteditproducts,
 deleteproduct,
 removeimage,
 updateproduct,
-logout}
+logout,
+orderManagment,
+orderDeatail,
+updateStatus}

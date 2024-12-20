@@ -1,0 +1,105 @@
+.order-table-container {
+    width: 1150px;
+    margin: 20px 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    padding: 20px;
+}
+
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+thead {
+    background-color: #f1f1f1;
+}
+
+th, td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    color: #333;
+}
+
+th {
+    font-size: 14px;
+    font-weight: bold;
+    color: #555;
+}
+
+tbody tr:hover {
+    background-color: #f8f8f8;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 10px;
+    font-size: 12px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.in-progress {
+    background-color: #ffe8d6;
+    color: #ff9800;
+}
+
+.cancelled {
+    background-color: #ffd6d6;
+    color: #f44336;
+}
+
+.shipped {
+    background-color: #e0e0e0;
+    color: #777;
+}
+
+.delivered {
+    background-color: #d2f8d2;
+    color: #4caf50;
+}
+
+/* Action Icons */
+.action-icons i {
+    cursor: pointer;
+    margin-right: 10px;
+    color: #555;
+    transition: color 0.3s;
+}
+
+.action-icons i:hover {
+    color: #333;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.pagination button {
+    border: none;
+    background-color: #fff;
+    color: #555;
+    margin: 5px;
+    padding: 8px 12px;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background-color: #3b82f6;
+    color: #fff;
+}

@@ -69,7 +69,7 @@
   </div>
 
 <!-- viewproduct -->
-<div class="container py-5" style="display: none;" id="section2">
+<!-- <div class="container py-5" style="display: none;" id="section2">
   <div class="row row-cols-1 row-cols-md-4 g-4">
     <% productss.forEach(product => { %>
       <div class="col">
@@ -110,7 +110,7 @@
   <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
     <button type="button" class="btn btn-danger btn-lg" id="section2-button" onclick="closeproduct()" >Close</button>
   </div>
-</div>
+</div> -->
  <!-- categories -->
  <section class="section">
   <div class="container">
@@ -656,19 +656,27 @@ console.log(err);
   })
       }
 
-      function showimages(){
-        const btn = document.getElementById("section1-button")
-        const btn2 = document.getElementById("section2-button")
-       const showprdct = document.getElementById('section2');
-       showprdct.style.display = "block"
-       btn.style.display = "none"
+      // function showimages(){
+      //   const btn = document.getElementById("section1-button")
+      //   const btn2 = document.getElementById("section2-button")
+      //  const showprdct = document.getElementById('section2');
+      //  showprdct.style.display = "block"
+      //  btn.style.display = "none"
        
-      }
-      function closeproduct (){
-         const showprdct = document.getElementById('section2');
-         const btn = document.getElementById("section1-button")
-       showprdct.style.display = "none"
-       btn.style.display = 'block'
+      // }
+      // function closeproduct (){
+      //    const showprdct = document.getElementById('section2');
+      //    const btn = document.getElementById("section1-button")
+      //  showprdct.style.display = "none"
+      //  btn.style.display = 'block'
+      // }
+      function showimages (){
+        fetch("/shop",{method:"GET"}).then((response)=>{
+if(response.ok) window.location.href = "/shop" 
+        }).catch((err)=>{
+console.log(err);
+
+        })
       }
     </script>
 

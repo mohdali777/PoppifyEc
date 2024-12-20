@@ -1,0 +1,117 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<link rel="stylesheet" href="/admincss/orderdeatails.css">
+<div class="container">
+    <!-- Page Heading -->
+    <h1>Order Details</h1>
+
+    <!-- Order Information -->
+    
+    <div class="order-info">
+        <div>
+            <p><strong>Order ID:</strong><%= order.orderId %> </p>
+            <p><strong>Date:</strong> 29 Dec 2022</p>
+            <p><strong>Customer:</strong> <%= order.address.firstName %> </p>
+        </div>
+        <div>
+            <p><strong>Total Amount:</strong> <%= order.totalPrice %> </p>
+            <p><strong>Payment Method:</strong> <%= order.paymentMethod %> </p>
+            <p><strong>Status:</strong> <span id="current-status" style="color: #ff9f43;"><%= order.orderStatus %> </span></p>
+        </div>
+    </div>
+
+    <!-- Status Changing Option -->
+    <div class="status-section">
+        <label for="order-status">Change Order Status:</label>
+        <select id="order-status" class="status-select">
+            <option value="Pending" selected>In Progress</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+        </select>
+        <button class="btn-save-status" onclick="changeOrderStatus()">Save Status</button>
+    </div>
+
+    <!-- Product List -->
+    <div class="products-section">
+        <h2>Products Ordered</h2>
+        <table class="product-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Product Name</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <% order.cartItems.forEach(items=>{ %>
+            <tbody>
+                <tr>
+                    <td><img   src="/uploads/<%= items.productId.image[0] %>" alt="Product Image"></td>
+                    <td><%= items.productId.name %></td>
+                    <td><%= items.quantity %></td>
+                    <td>₹<%= items.price %></td>
+                    <td>₹<%= items.total %></td>
+                </tr>
+            </tbody>
+            <% }) %>
+        </table>
+    </div>
+
+    <!-- Billing Address -->
+    <div class="billing-address">
+        <h2>Billing Address</h2>
+        <p><strong>First Name:</strong> <%= order.address.firstName %></p>
+        <p><strong>Company Name:</strong> <%= order.address.companyName %></p>
+        <p><strong>Street Address:</strong> <%= order.address.streetAddress %></p>
+        <p><strong>Apartment:</strong> <%= order.address.apartment %></p>
+        <p><strong>City:</strong> <%= order.address.city %></p>
+        <p><strong>Phone:</strong> +<%= order.address.phone %></p>
+        <p><strong>Email:</strong> <%= order.address.email %></p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="actions">
+        <a href="#" class="btn cancel">Cancel Order</a>
+        <a href="#" class="btn">Back to Orders</a>
+    </div>
+</div>
+
+<!-- JavaScript for Status Change -->
+<script>
+    function changeOrderStatus() {
+     const statusSelect = document.getElementById("order-status");
+     const currentStatus = document.getElementById("current-status");
+ 
+     // Send the status update to the backend using fetch (AJAX)
+     fetch(`/admin/update-status`, {
+         method: 'POST',
+         headers: {
+             'Content-Type': 'application/json',
+         },
+         body: JSON.stringify({ status: statusSelect.value })
+     })
+     .then(response => response.json())
+     .then(data => {
+         currentStatus.textContent = data.status;
+ 
+         if (data.status === "Delivered") {
+             currentStatus.style.color = "#28a745"; 
+         } else if (data.status === "Shipped") {
+             currentStatus.style.color = "#6c757d"; 
+         } else if (data.status === "Cancelled") {
+             currentStatus.style.color = "#dc3545"; 
+         } else {
+             currentStatus.style.color = "#ff9f43"; 
+         }
+         alert(`Order status updated to "${data.status}"`);
+     })
+     .catch(error => {
+         console.error('Error updating order status:', error);
+         alert('Failed to update order status');
+     });
+ }
+ </script>
+ 
+<%- include('../partials/admin/footer') %>
