@@ -1,6 +1,6 @@
-const {Admin} = require("../model/admin/adminmodel")
+const {Admin, Coupen} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
-const {User,Order} = require("../model/user/usermodel")
+const {User,Order,Return} = require("../model/user/usermodel")
 const { serializeUser } = require("passport")
 const { Category } = require("../model/admin/adminmodel");
 const {Product} = require("../model/admin/adminmodel")
@@ -289,12 +289,10 @@ const addproductsget = async (req,res)=> {
 
 const addproductpost = async (req, res) => {
   try {
-    // Extract data from the request body
     const { name, description, category, price, quantity, brand, variants, colors } = req.body;
     console.log(req.files);
     
     const image = req.files.map(file => file.filename);
-    // console.log(image);
     const parsevariants = JSON.parse(variants)
     console.log(parsevariants);
     
@@ -408,11 +406,10 @@ const orderManagment = async (req,res) => {
 const orderDeatail = async (req,res) => {
   try {
     const orderId = req.params.orderId;
-    console.log(orderId);
     req.session.orderid = orderId;
     const order = await Order.findById(orderId).populate("cartItems.productId");
-    console.log(order);
-    res.render("admins/orderdeatails",{order})
+    const Returns = await Return.findOne({orderId})
+    res.render("admins/orderdeatails",{order,Returns})
   } catch (error) {
     console.log(error);
     
@@ -434,7 +431,104 @@ const updateStatus = async (req,res) => {
         res.status(500).json({ message: 'Failed to update order status', error });
     }  
 }
+const returnAccept = async (req,res) => {
+    try {
+      console.log(req.body);
+      const { orderId, itemId } = req.body;
+      const order = await Order.findById(orderId);
+      if (!order) {
+        return res.status(404).json({ success: false, message: "Order not found." });
+      }
+      const item = order.cartItems.find((item) => item._id.toString() === itemId);
+      if (!item) {
+        return res.status(404).json({ success: false, message: "Item not found in the order." });
+      }
+      item.status = "Accepted";
+      await order.save();
+      return res.status(200).json({ success: true, message: "Return request accepted successfully." });
+    } catch (error) {
+      console.error("Error accepting return request:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while processing the return request. Please try again later.",
+      });
+    }  
+}
 
+const returnReject = async (req,res) => {
+  try {
+    console.log(req.body);
+    const { orderId, itemId } = req.body;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ success: false, message: "Order not found." });
+    }
+    const item = order.cartItems.find((item) => item._id.toString() === itemId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: "Item not found in the order." });
+    }
+    item.status = "Rejected";
+    await order.save();
+    return res.status(200).json({ success: true, message: "Return request Rejected successfully." });
+  } catch (error) {
+    console.error("Error accepting return request:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while processing the return request. Please try again later.",
+    });
+  }  
+}
+
+const getCoupens = async (req,res) => {
+  try {
+    const coupens = await Coupen.find({});
+    res.render("admins/coupen",{coupens})
+  } catch (error) {
+    console.error("Error accepting return request:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while processing the return request. Please try again later.",
+    });
+  }
+}
+
+
+const createCoupen = async (req,res) => {
+  try {
+    const {couponCode,discount,expiryDate,description} = req.body;
+    const existingCoupen = await Coupen.findOne({couponCode});
+    if(existingCoupen){
+      return res.status(400).json({ message: 'Coupon code already exists.' });
+    }
+    const newCoupen = new Coupen({
+      couponCode,
+      discount,
+      expiryDate,
+      description
+    })
+    await newCoupen.save()
+    res.status(201).json({ message: 'Coupon created successfully', });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+}
+
+const deleteCoupen = async (req, res) => {
+  try {
+    console.log(req.body);
+    
+    const { coupenId } = req.params;
+    const coupen = await Coupen.findByIdAndDelete(coupenId);
+    if (!coupen) {
+      return res.status(404).json({ success: false, message: "Coupon not found" });
+    }
+    res.status(200).json({ success: true, message: "Coupon deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
 
 
@@ -465,4 +559,9 @@ updateproduct,
 logout,
 orderManagment,
 orderDeatail,
-updateStatus}
+updateStatus,
+returnAccept,
+returnReject,
+createCoupen,
+getCoupens,
+deleteCoupen}

@@ -18,8 +18,12 @@ router.get("/editcategory/:categoryId",AdminRoutes.editcategory)
 router.get("/addproducts",session.sessionCheck,AdminRoutes.addproductsget)
 router.get("/editproduct/:productId",AdminRoutes.geteditproducts)
 router.get("/logout",AdminRoutes.logout)
-router.get("/order-management",AdminRoutes.orderManagment)
-router.get("/order-deatails/:orderId",AdminRoutes.orderDeatail)
+router.get("/order-management",session.sessionCheck,AdminRoutes.orderManagment)
+router.get("/order-deatails/:orderId",session.sessionCheck,AdminRoutes.orderDeatail)
+router.get("/coupon-management",AdminRoutes.getCoupens)
+router.get("/create-coupen",(req,res)=>{
+    res.render("admins/addcoupen")
+})
 
 
 router.post("/login",AdminRoutes.postlogin)
@@ -36,6 +40,10 @@ router.post("/deleteproduct/:productId",AdminRoutes.deleteproduct)
 router.post("/removeimage/:image/:productid",AdminRoutes.removeimage)
 router.post("/update-product",upload.array("images"),AdminRoutes.updateproduct)
 router.post("/update-status",AdminRoutes.updateStatus)
+router.post("/returnaccept",AdminRoutes.returnAccept)
+router.post("/returnreject",AdminRoutes.returnReject)
+router.post("/create-coupon",AdminRoutes.createCoupen)
+router.delete("/deletecoupen/:coupenId",AdminRoutes.deleteCoupen)
 
 
 

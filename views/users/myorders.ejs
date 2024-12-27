@@ -1,13 +1,12 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 <div class="container-order-page">
     <h2 class="heading-order-page">My Orders</h2>
     <p class="order-info-order-page">You have <%= orders.length %> items in your order</p>
 
     <% orders.forEach(order => { %>
     <div class="order-card-order-page">
-        <!-- Order Details (Left Side) -->
         <div class="order-details-order-page">
             <h3>Order Id: <%= order.orderId%></h3>
             <h3><%= order.createdAt %></h3>
@@ -16,10 +15,10 @@
             <p>Status: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
         </div>
 
-        <!-- Billing Address Button -->
+ 
         <button class="btn-order-page" style="background-color: black; " onclick="toggleBillingAddress('<%= order._id %>')">Show Billing Address</button>
         <br>
-        <!-- Billing Address (Initially Hidden) -->
+  
         <div id="billing-address-<%= order._id %>" class="billing-address-order-page" 
             style="font-family: Arial, sans-serif; padding: 15px; background-color: #f9f9f9; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); display: none; margin-top: 15px;">
            <h4 style="font-size: 20px; margin-bottom: 12px; color: #333; font-weight: bold;">Billing Address</h4>
@@ -50,14 +49,26 @@
             <div class="product-card-order-page">
                 <img src="/uploads/<%= item.productId.image[0] || 'placeholder.jpg' %>" 
                      alt="<%= item.productId.name || 'Product' %>" />
-                <div class="product-details-order-page">
-                    <h4><%= item.productId.name %></h4>
+                <div class="product-details-order-page" >
+                    <h4><a href="" onclick="productdeatails('<%= item.productId._id %>','<%= item.productId.category %>')" style="text-decoration: none; color: black;" ><%= item.productId.name %></a></h4>
                     <p>Quantity: <%= item.quantity %> - ₹<%= item.price %> per unit</p>
                     <p>Total: ₹<%= item.total %></p>
 
+                    <% if (item.status) { %>
+                      <p><strong>Return Status:</strong> <%= item.status %></p>
+                    <% } else { %>
+                      <p><strong>Return Status:</strong> Not Requested</p>
+                    <% } %>
+
                     <!-- Return Button for Each Product -->
                     <% if (order.orderStatus === 'Delivered') { %>
-                        <button class="btn-order-page btn-return-product-page" style="background-color: green;" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>')">Return Product</button>
+                      <% if (item.status == null) { %>
+                        <!-- Show return button if status is 'Pending' -->
+                        <button class="btn-order-page btn-return-product-page" style="background-color: green;" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>','<%= item._id %>')">Return Product</button>
+                      <% } else { %>
+                        <!-- Disable return button if status is not 'Pending' -->
+                        <button class="btn-order-page btn-return-product-page" style="background-color: grey;" disabled>Returned</button>
+                      <% } %>
                     <% } %>
                 </div>
             </div>
@@ -67,22 +78,35 @@
     <% }); %>
 </div>
 
+<div id="returnModal" style="display:none; position:fixed; z-index:1000; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5);">
+  <div style="background-color:#fff; margin:10% auto; padding:20px; border-radius:8px; width:40%; text-align:center; position:relative;">
+    <!-- Close Button -->
+    <span id="closeModal" style="color:#aaa; position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer;">&times;</span>
+    <h2>Return Product</h2>
+    <p style="margin-bottom: 10px;">Please provide a reason for returning the product:</p>
+    <!-- Textarea -->
+    <textarea id="returnReason" style="width:90%; margin:10px 0; padding:10px; font-size:16px; border-radius:4px; border:1px solid #ccc;" rows="4"></textarea>
+    <!-- Submit Button -->
+    <button id="submitReturn" style="background-color:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:4px; cursor:pointer;">
+      Submit
+    </button>
+  </div>
+</div>
+
 <script>
-    // Function to toggle product details visibility
     function toggleProducts(button) {
         const productsContainer = button.closest('.order-card-order-page').querySelector('.products-container-order-page');
         productsContainer.classList.toggle('active');
         button.textContent = productsContainer.classList.contains('active') ? "Hide Products" : "View Products";
     }
 
-    // Function to toggle billing address visibility
     function toggleBillingAddress(orderId) {
         const billingAddress = document.getElementById(`billing-address-${orderId}`);
         const isHidden = billingAddress.style.display === 'none';
         billingAddress.style.display = isHidden ? 'block' : 'none';
     }
 
-    // Function to handle order cancellation
+  
     async function handleCancel(orderId) {
   const willCancel = await swal({
     title: "Are you sure?",
@@ -130,24 +154,61 @@
     swal("Cancelled", "Your order is safe.", "info");
   }
 }
+function productdeatails (productId,category){
+  fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
+  }).catch((err)=>{
+console.log(err);
+  })
+      }
 
 
-    // Function to handle product return
-    // async function handleReturn(orderId, productId) {
-    //     if (confirm('Are you sure you want to return this product?')) {
-    //         const response = await fetch(`/orders/${orderId}/return/${productId}`, {
-    //             method: 'POST',
-    //             headers: { 'Content-Type': 'application/json' }
-    //         });
-    //         const result = await response.json();
-    //         if (result.success) {
-    //             alert(result.message);
-    //             location.reload(); // Refresh the page to reflect changes
-    //         } else {
-    //             alert('Failed to return the product. Please try again.');
-    //         }
-    //     }
-    // }
+
+
+  submitBtn.onclick = async function () {
+    const reason = returnReasonInput.value.trim();
+    if (!reason) {
+      alert('Please provide a reason for the return.');
+      return;
+    }
+  }
+  async function handleReturn(orderId, productId,itemId) {
+  const modal = document.getElementById('returnModal');
+  const closeBtn = document.getElementById('closeModal');
+  const returnReasonInput = document.getElementById('returnReason');
+  const submitBtn = document.getElementById('submitReturn');
+  closeBtn.onclick = function () {
+    modal.style.display = 'none';
+  };
+  modal.style.display = 'block';
+  submitBtn.onclick = async function () {
+    const reason = returnReasonInput.value.trim();
+    if (!reason) {
+      alert('Please provide a reason for the return.');
+      return;  
+    }
+
+    try {
+      const response = await fetch(`/orders/${orderId}/return/${productId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason ,itemId})  
+      });
+      const result = await response.json();
+      if (result.success) {
+        alert(result.message);  
+        location.reload();  
+      } else {
+        alert('Failed to return the product. Please try again.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('An error occurred while processing your return.');
+    }
+    modal.style.display = 'none';
+  };
+}
+
 </script>
 
 <%- include('../partials/user/footer') %>

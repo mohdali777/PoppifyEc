@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { User } = require('../user/usermodel');
 
 // Admin Schema
 const adminSchema = new mongoose.Schema(
@@ -85,16 +86,49 @@ const productSchema = new mongoose.Schema({
 ],
   createdAt: {
     type: Date,
-    default: Date.now,  // Automatically set the date when the product is created
+    default: Date.now,  
   },
   updatedAt: {
     type: Date,
-    default: Date.now,  // Automatically set the date when the product is last updated
+    default: Date.now, 
   },
 });
 
+const couponSchema = new mongoose.Schema({
+  couponCode: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  discount: {
+    type: Number,
+    required: true,
+  },
+  expiryDate: {
+    type: Date,
+    required: true,
+  },
+  description: {
+    type: String,
+    required: true,
+  },
+  status: {
+    type: String,
+    default: 'active',
+  },createdAt: {
+    type: Date,
+    default: Date.now,  
+  },
+  count:{
+    type:Number,
+    default:0,
+  },userId: { type: [mongoose.Schema.Types.ObjectId], 
+    default: [] 
+  },
+});
+const Coupen = mongoose.model("coupen",couponSchema)
 const Product = mongoose.model('Product', productSchema);
 const Admin = mongoose.model('admin', adminSchema);
 const Category = mongoose.model('Category', categorySchema);
 
-module.exports = { Admin, Category, Product };
+module.exports = { Admin, Category, Product,Coupen };

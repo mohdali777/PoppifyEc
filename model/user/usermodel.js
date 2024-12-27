@@ -199,7 +199,8 @@ const orderSchema = new mongoose.Schema({
       total: {
         type: Number,
         required: true,
-      },
+      },reason: { type: String,default:null},
+      status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: null },
     },
   ],
   totalPrice: {
@@ -208,7 +209,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
       type: String,
-      enum: ['COD', 'Card', 'UPI', 'NetBanking'],
+      enum: ['COD', 'Card', 'RazorPay', 'NetBanking'],
       default: 'COD'
   },
   address: {
@@ -219,6 +220,16 @@ const orderSchema = new mongoose.Schema({
       city: { type: String, required: true },
       phone: { type: String, required: true },
       email: { type: String, required: true }
+  },
+  razorpay: {
+    orderId: { type: String ,default:null}, 
+    paymentId: { type: String ,default:null}, 
+    signature: { type: String ,default:null}, 
+    paymentStatus: { 
+      type: String, 
+      enum: ['Pending', 'Failed', 'Success'], 
+      default: 'Pending' 
+    },
   },
   orderStatus: {
       type: String,
@@ -234,11 +245,45 @@ const orderSchema = new mongoose.Schema({
       default: Date.now
   }
 });
-
-// Middleware to auto-update 'updatedAt' on save
 orderSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
+});
+
+const wishlistSchema = new mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    items: [
+      {
+        productId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Product',
+          required: true,
+        },
+        addedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+  },
+  {
+    timestamps: true, 
+  }
+);
+
+const returnRequestSchema = new mongoose.Schema({
+  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
+  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  reason: { type: String, required: true },
+  status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: 'Pending' },
+  requestedAt: { type: Date, default: Date.now },
+  reviewedAt: { type: Date }
 });
 
 
@@ -250,6 +295,8 @@ const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP', otpSchema);
 const Address = mongoose.model("Address",AddressSchema)
 const Order =  mongoose.model('Order', orderSchema);
+const Wishlist = mongoose.model("Wishlist",wishlistSchema)
+const Return = mongoose.model('ReturnRequest', returnRequestSchema);
 
 // Export the models
-module.exports = { User, OTP ,Address,Cart,Order};
+module.exports = { User, OTP ,Address,Cart,Order,Wishlist,Return};

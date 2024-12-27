@@ -46,7 +46,7 @@
         <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
         <input type="number" name="price" placeholder="Price" required>
         <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
+        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required min="0">
         <label>Select Colors:</label>
         <div class="color-options">
             <input type="checkbox" name="colors" id="red" value="red">
@@ -62,8 +62,6 @@
     </div>
 </div>
 <button type="button" onclick="addVariant()">Add Variant</button>
-
-
     <button type="submit" class="submit-btn">Add Product</button>
 </form>
 
@@ -83,7 +81,7 @@
         <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
         <input type="number" name="price" placeholder="Price" required>
           <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required>
+        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required min="1">
         <label>Select Colors:</label>
         <div class="color-options">
             <input type="checkbox" name="colors" id="red" value="red">

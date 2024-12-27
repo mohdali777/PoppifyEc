@@ -43,6 +43,9 @@
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
+                    <th>Reason</th>
+                    <th>status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <% order.cartItems.forEach(items=>{ %>
@@ -53,6 +56,25 @@
                     <td><%= items.quantity %></td>
                     <td>₹<%= items.price %></td>
                     <td>₹<%= items.total %></td>
+                    <% if (items.reason &&  items.status  == 'Pending') { %>
+                    <td style="word-wrap: break-word; white-space: normal; max-height: 50px; overflow-y: auto;">
+                        <%= items.status %>
+                      </td>   
+                    <td>  <%= items.reason %></td>
+
+                    
+                        <td>
+                            <button class="btn-accept" onclick="acceptReturn('<%=items._id %>','<%= order._id%>')" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+                                Accept
+                            </button>
+                            <button class="btn-reject" onclick="rejectReturn('<%=items._id %>','<%= order._id%>')" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">
+                                Reject
+                            </button>
+                        </td>
+                    <% } else { %>
+                        <td></td>
+                    <% } %>
+                    
                 </tr>
             </tbody>
             <% }) %>
@@ -112,6 +134,49 @@
          alert('Failed to update order status');
      });
  }
+ function acceptReturn(itemId,orderId){
+    fetch("/admin/returnaccept", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ itemId, orderId })
+}).then((response)=> response.json()).then((data)=>{
+if(data.success){
+    alert(data.message),
+    window.location.reload();
+    console.log(data.message);  
+}else{
+    alert(data.message)
+    window.location.reload();
+    console.log(data.message);  
+}
+}).catch((error)=>{
+    console.log(error);
+    
+})
+ 
+}
+function rejectReturn(itemId,orderId){
+    fetch("/admin/returnreject", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ itemId, orderId })
+}).then((response)=> response.json()).then((data)=>{
+if(data.success){
+    alert(data.message),
+    window.location.reload();
+    console.log(data.message);  
+}else{
+    alert(data.message)
+    window.location.reload();
+    console.log(data.message);  
+}
+}).catch((error)=>{
+    console.log(error);
+    
+})
+ 
+}
+ 
  </script>
  
 <%- include('../partials/admin/footer') %>

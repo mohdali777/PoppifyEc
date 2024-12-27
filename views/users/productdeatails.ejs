@@ -1,6 +1,7 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert/dist/sweetalert.min.js"></script>
 
 <div class="breadcrumbss">
   <a href="/home">Home/</a>  
@@ -60,6 +61,7 @@
         
           <label for="size">Size</label>
           <select id="size" name="size" required>
+            <option value="">Select Variant</option>
             <% products.variants.forEach(variant => { %>
               <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" ><%= variant.variant %> </option>
             <% }); %>
@@ -192,9 +194,11 @@ const button1 = document.getElementById("button_cart");
 sizeSelect.addEventListener('change', function () {
   const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
   const price = selectedOption.getAttribute('data-price');
-  const quantity = parseInt(selectedOption.getAttribute('data-quantity'), 10); // Ensure `quantity` is a number
+  const quantity = parseInt(selectedOption.getAttribute('data-quantity'), 10); 
+  const qualityvalue = document.getElementById("quantity").value;
 
-  // Update price display
+
+  
   if (price) {
     ogprice.textContent = `₹${price}`;
     const discountedPrice = price * 0.90;
@@ -203,14 +207,14 @@ sizeSelect.addEventListener('change', function () {
     priceElement.textContent = "N/A";
   }
 
-  // Update quantity display
+  
   if (!isNaN(quantity)) {
     quantityElement.textContent = `${quantity}`;
   } else {
     quantityElement.textContent = "N/A";
   }
 
-  // Update stock status and button state
+  
   if (quantity === 0) {
     stockStatusElement.textContent = "Out Of Stock";
     stockStatusElement.style.color = "red";
@@ -222,12 +226,26 @@ sizeSelect.addEventListener('change', function () {
     button.disabled = false;
     button1.disabled = false;
   } else {
-    stockStatusElement.textContent = ""; // Clear status
-    stockStatusElement.style.color = ""; // Reset color
+    stockStatusElement.textContent = ""; 
+    stockStatusElement.style.color = ""; 
     button.disabled = false;
     button1.disabled = false;
   }
 });
+
+
+document.getElementById('quantity').addEventListener('input', function() {
+    const quantityInput = document.getElementById('quantity');  
+    const enteredQuantity = parseInt(quantityInput.value, 10); 
+    const quantityElement = document.getElementById("quantityid"); 
+    const totalquantity = parseInt(quantityElement.textContent, 10);
+    if (enteredQuantity > totalquantity) {
+        alert("limit Exceed")
+        quantityInput.value = totalquantity;
+    }
+});
+
+
 
 function showreviews(){
   const reviewcontainer = document.getElementById("reviewcontainer")
@@ -243,17 +261,18 @@ document.getElementById("quantity").addEventListener('input', function () {
   const buyButton = document.getElementById('button_product');
     if (quantityInput.value >= 1) {
       buyButton.disabled = false;
+      button1.disabled =false;
     } else {
       buyButton.disabled = true;
+      button1.disabled =true;
     }
   });
 
   function addtocart(productId){
-    const priceText = priceElement.textContent.trim(); // Get the text and trim any extra spaces
+    const priceText = priceElement.textContent.trim();
     const price = parseFloat(priceText.replace('₹', '').trim()); 
     console.log(price);
   const selectedQuantity = document.getElementById("quantity").value;
-  console.log(selectedQuantity);
   const variantElement = document.getElementById("size");
     if (!variantElement) {
         console.error('Variant select element not found!');
@@ -266,6 +285,7 @@ document.getElementById("quantity").addEventListener('input', function () {
     const selectedVariant = variantElement.options[variantElement.selectedIndex];
     const variantName = selectedVariant.value;
     const totalquantity = parseInt(selectedVariant.getAttribute("data-quantity"), 10);
+
   
   const cart = {
     productId :productId ,

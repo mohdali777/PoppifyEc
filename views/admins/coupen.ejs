@@ -1,0 +1,92 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<link rel="stylesheet" href="/admincss/coupen.css">
+<div class="coupon-table-container">
+    <h2>Coupon Management</h2>
+    <table>
+        <a href="/admin/create-coupen" style="margin-top: 0px; display: inline-block; background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px; cursor: pointer ;">
+            Create New Coupon
+        </a>
+        <br>
+        <br>
+        <thead>
+            <tr>
+                <th>Code</th>
+                <th>Discount</th>
+                <th>Start Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Usage Count</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <% coupens.forEach(coupen=> { %>
+        <tbody>
+            <!-- Dummy Data Example 1 -->
+            <tr>
+                <td><%=coupen.couponCode %></td>
+                <td><%=coupen.discount %>%</td>
+                <td>
+                    <%= new Date(coupen.createdAt).toLocaleString('en-IN', { 
+                      timeZone: 'Asia/Kolkata', 
+                      day: '2-digit', 
+                      month: '2-digit', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true 
+                    }) %>
+                  </td>
+                  <td>
+                    <%= new Date(coupen.expiryDate).toLocaleString('en-IN', { 
+                      timeZone: 'Asia/Kolkata', 
+                      day: '2-digit', 
+                      month: '2-digit', 
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true 
+                    }) %>
+                  </td>
+                  
+                <td><span class="status active" style="background-color: #28a745; color: white;"><%=coupen.status %></span></td>
+                <td><%=coupen.count %></td>
+                <td class="action-icons">
+                    <a href="/admin/coupon-details/1" style="text-decoration: none;"><i>&#9998;</i></a>
+                    <i>&#128065;</i>
+                    <i onclick="deleteCoupen('<%=coupen._id %>')">&#128465;</i>
+                </td>
+            </tr>
+            <!-- Dummy Data Example 2 -->
+        </tbody>
+    <% }) %>
+    </table>
+
+    <!-- Pagination -->
+    <div class="pagination">
+        <button>&#8592;</button>
+        <button class="active">01</button>
+        <button>02</button>
+        <button>03</button>
+        <button>04</button>
+        <button>05</button>
+        <button>&#8594;</button>
+    </div>
+</div>
+<script>
+    function deleteCoupen(coupenId){
+        fetch(`/admin/deletecoupen/${coupenId}`,{method:"DELETE"}).then((response)=>  response.json() ).then((data)=>{
+            if(data.success){
+                alert(data.message)
+                window.location.reload();
+            }else{
+                alert(data.message)
+            }
+        }).catch((error)=>{
+            console.log(error);
+            alert("something went wrong while delete")
+        })
+    }
+</script>
+
+<%- include('../partials/admin/footer') %>

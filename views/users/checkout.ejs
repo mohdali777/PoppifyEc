@@ -1,5 +1,6 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
 <div class="container py-5">
     <div class="row justify-content-center">
@@ -113,7 +114,7 @@
                 <% }) %>
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;">Subtotal</span>
-                        <strong style="font-size: 1.2rem;">$<%=cart.totalPrice %></strong>
+                        <strong style="font-size: 1.2rem;" id="totalPrice">$<%=cart.totalPrice %></strong>
                     </li>
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;">Shipping</span>
@@ -122,14 +123,22 @@
                     <hr>
                     <li class="d-flex justify-content-between mb-3">
                         <strong style="font-size: 1.2rem;">Total</strong>
-                        <strong style="font-size: 1.2rem;">$<%=cart.totalPrice %></strong>
+                        <strong style="font-size: 1.2rem;" id="totalPrice1">$<%=cart.totalPrice %></strong>
                     </li>
+                    <li class="d-flex justify-content-between mb-3" >
+                      <strong style="font-size: 1.2rem; display: none;"  id="discountedPrice">Discount Price</strong>
+                      <strong style="font-size: 1.2rem;" id="totalPrice2"></strong>
+                  </li> 
+                  <p id="couponAppliedMessage" style=" display: none; color: green; font-weight: bold; margin-top: 10px;">
+                    Coupon successfully applied!
+                  </p>
                 </ul>
+                
 
                 <div class="mb-3">
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="upi" checked>
-                        <label class="form-check-label" for="upi" style="font-size: 1.2rem;">UPI</label>
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" checked>
+                        <label class="form-check-label" for="upi" style="font-size: 1.2rem;">Razorpay</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="radio" name="paymentMethod" id="wallet">
@@ -142,8 +151,8 @@
                 </div>
 
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" placeholder="Coupon Code" style="font-size: 1.2rem; height: 45px;">
-                    <button class="btn btn-outline-dark" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
+                    <input type="text" class="form-control" id="coupen-code" placeholder="Coupon Code" style="font-size: 1.2rem; height: 45px;">
+                    <button class="btn btn-outline-dark" onclick="coupenApply('<%= cart.totalPrice %>')" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
                 </div>
                 <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
             </div>
@@ -151,20 +160,37 @@
     </div>
 </div>
 <script>
-    function placeorder(price) {
-        const useDefaultAddress = document.getElementById("defaultAddress").checked;
+    function placeorder(pricee) {
+      const useDefaultAddress = document.getElementById("defaultAddress").checked;
+const priceElement = document.getElementById("totalPrice1");
+const discountedPriceElement = document.getElementById("totalPrice2");
+const totalPrice = discountedPriceElement && discountedPriceElement.textContent.trim()
+        ? parseFloat(discountedPriceElement.textContent.trim().replace(/[^0-9.]/g, ""))
+        : priceElement && priceElement.textContent.trim()
+        ? parseFloat(priceElement.textContent.trim().replace(/[^0-9.]/g, ""))
+        : null;
 
-        const orderDetails = {
-            paymentMethod: "COD", 
-            totalPrice: price,
-            firstName: useDefaultAddress ? "<%= address?.name || '' %>" : document.getElementById("firstName").value,
-            companyName: useDefaultAddress ? "<%= address?.companyname || '' %>" : document.getElementById("companyName").value,
-            streetAddress: useDefaultAddress ? "<%= address?.streetaddress || '' %>" : document.getElementById("streetAddress").value,
-            apartment: useDefaultAddress ? "<%= address?.appartment || '' %>" : document.getElementById("apartment").value,
-            city: useDefaultAddress ? "<%= address?.city || '' %>" : document.getElementById("city").value,
-            phone: useDefaultAddress ? "<%= address?.phone || '' %>" : document.getElementById("phone").value,
-            email: useDefaultAddress ? "<%= address?.email || '' %>" : document.getElementById("email").value,
-        };
+    // Validate total price
+    if (!totalPrice || isNaN(totalPrice)) {
+        alert("Invalid total price. Please check your cart and try again.");
+        return;
+    }
+const rozer = document.getElementById("razorpay").checked;
+const cod = document.getElementById("cod").checked;
+
+
+const orderDetails = {
+    paymentMethod : rozer ? "RazorPay" : cod ? "COD" : null,
+    totalPrice: parseFloat(totalPrice), // Convert to number
+    firstName: useDefaultAddress ? "<%= address?.name || '' %>" : document.getElementById("firstName").value,
+    companyName: useDefaultAddress ? "<%= address?.companyname || '' %>" : document.getElementById("companyName").value,
+    streetAddress: useDefaultAddress ? "<%= address?.streetaddress || '' %>" : document.getElementById("streetAddress").value,
+    apartment: useDefaultAddress ? "<%= address?.appartment || '' %>" : document.getElementById("apartment").value,
+    city: useDefaultAddress ? "<%= address?.city || '' %>" : document.getElementById("city").value,
+    phone: useDefaultAddress ? "<%= address?.phone || '' %>" : document.getElementById("phone").value,
+    email: useDefaultAddress ? "<%= address?.email || '' %>" : document.getElementById("email").value,
+};
+
 
         console.log("Order Details:", orderDetails);
 
@@ -178,18 +204,99 @@
             .then(response => response.json())
             .then(data => {
                 console.log("Order placed successfully:", data);
-                swal({
-        title: "Notification",
-        text: data.message, 
-        icon: "info",       
-        button: "OK",       
-                 });
+                if (orderDetails.paymentMethod === "RazorPay" && data.razorpayOrderId) {
+                  console.log('enterrazorpay');
+                  
+            initializeRazorpay(data.razorpayOrderId, orderDetails.totalPrice, data.keyId,orderDetails);
+            console.log('enterrazorpay');
+        } else {
+            swal({
+                title: "Notification",
+                text: data.message,
+                icon: "info",
+                button: "OK",
+            });
+        }
             })
             .catch(err => {
                 console.error("Error placing order:", err);
                 alert("Failed to place order.");
             });
     }
+
+
+  
+
+    function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
+    console.log("Initializing Razorpay...");
+    console.log("Razorpay Order ID:", razorpayOrderId);
+    console.log("Order Details:", orderDetails);
+
+    const options = {
+        key: keyId, 
+        amount: Math.round(amount * 100), // Convert to paisa
+        currency: "INR",
+        name: "Poppify",
+        description: "Order Payment",
+        order_id: razorpayOrderId,
+        handler: function (response) {
+            console.log("Payment successful response:", response);
+            verifyPayment(response, razorpayOrderId, orderDetails);
+        },
+        prefill: {
+            name: orderDetails.firstName,
+            email: orderDetails.email,
+            contact: orderDetails.phone,
+        },
+        theme: {
+            color: "#3399cc",
+        },
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+}
+
+function verifyPayment(response, razorpayOrderId, orderDetails) {
+    console.log("Verifying Payment...");
+    console.log("Response:", response);
+
+    fetch('/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            razorpayOrderId: razorpayOrderId,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+        }),
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Payment verification data:", data);
+            if (data.success) {
+                swal({
+                    title: "Payment Successful",
+                    text: "Your order has been placed successfully!",
+                    icon: "success",
+                    button: "OK",
+                });
+            } else {
+                swal({
+                    title: "Payment Failed",
+                    text: data.message,
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Payment verification failed:", err);
+            alert("Failed to verify payment. Please contact support.");
+        });
+}
+
 
 
     document.getElementById("changeAddressButton").addEventListener("click", () => {
@@ -206,7 +313,42 @@ function selectAddress(id, name, companyname, streetaddress, appartment, city, p
       ${name}, ${companyname}, ${streetaddress}, ${appartment}, ${city}, ${phone}, ${email}
     </textarea>
   `;}
+
+  function coupenApply(totalPrice){
+    const couponCode = document.getElementById('coupen-code').value;
+  if (!couponCode) {
+    document.getElementById('couponMessage').innerText = "Please enter a coupon code.";
+    return;
+  }
+  fetch('/apply-coupon', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ couponCode ,totalPrice}),
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert(data.message)
+        const originalPriceElement = document.getElementById('totalPrice1');
+        originalPriceElement.style.textDecoration = "line-through";
+        originalPriceElement.style.color = "red"
+        document.getElementById("discountedPrice").style.display = "block"
+        document.getElementById('totalPrice2').innerText = `$${data.newTotal}`;
+        document.getElementById("couponAppliedMessage").style.display = "block"
+      } else {
+        alert(data.message)
+        // document.getElementById('couponMessage').innerText = data.message;
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      // document.getElementById('couponMessage').innerText = "An error occurred. Please try again.";
+    });
+}
 </script>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <%- include('../partials/user/footer') %>

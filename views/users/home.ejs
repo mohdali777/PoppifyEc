@@ -37,10 +37,10 @@
               <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
             </div>
             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" id="wishlist" onclick="addWishlist('<%=product._id %>')">
                 <i class="bi bi-heart" style="font-size: 15px;"></i>
               </button>
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" onclick="">
                 <i class="bi bi-eye" style="font-size: 15px;"></i>
               </button>
             </div>
@@ -678,6 +678,31 @@ console.log(err);
 
         })
       }
+
+      function addWishlist(productId) {
+  fetch(`/addwishlist/${productId}`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to add product to wishlist");
+      }
+      return response.json(); 
+    })
+    .then((data) => {
+      if (data.success) {
+        alert(data.message || "Product added to wishlist!");
+        const button = document.getElementById("wishlist");
+       button.style.backgroundColor = "red";
+        window.location.reload(); 
+      } else {
+        alert(data.message || "Unable to add product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error adding product to wishlist:", error);
+      alert("An error occurred. Please try again later.");
+    });
+}
+
     </script>
 
     <%- include('../partials/user/footer') %>
