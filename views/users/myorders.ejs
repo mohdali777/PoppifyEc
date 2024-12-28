@@ -12,7 +12,10 @@
             <h3><%= order.createdAt %></h3>
             <p>Order Total: <strong>₹<%= order.totalPrice %></strong></p>
             <p>Payment Method: <strong><%= order.paymentMethod %></strong></p>
-            <p>Status: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
+            <% if (order.paymentMethod == "RazorPay") {%>
+            <p>PaymentStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.razorpay.paymentStatus %></span></p>
+            <% }%>
+            <p>OrderStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
         </div>
 
  

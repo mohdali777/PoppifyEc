@@ -1,0 +1,104 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<style>
+    /* styles.css */
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+main {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.table-container {
+  width: 1150px;
+  overflow-x: auto;
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin: 20px 40px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+thead {
+  background-color: #007bff;
+  color: white;
+}
+
+th, td {
+  padding: 1rem;
+  border: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.active {
+  color: green;
+  font-weight: bold;
+}
+
+.inactive {
+  color: red;
+  font-weight: bold;
+}
+
+</style>
+<div class="table-container">
+    <a href="/admin/add-offer" type="button" class="btn btn-success" style="margin: 0px 20px ; width: 90px;">Add Offers</a>
+    <br>
+    <br>
+    <table>
+      <thead>
+        <tr>
+          <th>Offer Name</th>
+          <th>Offer Type</th>
+          <th>Discount Type</th>
+          <th>Discount Value</th>
+          <th>Minimum Order Value</th>
+          <th>Starting Date</th>
+          <th>Expiry Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Product Offer</td>
+          <td>Percentage</td>
+          <td>20%</td>
+          <td>$50</td>
+          <td>2024-12-31</td>
+          <td class="active">Active</td>
+        </tr>
+        <tr>
+          <td>Category Offer</td>
+          <td>Flat</td>
+          <td>$10</td>
+          <td>$100</td>
+          <td>2024-11-30</td>
+          <td class="inactive">Expired</td>
+        </tr>
+        <tr>
+          <td>Referral Offer</td>
+          <td>Percentage</td>
+          <td>15%</td>
+          <td>N/A</td>
+          <td>2024-12-15</td>
+          <td class="active">Active</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('../partials/admin/footer') %>

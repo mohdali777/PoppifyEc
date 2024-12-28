@@ -1,4 +1,4 @@
-const {OTP,User,Address,Cart,Order,Wishlist,Return} = require("../model/user/usermodel")
+const {OTP,User,Address,Cart,Order,Wishlist,Return,Wallet} = require("../model/user/usermodel")
 const{Product, Coupen} = require("../model/admin/adminmodel")
 const {Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
@@ -670,7 +670,7 @@ let postlogin = async (req,res)=>{
     const placeOrder = async (req,res)=>{
       console.log(req.body);
       
-      const {paymentMethod, useDefaultAddress, totalPrice,...newAddress} = req.body
+      const {paymentMethod, useDefaultAddress, totalPrice,coupenId,...newAddress} = req.body
       try {
         const userId = req.session.userId;
        const cart = await Cart.findOne({ userId: userId })
@@ -678,6 +678,9 @@ let postlogin = async (req,res)=>{
         console.log("empty cart");
         
         return res.status(400).json({ message: "Cart is empty" });
+    }
+    if(!newAddress){
+      return res.status(400).json({ message: "please Add Address" });
     }
        const cartItems = cart.items;
        console.log(cartItems);
@@ -690,6 +693,9 @@ let postlogin = async (req,res)=>{
             finalAddress = newAddress;     
         }
         console.log(finalAddress);
+        if(!finalAddress){
+          return res.status(400).json({ message: "please Add Address" });
+        }
         const orderId = `ORD${Date.now()}`;
 
         let razorpayOrderId = null;
@@ -725,6 +731,7 @@ let postlogin = async (req,res)=>{
             paymentStatus: "Pending",
           },
           orderStatus:"Pending",
+          coupenId:coupenId
         })
       for (let item of cartItems) {
         const product = await Product.findById(item.productId);
@@ -775,7 +782,8 @@ let postlogin = async (req,res)=>{
 
     const cancelOrder = async (req, res) => {
       try {
-        console.log(req.params.orderId);       
+        console.log(req.params.orderId); 
+        const userId = req.session.userId;      
           const orderId = req.params.orderId;
           const order = await Order.findById(orderId);
           if (!order) {
@@ -796,6 +804,34 @@ let postlogin = async (req,res)=>{
                   }
               }
           }
+
+          if (order.paymentMethod === "RazorPay") {
+            const wallet = await Wallet.findOne({ userId });
+          if(!wallet){
+              return res.status(404).json({ message: "Wallet not found for the user." });
+          }
+            if (wallet) {
+                if (typeof order.totalPrice !== 'number' || isNaN(order.totalPrice)) {
+                    throw new Error(`Invalid totalAmount: ${order.totalPrice}`);
+                }
+                wallet.balance += order.totalPrice;
+                wallet.transactions.push({
+                    transactionId: `Refund-${order._id}`,
+                    date: new Date(),
+                    description: `Refund for cancelled order ${order._id}`,
+                    type: "credit", 
+                    amount: order.totalPrice,
+                });
+                await wallet.save();
+                await order.save();
+            } else {
+                console.error("Wallet not found for user:", userId);
+                return res.status(404).json({ message: "User wallet not found" });
+            }
+        }
+        
+         
+
           await order.save();
           res.status(200).json({ message: "Order cancelled successfully", order });
       } catch (error) {
@@ -957,8 +993,14 @@ let postlogin = async (req,res)=>{
       coupen.status = "redeemed"; 
     }
     coupen.userId.push(userId)
+
+
+
+    const coupenId = coupen._id;
+    console.log(coupenId);
+    
     await coupen.save();
-    return res.status(200).json({ success: true, message: `Coupon applied! You saved ${discount}%.`, newTotal });
+    return res.status(200).json({ success: true, message: `Coupon applied! You saved ${discount}%.`, newTotal ,coupenId});
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "An error occurred while applying the coupon." });
@@ -1007,7 +1049,7 @@ let postlogin = async (req,res)=>{
             "razorpay.paymentId": razorpayPaymentId,
             "razorpay.signature": razorpaySignature,
             "razorpay.paymentStatus": "Success",
-            orderStatus: "Processing", // Update the status accordingly
+            orderStatus: "Pending", // Update the status accordingly
           },
         },
         { new: true } // This option returns the updated document
@@ -1034,6 +1076,47 @@ let postlogin = async (req,res)=>{
       res.status(400).json({ message: "Payment verification failed" });
     }
   };
+
+  const getWallet = async (req,res) => {
+    try {
+      const userId = req.session.userId;
+      if(!userId){
+        return res.status(401).json({success:false,message:"user not authenticated"})
+      } 
+      function generateCardNumber() {
+        const prefix = Math.floor(Math.random() * 5) + 51;  // Generates a number between 51 and 55
+        const cardNumber = `${prefix}${Math.floor(Math.random() * 1000000000000000)}`.slice(0, 16);
+        return cardNumber;
+    }
+  
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() + 5);  // Set expiry to 5 years from now
+    const cardExpiry = `${("0" + (expiryDate.getMonth() + 1)).slice(-2)}/${expiryDate.getFullYear().toString().slice(-2)}`;
+  
+  
+      let wallet = await Wallet.findOne({userId})
+      const user = await User.findById(userId)
+      if(!wallet){
+        wallet = new Wallet({
+          userId: userId,
+          cardNumber: generateCardNumber(), 
+          balance: 0.0,   
+          cardExpiry: cardExpiry,
+          cardHolderName: user.username, 
+          cardType: 'MasterCard', 
+          transactions: []  
+  
+        })
+      }
+  
+      await wallet.save();
+      res.render("users/wallet",{wallet})
+    } catch (error) {
+      console.error("Error in getWallet:", error);
+      res.status(500).json({ success: false, message: "An error occurred while fetching wallet data." });
+    }
+   
+  }
     
 module.exports = {login,
     signup,
@@ -1074,4 +1157,5 @@ getwishlist,
 removeWishlist,
 returnrequiest,
 applyCoupens,
-verifyPayment}
+verifyPayment,
+getWallet}

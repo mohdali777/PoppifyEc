@@ -1,0 +1,203 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<style>
+
+.wallet {
+    width: 1150px;
+    margin: 10px 40px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    font-family: Arial, sans-serif;
+}
+
+/* Wallet header for MasterCard */
+.wallet-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+/* MasterCard design with fixed width and height */
+.card-wallet {
+    width: 393px;
+    height: 230px;
+    background: linear-gradient(135deg, #2d30a9, #5371bc);
+    border-radius: 15px;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Card Header with MasterCard logo and Add Money button */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-logo {
+    width: 50px;
+    height: 40px;
+}
+
+.add-money button {
+    background-color: #6423d5;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.add-money button:hover {
+    background-color: #e67e22;
+}
+
+/* Card Information */
+.card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card-number {
+    font-size: 13px;
+    font-weight: medium;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.card-balance {
+    font-size: 22px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.card-expiry {
+    font-size: 12px;
+}
+
+/* Wallet body for transaction history */
+.wallet-body {
+    font-size: 16px;
+    color: #333;
+}
+
+.wallet-body h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.transaction-header {
+    display: grid;
+    grid-template-columns: 1fr 2fr 3fr 1fr;
+    padding: 10px;
+    background-color: #f4f4f4;
+    font-weight: bold;
+    border-bottom: 2px solid #ddd;
+}
+
+.transaction-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 3fr 1fr;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.transaction-item div {
+    padding: 5px;
+}
+
+.transaction-id, .transaction-date, .transaction-description, .transaction-amount {
+    text-align: left;
+}
+
+.transaction-amount {
+    text-align: right;
+}
+
+.transaction-list {
+    margin-top: 20px;
+}
+
+.no-transactions {
+    padding: 20px;
+    text-align: center;
+    font-size: 18px;
+    color: #666;
+    background-color: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+
+</style>
+<div class="container-sm">
+  <%- include('../partials/user/sidebaruser') %>
+ 
+  <div class="wallet">
+    <!-- Wallet Header with MasterCard Design -->
+    <div class="wallet-header">
+      <div class="card-wallet">
+        <!-- Card content -->
+        <div class="card-header">
+          <img src="../images/mastercard_logo.png" alt="MasterCard Logo" class="card-logo">
+          <div class="add-money">
+            <button>Add Money</button>
+          </div>
+        </div>
+        <div class="card-info">
+          <div class="card-balance"><%= wallet.balance.toFixed(2) %></div>
+          <div class="card-number"><%= wallet.cardNumber %></div>
+          <div class="card-expiry">Expiry: <%= wallet.cardExpiry %></div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Wallet Body for Transaction History -->
+    <div class="wallet-body">
+        <h3>Transaction History</h3>
+        <div class="transaction-list">
+            <% if (wallet.transactions.length === 0) { %>
+                <div class="no-transactions">
+                    <p>No transaction history available</p>
+                </div>
+            <% } else { %>
+                <!-- Transaction Table with Headers -->
+                <div class="transaction-header">
+                    <div class="transaction-id">Transaction ID</div>
+                    <div class="transaction-date">Date</div>
+                    <div class="transaction-description">Description</div>
+                    <div class="transaction-amount">Amount</div>
+                </div>
+    
+                <!-- Transaction Items -->
+                <% wallet.transactions.forEach(transaction => { %>
+                    <div class="transaction-item">
+                        <div class="transaction-id"><%= transaction.transactionId %></div>
+                        <div class="transaction-date"><%= transaction.transactionDate %></div>
+                        <div class="transaction-description"><%= transaction.description %></div>
+                        <div class="transaction-amount"><%= transaction.amount < 0 ? '-' : '+' %> <%= Math.abs(transaction.amount).toFixed(2) %></div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+    </div>
+    
+  </div>
+
+</div>
+</div>
+<script>
+
+</script>
+<%- include('../partials/user/footer') %>

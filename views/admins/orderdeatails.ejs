@@ -64,7 +64,7 @@
 
                     
                         <td>
-                            <button class="btn-accept" onclick="acceptReturn('<%=items._id %>','<%= order._id%>')" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
+                            <button class="btn-accept" onclick="acceptReturn('<%=items._id %>','<%= order._id%>','<%= order.userId%>')" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px;">
                                 Accept
                             </button>
                             <button class="btn-reject" onclick="rejectReturn('<%=items._id %>','<%= order._id%>')" style="background-color: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-size: 14px; margin-left: 10px;">
@@ -134,11 +134,11 @@
          alert('Failed to update order status');
      });
  }
- function acceptReturn(itemId,orderId){
+ function acceptReturn(itemId,orderId,userId){
     fetch("/admin/returnaccept", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ itemId, orderId })
+    body: JSON.stringify({ itemId, orderId,userId })
 }).then((response)=> response.json()).then((data)=>{
 if(data.success){
     alert(data.message),

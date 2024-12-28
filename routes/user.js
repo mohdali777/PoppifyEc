@@ -39,6 +39,7 @@ router.get("/google", passport.authenticate("google", {
   router.get("/products-shop",userControl.sort)
   router.get("/edit-address/:addressId",sessions.sessionCheck,userControl.editaddressGet)
   router.get("/getwishlist",userControl.getwishlist)
+  router.get("/wallet", userControl.getWallet)
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)
@@ -59,6 +60,7 @@ router.post("/removewishlis/:productId",userControl.removeWishlist)
 router.post("/orders/:orderId/return/:productId",userControl.returnrequiest)
 router.post("/apply-coupon",userControl.applyCoupens)
 router.post("/verify-payment",userControl.verifyPayment)
+
 
 
 

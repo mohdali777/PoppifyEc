@@ -1,6 +1,6 @@
 const {Admin, Coupen} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
-const {User,Order,Return} = require("../model/user/usermodel")
+const {User,Order,Return,Wallet,Offer} = require("../model/user/usermodel")
 const { serializeUser } = require("passport")
 const { Category } = require("../model/admin/adminmodel");
 const {Product} = require("../model/admin/adminmodel")
@@ -434,7 +434,7 @@ const updateStatus = async (req,res) => {
 const returnAccept = async (req,res) => {
     try {
       console.log(req.body);
-      const { orderId, itemId } = req.body;
+      const { orderId, itemId ,userId} = req.body;
       const order = await Order.findById(orderId);
       if (!order) {
         return res.status(404).json({ success: false, message: "Order not found." });
@@ -443,6 +443,47 @@ const returnAccept = async (req,res) => {
       if (!item) {
         return res.status(404).json({ success: false, message: "Item not found in the order." });
       }
+
+
+  
+   
+    
+      if (order.paymentMethod === "RazorPay") {
+        const wallet = await Wallet.findOne({ userId });
+      if(!wallet){
+          return res.status(404).json({ message: "Wallet not found for the user." });
+      }
+        if (wallet) {
+            if (typeof item.total !== 'number' || isNaN(item.total)) {
+                throw new Error(`Invalid totalAmount: ${item.total}`);
+            }
+            let walletbalance;
+            if(order.coupenId != null){
+              const coupenId = order.coupenId;
+              const coupen = await Coupen.findById(coupenId)
+              const discountAmountt = coupen.discount;
+              const discountAmount = (item.total * discountAmountt) / 100; 
+              walletbalance = item.total - discountAmount; 
+            }else{
+              walletbalance = item.total
+            }
+        console.log(`wallet balance ${walletbalance}`);
+        
+            wallet.balance += walletbalance;
+            wallet.transactions.push({
+                transactionId: `Refund-${item._id}`,
+                date: new Date(),
+                description: `Refund for cancelled order ${item._id}`,
+                type: "credit", 
+                amount: walletbalance,
+            });
+            await wallet.save();
+            await order.save();
+        } else {
+            console.error("Wallet not found for user:", userId);
+            return res.status(404).json({ message: "User wallet not found" });
+        }
+    }
       item.status = "Accepted";
       await order.save();
       return res.status(200).json({ success: true, message: "Return request accepted successfully." });
@@ -531,6 +572,29 @@ const deleteCoupen = async (req, res) => {
 };
 
 
+const createOffer = async (req,res) => {
+  try {
+    console.log(req.body);
+    
+    const { offerName,offerType, discountType, discountValue, minimumOrderValue, expiryDate,StartingDate, isActive } = req.body;
+    const newOffer = new Offer({
+         offerName,
+          offerType,
+          discountType,
+          discountValue,
+          minimumOrderValue,
+          expiryDate,
+          StartingDate, 
+          isActive
+    })   
+
+    await newOffer.save()
+ 
+  } catch (error) {
+    console.error("Error deleting coupon:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
 
 
 module.exports = {
@@ -564,4 +628,5 @@ returnAccept,
 returnReject,
 createCoupen,
 getCoupens,
-deleteCoupen}
+deleteCoupen,
+createOffer}

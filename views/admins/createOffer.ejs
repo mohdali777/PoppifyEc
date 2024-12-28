@@ -1,0 +1,186 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+
+<style>
+.offer-form-container {
+  width: 1150px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px 40px;
+  height: fit-content;
+}
+
+.offer-form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+#create-offer-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: fit-content;
+  height: fit-content;
+  margin: 50px auto;
+}
+
+.form-group {
+  width: 48%;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+#offer-create-btn.create-offer-btn {
+  background-color: #28a745;
+}
+
+#offer-create-btn.create-offer-btn:hover {
+  background-color: #218838;
+}
+</style>
+
+<div class="offer-form-container">
+    <h2>Create Offer</h2>
+    <form id="create-offer-form" action="/admin/create-offer" method="post">
+      <div class="form-group">
+        <label for="offer-name" >Offer Name:</label>
+        <input type="text" name="offerName" id="offer-name" placeholder="Offer Name">
+      </div>
+      <div class="form-group">
+        <label for="offer-type">Offer Type:</label>
+        <select id="offer-type" name="offerType"  required>
+          <option value="product">Product</option>
+          <option value="category">Category</option>
+          <option value="referral">Referral</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="discount-type">Discount Type:</label>
+        <select id="discount-type" name="discountType" required>
+          <option value="percentage">Percentage</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="discount-value">Discount Value:</label>
+        <input type="number" id="discount-value" name="discountValue" placeholder="Enter discount percentage" min="1" required>
+      </div>
+
+      <div class="form-group">
+        <label for="minimum-order-value">Minimum Order Value:</label>
+        <input type="number" id="minimum-order-value" name="minimumOrderValue" placeholder="Enter minimum order value">
+      </div>
+
+      <div class="form-group">
+        <label for="expiry-date">Expiry Date:</label>
+        <input type="date" id="expiry-date" name="expiryDate" required>
+      </div>
+
+      <div class="form-group">
+        <label for="Starting-Date">Start Date:</label>
+        <input type="date" id="Starting-Date" name="StartingDate" required>
+      </div>
+
+      <div class="form-group">
+        <label for="is-active">Is Active:</label>
+        <select id="is-active" name="isActive">
+          <option value="true">Yes</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+
+      <!-- Updated button with ID and class -->
+      <button type="submit" id="offer-create-btn" class="submit-btn create-offer-btn">Create Offer</button>
+    </form>
+</div>
+
+<script>
+document.getElementById("offer-create-btn").addEventListener("click", function (e) {
+  // Prevent form submission to validate first
+  e.preventDefault();
+
+  // Get form values
+  const offerType = document.getElementById("offer-type").value;
+  const discountType = document.getElementById("discount-type").value;
+  const discountValue = document.getElementById("discount-value").value;
+  const minimum = document.getElementById("minimum-order-value").value;
+  const expiryDate = document.getElementById("expiry-date").value;
+  const StartDate = document.getElementById("Starting-Date").value;
+  const isActive = document.getElementById("is-active").value;
+
+  // Validate form fields
+  if (
+    !offerType || 
+    !discountType || 
+    !discountValue || 
+    discountValue <= 0 || 
+    discountValue > 100 || 
+    (minimum && minimum < 0) || 
+    !expiryDate ||
+    !StartDate ||
+    !isActive
+  ) {
+    alert("Please fill out all required fields correctly.");
+    return;  // Stops form submission if validation fails
+  }
+
+
+  const startDateObj = new Date(StartDate);
+  const expiryDateObj = new Date(expiryDate);
+  const currentDate = new Date();
+
+  if (expiryDateObj <= startDateObj) {
+    alert("Expiry Date should be after the Start Date.");
+    return;
+  }
+
+
+  document.getElementById("create-offer-form").submit();
+});
+
+
+</script>
+
+<%- include('../partials/admin/footer') %>

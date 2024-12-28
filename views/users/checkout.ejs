@@ -155,6 +155,7 @@
                     <button class="btn btn-outline-dark" onclick="coupenApply('<%= cart.totalPrice %>')" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
                 </div>
                 <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
+                <input type="text" id="copen-container" hidden>
             </div>
         </div>
     </div>
@@ -177,7 +178,7 @@ const totalPrice = discountedPriceElement && discountedPriceElement.textContent.
     }
 const rozer = document.getElementById("razorpay").checked;
 const cod = document.getElementById("cod").checked;
-
+ 
 
 const orderDetails = {
     paymentMethod : rozer ? "RazorPay" : cod ? "COD" : null,
@@ -189,8 +190,12 @@ const orderDetails = {
     city: useDefaultAddress ? "<%= address?.city || '' %>" : document.getElementById("city").value,
     phone: useDefaultAddress ? "<%= address?.phone || '' %>" : document.getElementById("phone").value,
     email: useDefaultAddress ? "<%= address?.email || '' %>" : document.getElementById("email").value,
+    coupenId: document.getElementById("copen-container").value ? document.getElementById("copen-container").value  : null 
 };
 
+if(orderDetails.firstName ==""||orderDetails.companyName=="" || orderDetails.streetAddress==""||orderDetails.apartment==""||orderDetails.city==""||orderDetails.phone==""||orderDetails.email==""){
+  return alert("Please Choose Address")
+}
 
         console.log("Order Details:", orderDetails);
 
@@ -337,6 +342,9 @@ function selectAddress(id, name, companyname, streetaddress, appartment, city, p
         document.getElementById("discountedPrice").style.display = "block"
         document.getElementById('totalPrice2').innerText = `$${data.newTotal}`;
         document.getElementById("couponAppliedMessage").style.display = "block"
+        document.getElementById("copen-container").value = data.coupenId
+        console.log(data.coupenId);
+        
       } else {
         alert(data.message)
         // document.getElementById('couponMessage').innerText = data.message;

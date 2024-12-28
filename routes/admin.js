@@ -24,6 +24,12 @@ router.get("/coupon-management",AdminRoutes.getCoupens)
 router.get("/create-coupen",(req,res)=>{
     res.render("admins/addcoupen")
 })
+router.get("/add-offer",(req,res)=>{
+    res.render("admins/createOffer")
+})
+router.get("/offer",(req,res)=>{
+    res.render("admins/offers")
+})
 
 
 router.post("/login",AdminRoutes.postlogin)
@@ -44,6 +50,7 @@ router.post("/returnaccept",AdminRoutes.returnAccept)
 router.post("/returnreject",AdminRoutes.returnReject)
 router.post("/create-coupon",AdminRoutes.createCoupen)
 router.delete("/deletecoupen/:coupenId",AdminRoutes.deleteCoupen)
+router.post("/create-offer",AdminRoutes.createOffer)
 
 
 

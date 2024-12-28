@@ -227,14 +227,18 @@ const orderSchema = new mongoose.Schema({
     signature: { type: String ,default:null}, 
     paymentStatus: { 
       type: String, 
-      enum: ['Pending', 'Failed', 'Success'], 
+      enum: ['Pending', 'Failed', 'Success','Returned'], 
       default: 'Pending' 
     },
   },
   orderStatus: {
       type: String,
-      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled','Returned'],
       default: 'Pending'
+  },
+  coupenId:{
+    type:String,
+    default:null
   },
   createdAt: {
       type: Date,
@@ -277,19 +281,130 @@ const wishlistSchema = new mongoose.Schema(
 );
 
 const returnRequestSchema = new mongoose.Schema({
-  orderId: { type: mongoose.Schema.Types.ObjectId, ref: 'Order', required: true },
-  productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  reason: { type: String, required: true },
-  status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: 'Pending' },
-  requestedAt: { type: Date, default: Date.now },
+  orderId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Order', 
+    required: true 
+  },
+  productId:
+   { type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Product', 
+    required: true 
+
+   },
+  userId: {
+     type: mongoose.Schema.Types.ObjectId, 
+     ref: 'User', 
+     required: true
+     },
+  reason: { type: String, required: true
+
+   },
+  status: {
+     type: String,
+      enum: ['Pending', 'Accepted', 'Rejected'], 
+      default: 'Pending'
+     },
+  requestedAt: { type: Date, default: Date.now 
+
+  },
   reviewedAt: { type: Date }
+});
+
+const walletSchema = new mongoose.Schema({
+  userId: { // Referring to the user owning the wallet
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+  },
+  cardNumber: {
+      type: String,
+      required: true,
+      unique: true
+  },
+  balance: {
+      type: Number,
+      required: true,
+      default: 0.0
+  },
+  cardExpiry: {
+      type: String, // 'MM/YY' format
+      required: true
+  },
+  cardHolderName: {
+      type: String,
+      required: true
+  },
+  cardType: {
+      type: String,
+      enum: ['MasterCard', 'Visa', 'American Express'], // Different card types
+      required: true
+  },
+  transactions: [{
+      transactionId: {
+          type: String,
+          required: true,
+          unique: true
+      },
+      amount: {
+          type: Number,
+          required: true,
+          min: 0
+      },
+      transactionDate: {
+          type: Date,
+          default: Date.now
+      },
+      description: {
+          type: String,
+          required: true
+      },
+      type: { // 'credit' or 'debit'
+          type: String,
+          enum: ['credit', 'debit'],
+          required: true
+      }
+  }],
+  createdAt: {
+      type: Date,
+      default: Date.now
+  }
 });
 
 
 
 
-// Models
+
+const offerSchema = new mongoose.Schema({
+  offerName:{
+    type:String,
+    required:true
+  },
+  offerType: { 
+      type: String, 
+      enum: ["product", "category", "referral"], 
+      required: true 
+  }, 
+  discountType: { 
+      type: String,  
+      required: true 
+  }, 
+  discountValue: { type: Number, required: true }, 
+  minimumOrderValue: { type: Number, default: 0 }, 
+  expiryDate: { type: Date, required: true }, 
+  StartingDate: { type: Date, required: true },
+  usageLimit: { type: Number, default: null },
+  usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], 
+  isActive: { type: Boolean, default: true }, 
+});
+
+
+// Create and export the Wallet model
+
+
+
+
+const Offer = mongoose.model("Offer", offerSchema);
 const Cart = mongoose.model('Cart', cartSchema);
 const User = mongoose.model('User', userSchema);
 const OTP = mongoose.model('OTP', otpSchema);
@@ -297,6 +412,7 @@ const Address = mongoose.model("Address",AddressSchema)
 const Order =  mongoose.model('Order', orderSchema);
 const Wishlist = mongoose.model("Wishlist",wishlistSchema)
 const Return = mongoose.model('ReturnRequest', returnRequestSchema);
+const Wallet = mongoose.model('Wallet', walletSchema);
 
 // Export the models
-module.exports = { User, OTP ,Address,Cart,Order,Wishlist,Return};
+module.exports = { User, OTP ,Address,Cart,Order,Wishlist,Return,Wallet,Offer};
