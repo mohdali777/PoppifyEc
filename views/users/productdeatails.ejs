@@ -24,11 +24,21 @@
           <div class="fontprdeatails">
             <h3><%= products.name%></h3>
             <p class="product-rating">⭐⭐⭐⭐⭐</p>
-            <div  style="display: flex; gap: 10px;"><span style="    font-size: 15px; margin-top: -3px;font-weight: 600;color: red"> -10  %</span>
-              <h4 id="originalprice" style="text-decoration: line-through red ;">  ₹<%= products.price %> </h4>
+            <div  style="display: flex; gap: 10px;"><span  id="offerperst" style="  display: none;  font-size: 15px; margin-top: -3px;font-weight: 600;color: red"> -10  %</span>
+              <h4 id="originalprice" >  ₹<%= products.price %> </h4>
             </div>
-            <h4 id="price">₹<%= (products.price - (products.price * 0.10)).toFixed(2) %></h4>
+            <!-- <h4 id="price" style="display: none;" disabled>₹</h4 > -->
 
+            <% if (products.offerId) { %> 
+              <input type="text" value="<%= products.offerId.discountValue %>" id="offer-persantage">
+              <input type="text" value="<%= products.offerId.minimumOrderValue %>"id="offer-minimumamount">
+            <% } %>
+
+            <% if (products.categoryId && products.categoryId.offerId) { %> 
+              <input type="text" value="<%= products.categoryId.offerId.discountValue %>" id="offer-persantage-category">
+              <input type="text" value="<%= products.categoryId.offerId.minimumOrderValue %>" id="offer-minimumamount-category">
+            <% } %>
+            
               <p id="quantityid"  style="   font-size: 1rem;
               font-weight: bold;
               color: #333; /* Dark grey for the text */
@@ -58,12 +68,17 @@
               <span>Green</span>
             </div>
           </div>
-        
+
+
+         
+
+          
           <label for="size">Size</label>
           <select id="size" name="size" required>
             <option value="">Select Variant</option>
             <% products.variants.forEach(variant => { %>
-              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" ><%= variant.variant %> </option>
+              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" data-offer="<%= products.offerId ? products.offerId.discountValue : '' %>"
+                ><%= variant.variant %> </option>
             <% }); %>
           </select>
           <label for="quantity">Quantity</label>
@@ -184,12 +199,19 @@ zoomWrappers.forEach(wrapper => {
     });
 });
 const sizeSelect = document.getElementById('size');
-const priceElement = document.getElementById('price');
+// const priceElement = document.getElementById('price');
 const quantityElement = document.getElementById("quantityid");
 const stockStatusElement = document.getElementById("stock-status");
 const button = document.getElementById("button_product");
 const ogprice = document.getElementById("originalprice");
 const button1 = document.getElementById("button_cart");
+
+const discountper = document.getElementById("offer-persantage") ? parseFloat(document.getElementById("offer-persantage").value) : 0;
+const discountmini = document.getElementById("offer-minimumamount") ? parseFloat(document.getElementById("offer-minimumamount").value) : 0;
+
+const discountperCategory = document.getElementById("offer-persantage-category") ? parseFloat(document.getElementById("offer-persantage-category").value) : 0;
+const discountminiCategory = document.getElementById("offer-minimumamount-category") ? parseFloat(document.getElementById("offer-minimumamount-category").value) : 0;
+
 
 sizeSelect.addEventListener('change', function () {
   const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
@@ -201,11 +223,25 @@ sizeSelect.addEventListener('change', function () {
   
   if (price) {
     ogprice.textContent = `₹${price}`;
-    const discountedPrice = price * 0.90;
-    priceElement.textContent = `₹${discountedPrice.toFixed(2)}`;;
   } else {
     priceElement.textContent = "N/A";
   }
+
+  if (discountper > 0 && price >= discountmini) {
+    let priceElement = document.getElementById("price");
+if (!priceElement) {
+    priceElement = document.createElement("h4");
+    priceElement.id = "price";
+    ogprice.parentNode.insertBefore(priceElement, ogprice.nextSibling); // Insert after the original price
+}
+const discountedPrice = price - (price * discountper / 100);
+priceElement.textContent = `₹${discountedPrice.toFixed(2)}`;
+ogprice.style.textDecoration = "line-through red";
+} else {
+  const priceElement = document.getElementById("price");
+  if (priceElement) priceElement.remove();
+    ogprice.style.textDecoration = "none";
+}
 
   
   if (!isNaN(quantity)) {
@@ -269,8 +305,28 @@ document.getElementById("quantity").addEventListener('input', function () {
   });
 
   function addtocart(productId){
-    const priceText = priceElement.textContent.trim();
-    const price = parseFloat(priceText.replace('₹', '').trim()); 
+    const offerprice = document.getElementById("price");
+    const ogprice = document.getElementById("originalprice");
+    console.log(offerprice);
+    console.log(ogprice);
+    
+    
+    if (!offerprice && !ogprice) {
+        console.error("Price elements not found!");
+        return;
+    }
+    const priceText = offerprice ? offerprice.textContent : ogprice.textContent;
+  
+    const price = parseFloat(priceText.replace('₹', '').trim());
+
+    console.log("Price:", price);
+
+    // Check if price is valid
+    if (isNaN(price) || price <= 0) {
+        console.error("Invalid price!");
+        return;
+    }
+ 
     console.log(price);
   const selectedQuantity = document.getElementById("quantity").value;
   const variantElement = document.getElementById("size");

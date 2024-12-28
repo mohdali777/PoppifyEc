@@ -34,6 +34,14 @@
         <% }) %>
     </select>
 
+    <label for="offers">Offers</label>
+    <select id="offers" class="custom-width" name="offer" >
+        <% offers.forEach(offer => { %>
+        <option value="<%= offer.offerName %>"><%= offer.offerName %></option>
+            <% }) %>
+    </select>
+
+
     <label for="price">Base Price</label>
     <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" required>
 
@@ -187,6 +195,7 @@ function displayImagePreview(file) {
         formData.append('price', document.getElementById('price').value);
         formData.append('quantity', document.getElementById('quantity').value);
         formData.append('brand', document.getElementById('brand').value);
+        formData.append('offer', document.getElementById('offers').value);
 
 const selectedColors = Array.from(document.querySelectorAll('input[name="colors"]:checked')).map(el => el.value);
 selectedColors.forEach(color => formData.append('colors[]', color)); 

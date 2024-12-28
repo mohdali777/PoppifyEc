@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { User } = require('../user/usermodel');
 
 // Admin Schema
 const adminSchema = new mongoose.Schema(
@@ -37,6 +36,11 @@ const categorySchema = new mongoose.Schema(
     image_url: {
       type: String, 
     },
+    offerId:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:"Offer",
+      default:null
+    },
   },
   { timestamps: true } 
 );
@@ -56,6 +60,11 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String, // Reference to the Category model                // The name of your Category model
     required: true,  // Category is required
+  },
+  categoryId:{
+    type:mongoose.Schema.Types.ObjectId,
+  ref:"Category",
+  default:null
   },
   price: {
     type: Number,
@@ -84,6 +93,11 @@ const productSchema = new mongoose.Schema({
         colors:{type:[String],default:[]}
     }
 ],
+offerId:{
+  type:mongoose.Schema.Types.ObjectId,
+  ref:"Offer",
+  default:null
+},
   createdAt: {
     type: Date,
     default: Date.now,  

@@ -1,9 +1,9 @@
-const {Admin, Coupen} = require("../model/admin/adminmodel")
+const {Admin, Coupen,Product,Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const {User,Order,Return,Wallet,Offer} = require("../model/user/usermodel")
-const { serializeUser } = require("passport")
-const { Category } = require("../model/admin/adminmodel");
-const {Product} = require("../model/admin/adminmodel")
+
+// const {  } = require("../model/admin/adminmodel");
+// const {} = require("../model/admin/adminmodel")
 const mongoose = require('mongoose')
 
 let getlogin = async(req,res)=>{
@@ -47,6 +47,7 @@ let postlogin = async(req,res)=>{
         if(!admin){
             return res.render("admins/signin",{message:"usernot Found"})
         }
+        
         const isMatch = await bcrypt.compare(password, admin.password);
         console.log(isMatch);
         
@@ -166,12 +167,13 @@ const categories = await Category.find({})
 res.render("admins/category",{categories,message:false})
 }
 const categorybutton = async(req,res)=>{
-res.render("admins/addcategory",{message:false})
+  const offers = await Offer.find({offerType:"category",isActive:true})
+res.render("admins/addcategory",{message:false,offers})
 }
 
 const addcategory = async (req, res) => {
   try {
-    const { name, description, is_listed } = req.body;
+    const { name, description, is_listed ,offer} = req.body;
 
     // Get the uploaded image file (if any)
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
@@ -186,12 +188,20 @@ const addcategory = async (req, res) => {
       });
     }
 
+    let offerId = null;  
+    const OFFer = await Offer.findOne({ offerName:offer }); 
+    console.log(OFFer);
+    if (OFFer) {  // If an offer is found
+      offerId = OFFer._id;  // Assign offerId the _id of the found offer
+    }
+
     // Create a new category
     const newCategory = new Category({
       name,
       description,
       is_listed: is_listed === "true",
       image_url,
+      offerId
     });
 
     await newCategory.save();
@@ -278,9 +288,10 @@ const deleteCategory = async (req, res) => {
 const addproductsget = async (req,res)=> {
   try {
     const categories = await Category.find({is_listed:true});
-    res.render("admins/addproduct",{categories})
+    const offers = await Offer.find({offerType:"product",isActive:true})
+    res.render("admins/addproduct",{categories,offers})
   } catch (error) {
-    console.log(err);
+    console.log(error);
     res.status(500).send('Server Error');
   }
 
@@ -288,25 +299,38 @@ const addproductsget = async (req,res)=> {
 }
 
 const addproductpost = async (req, res) => {
+  console.log(req.body);
+  
   try {
-    const { name, description, category, price, quantity, brand, variants, colors } = req.body;
+    const { name, description, category, price, quantity, brand, variants, colors,offer } = req.body;
     console.log(req.files);
     
     const image = req.files.map(file => file.filename);
     const parsevariants = JSON.parse(variants)
     console.log(parsevariants);
-    
+
+    let offerId = null;  
+    const OFFer = await Offer.findOne({ offerName:offer }); 
+    console.log(OFFer);
+    if (OFFer) {  // If an offer is found
+      offerId = OFFer._id;  // Assign offerId the _id of the found offer
+    }
+
+    const categoryName = await Category.findOne({name:category})
+    const categoryId = categoryName._id; 
     
     const newProduct = new Product({
       name,
       description,
       category,
+      categoryId,
       price,
       quantity,
       brand,
       variants: parsevariants, // Default to empty array if not provided
       colors: Array.isArray(colors) ? colors : [],
-      image,  // Save the array of image file paths
+      image,  
+      offerId
       
     });
 

@@ -255,7 +255,7 @@ let postlogin = async (req,res)=>{
         try {
             const productId = req.params.productId;
             const categoryid = req.params.category;
-            const products = await Product.findById(productId)
+            const products = await Product.findById(productId).populate("offerId").populate({path: 'categoryId', populate: {path: 'offerId',},})
             const category = await Product.find({category:categoryid}).limit(4)
             res.render("users/productdeatails",{products,category})
         } catch (error) {

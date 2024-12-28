@@ -16,6 +16,13 @@
 
     <label for="category-image">Category Image</label>
     <input type="file" id="category-image" name="image_url" >
+    
+    <label for="offers">Offers</label>
+    <select id="offers" name="offer">
+      <% offers.forEach(offer => { %>
+        <option value="<%= offer.offerName %>"><%= offer.offerName %></option>
+            <% }) %>
+    </select>
 
     <label for="is-listed">Visibility</label>
     <select id="is-listed" name="is_listed">
