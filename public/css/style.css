@@ -790,7 +790,7 @@ h2 {
 
 .divcontainer-usermanagement{
   display: flex;
-  height: 1000px;
+  height: auto;
 }
 
 .divsidebar-user{

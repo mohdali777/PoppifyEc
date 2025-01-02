@@ -171,7 +171,12 @@ console.log(err);
   submitBtn.onclick = async function () {
     const reason = returnReasonInput.value.trim();
     if (!reason) {
-      alert('Please provide a reason for the return.');
+      swal({
+                title: "Attention!",
+                text: "Please provide a reason for the return.",
+                icon: "warning", // Use the warning icon
+                button: "OK",    // Customize the button text
+            });
       return;
     }
   }
@@ -187,7 +192,12 @@ console.log(err);
   submitBtn.onclick = async function () {
     const reason = returnReasonInput.value.trim();
     if (!reason) {
-      alert('Please provide a reason for the return.');
+      swal({
+                title: "Attention!",
+                text: "Please provide a reason for the return.",
+                icon: "warning", // Use the warning icon
+                button: "OK",    // Customize the button text
+            });
       return;  
     }
 
@@ -199,14 +209,29 @@ console.log(err);
       });
       const result = await response.json();
       if (result.success) {
-        alert(result.message);  
+        swal({
+                title: "Notification",
+                text: result.message,
+                icon: "info", 
+                button: "OK", 
+            }); 
         location.reload();  
       } else {
-        alert('Failed to return the product. Please try again.');
+        swal({
+                title: "Error!",
+                text: "Failed to return the product. Please try again.",
+                icon: "error", // Use the error icon for failure messages
+                button: "OK",  // Customize the button text
+            });
       }
     } catch (error) {
       console.error(error);
-      alert('An error occurred while processing your return.');
+      swal({
+                title: "Error!",
+                text: "An error occurred while processing your return.",
+                icon: "error", // Error icon
+                button: "OK",  // Button text
+            });
     }
     modal.style.display = 'none';
   };

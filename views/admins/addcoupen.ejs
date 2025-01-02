@@ -4,29 +4,34 @@
 
 <div class="coupon-container">
     <h2>Create New Coupon</h2>
-    <form action="/admin/create-coupon" method="POST" style="max-width: 1150px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
+    <form id="createCouponForm" action="/admin/create-coupon" method="POST" style="max-width: 1150px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
         <div class="form-group">
             <label for="couponCode">Coupon Code:</label>
             <input type="text" id="couponCode" name="couponCode" placeholder="Enter Coupon Code"
                    style="width: 100%; padding: 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 15px;">
+            <span id="couponCodeError" style="color: red; display: none;">Coupon Code is required.</span>
         </div>
 
         <div class="form-group">
             <label for="discount">Discount Percentage:</label>
             <input type="number" id="discount" name="discount" placeholder="Enter Discount Percentage"
                    style="width: 100%; padding: 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 15px;">
+            <span id="discountError" style="color: red; display: none;">Discount Percentage is required and must be between 1 and 100.</span>
         </div>
 
         <div class="form-group">
             <label for="expiryDate">Expiry Date:</label>
-            <input type="date" id="expiryDate" name="expiryDate"
+            <input type="date" id="expiryDate" name="expiryDate" 
+                   min="<%= new Date().toISOString().split('T')[0] %>" 
                    style="width: 100%; padding: 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 15px;">
+            <span id="expiryDateError" style="color: red; display: none;">Expiry Date is required.</span>
         </div>
 
         <div class="form-group">
             <label for="description">Description:</label>
             <textarea id="description" name="description" rows="4" placeholder="Enter Coupon Description"
                       style="width: 100%; padding: 12px; font-size: 14px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 15px;"></textarea>
+            <span id="descriptionError" style="color: red; display: none;">Description is required.</span>
         </div>
 
         <button type="submit" style="background-color: #007bff; color: white; padding: 12px 25px; font-size: 16px; border-radius: 5px; border: none; cursor: pointer;">
@@ -36,3 +41,55 @@
 </div>
 
 <%- include('../partials/admin/footer') %>
+
+<script>
+    // Add client-side validation for the form
+    document.getElementById("createCouponForm").addEventListener("submit", function(event) {
+        let valid = true;
+        
+        // Validate Coupon Code
+        const couponCode = document.getElementById("couponCode").value;
+        if (!couponCode) {
+            document.getElementById("couponCodeError").style.display = "inline";
+            valid = false;
+        } else {
+            document.getElementById("couponCodeError").style.display = "none";
+        }
+
+        // Validate Discount
+        const discount = document.getElementById("discount").value;
+        if (!discount || discount < 1 || discount > 100) {
+            document.getElementById("discountError").style.display = "inline";
+            valid = false;
+        } else {
+            document.getElementById("discountError").style.display = "none";
+        }
+
+        // Validate Expiry Date
+        const expiryDate = document.getElementById("expiryDate").value;
+        if (!expiryDate) {
+            document.getElementById("expiryDateError").style.display = "inline";
+            valid = false;
+        } else {
+            document.getElementById("expiryDateError").style.display = "none";
+        }
+
+        // Validate Description
+        const description = document.getElementById("description").value;
+        if (!description) {
+            document.getElementById("descriptionError").style.display = "inline";
+            valid = false;
+        } else {
+            document.getElementById("descriptionError").style.display = "none";
+        }
+
+        // If any validation failed, prevent form submission
+        if (!valid) {
+            event.preventDefault();
+        }
+    });
+
+
+
+    
+</script>

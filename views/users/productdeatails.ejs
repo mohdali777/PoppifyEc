@@ -29,14 +29,24 @@
             </div>
             <!-- <h4 id="price" style="display: none;" disabled>₹</h4 > -->
 
-            <% if (products.offerId) { %> 
-              <input type="text" value="<%= products.offerId.discountValue %>" id="offer-persantage">
-              <input type="text" value="<%= products.offerId.minimumOrderValue %>"id="offer-minimumamount">
+            <% if (products.offerId && products.offerId.isActive == true ) { %> 
+              <input type="text" value="<%= products.offerId.discountValue %>" id="offer-persantage" hidden>
+              <input type="text" value="<%= products.offerId.minimumOrderValue %>"id="offer-minimumamount" hidden>
+              <p style="font-size: 14px; color: #212121; margin: 8px 0; font-family: 'Roboto', sans-serif; line-height: 1.5;">
+                <span style="color: #388e3c; font-weight: 600;"><%= products.offerId.discountValue %>%</span> 
+                discount on orders above 
+                <span style="color: #000; font-weight: 600;">₹<%= products.offerId.minimumOrderValue %></span>.
+            </p>
             <% } %>
 
-            <% if (products.categoryId && products.categoryId.offerId) { %> 
-              <input type="text" value="<%= products.categoryId.offerId.discountValue %>" id="offer-persantage-category">
-              <input type="text" value="<%= products.categoryId.offerId.minimumOrderValue %>" id="offer-minimumamount-category">
+            <% if (products.categoryId && products.categoryId.offerId && products.categoryId.offerId.isActive == true) { %> 
+              <input type="text" value="<%= products.categoryId.offerId.discountValue %>" id="offer-persantage-category" hidden>
+              <input type="text" value="<%= products.categoryId.offerId.minimumOrderValue %>" id="offer-minimumamount-category" hidden>
+              <p style="font-size: 14px; color: #212121; margin: 8px 0; font-family: 'Roboto', sans-serif; line-height: 1.5;">
+                <span style="color: #388e3c; font-weight: 600;"><%= products.categoryId.offerId.discountValue %>%</span> 
+                discount on orders above 
+                <span style="color: #000; font-weight: 600;">₹<%= products.categoryId.offerId.minimumOrderValue %></span>.
+            </p>
             <% } %>
             
               <p id="quantityid"  style="   font-size: 1rem;
@@ -145,7 +155,7 @@
         <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
           <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">-40%</div>
           <div class="p-3" style="background-color: aliceblue; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;">
+            <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;"  onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
             <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
@@ -227,22 +237,33 @@ sizeSelect.addEventListener('change', function () {
     priceElement.textContent = "N/A";
   }
 
+  let finalPrice = price;
   if (discountper > 0 && price >= discountmini) {
-    let priceElement = document.getElementById("price");
-if (!priceElement) {
-    priceElement = document.createElement("h4");
-    priceElement.id = "price";
-    ogprice.parentNode.insertBefore(priceElement, ogprice.nextSibling); // Insert after the original price
-}
-const discountedPrice = price - (price * discountper / 100);
-priceElement.textContent = `₹${discountedPrice.toFixed(2)}`;
-ogprice.style.textDecoration = "line-through red";
-} else {
-  const priceElement = document.getElementById("price");
-  if (priceElement) priceElement.remove();
-    ogprice.style.textDecoration = "none";
-}
+    finalPrice = price - (price * discountper / 100);
+  }
 
+  
+  if (discountperCategory > 0 && finalPrice >= discountminiCategory) {
+    finalPrice = finalPrice - (finalPrice * discountperCategory / 100);
+  }
+
+ 
+  if (finalPrice !== price) {
+    let priceElement = document.getElementById("price");
+    if (!priceElement) {
+      priceElement = document.createElement("h4");
+      priceElement.id = "price";
+      ogprice.parentNode.insertBefore(priceElement, ogprice.nextSibling); // Insert after the original price
+    }
+
+    priceElement.textContent = `₹${finalPrice.toFixed(2)}`;
+    ogprice.style.textDecoration = "line-through red";
+  } else {
+   
+    const priceElement = document.getElementById("price");
+    if (priceElement) priceElement.remove();
+    ogprice.style.textDecoration = "none";
+  }
   
   if (!isNaN(quantity)) {
     quantityElement.textContent = `${quantity}`;
@@ -276,7 +297,12 @@ document.getElementById('quantity').addEventListener('input', function() {
     const quantityElement = document.getElementById("quantityid"); 
     const totalquantity = parseInt(quantityElement.textContent, 10);
     if (enteredQuantity > totalquantity) {
-        alert("limit Exceed")
+      swal({
+                title: "Error!",
+                text: "Limit Exceed.",
+                icon: "info", 
+                button: "OK",  
+            });
         quantityInput.value = totalquantity;
     }
 });
@@ -321,6 +347,7 @@ document.getElementById("quantity").addEventListener('input', function () {
 
     console.log("Price:", price);
 
+
     // Check if price is valid
     if (isNaN(price) || price <= 0) {
         console.error("Invalid price!");
@@ -328,6 +355,31 @@ document.getElementById("quantity").addEventListener('input', function () {
     }
  
     console.log(price);
+
+    const offerPriceText = offerprice ? offerprice.textContent : null;
+const originalPriceText = ogprice ? ogprice.textContent : null;
+
+// Parse the prices into numbers
+const offerPriceValue = offerPriceText ? parseFloat(offerPriceText.replace('₹', '').trim()) : null;
+const originalPriceValue = originalPriceText ? parseFloat(originalPriceText.replace('₹', '').trim()) : null;
+
+console.log("Offer Price:", offerPriceValue);
+console.log("Original Price:", originalPriceValue);
+
+// Validate prices
+if ((offerPriceValue === null && originalPriceValue === null) || 
+    (offerPriceValue !== null && offerPriceValue <= 0) || 
+    (originalPriceValue !== null && originalPriceValue <= 0)) {
+    console.error("Invalid price data!");
+    return;
+}
+
+// Calculate the offer amount (discount)
+const offerAmount = (originalPriceValue && offerPriceValue) ? (originalPriceValue - offerPriceValue) : 0;
+
+console.log("Offer Amount:", offerAmount);
+
+
   const selectedQuantity = document.getElementById("quantity").value;
   const variantElement = document.getElementById("size");
     if (!variantElement) {
@@ -348,7 +400,8 @@ document.getElementById("quantity").addEventListener('input', function () {
     price:price,
     quantity:selectedQuantity,
     variant:variantName,
-    totalquantity:totalquantity
+    totalquantity:totalquantity,
+    discoundOfferPrice:offerAmount
   }
 
   fetch('/add-to-cart', {
@@ -380,8 +433,26 @@ document.getElementById("quantity").addEventListener('input', function () {
   })
   .catch(error => {
     console.error('Error:', error);
-    alert('Something went wrong. Please try again later.');
+    swal({
+  title: "Error!",
+  text: "Something Went Wrong",
+  icon: "error", 
+  button: "OK",  
+});
   });
 }
+
+function productdeatails (productId,category){
+        console.log("............");
+        console.log(productId);
+        console.log("............");
+        
+  fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
+  }).catch((err)=>{
+console.log(err);
+
+  })
+      }
   </script>
 <%- include('../partials/user/footer') %>

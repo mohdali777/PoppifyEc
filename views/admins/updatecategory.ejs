@@ -36,6 +36,16 @@
       </div>
     <% } %>
 
+    <label for="offers">Offers</label>
+    <select id="offers" name="offer">
+      <option value="">selectOffer</option>
+      <% offers.forEach(offer => { %>
+        <option value="<%= offer.offerName %>">
+          <%= offer.offerName %>
+        </option>
+      <% }) %>
+    </select>
+
     <label for="is-listed">Visibility</label>
     <select id="is-listed" name="is_listed">
       <option value="true" <%= category.is_listed ? 'selected' : '' %>>List</option>

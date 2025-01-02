@@ -43,6 +43,14 @@
         <% }) %>
     </select>
 
+    <label for="offers">Offers</label>
+    <select id="offers" class="custom-width" name="offer" >
+        <option value="">Choose offer</option>
+        <% offers.forEach(offer => { %>
+        <option value="<%= offer.offerName %>"><%= offer.offerName %></option>
+            <% }) %>
+    </select>
+
     <label for="price">Base Price</label>
     <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" value="<%=product.price%>" required>
 
@@ -219,6 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('category', document.getElementById('category').value);
         formData.append('price', document.getElementById('price').value);
         formData.append('brand', document.getElementById('brand').value);
+        formData.append('offer', document.getElementById('offers').value);
         formData.append('id', productIdd);
         const variants = [];
 document.querySelectorAll('.variant-row').forEach(row => {

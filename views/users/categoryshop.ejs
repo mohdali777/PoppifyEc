@@ -1,0 +1,96 @@
+<%- include('../partials/user/header') %>
+<%- include('../partials/user/navbar') %>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+<div class="container py-5">
+    <div class="section_category">
+      <p class="section_category_p" style="color: red; font-size: 14px;">categories</p>
+    </div>
+    <div class="section_header">
+      <h3 class="section_title" style="font-size: 23px;"><%= name %></h3>
+      <p id="demo"></p>
+    </div>
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+      <% products.forEach(product => { %>
+        <div class="col">
+          <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
+            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">
+              -10%
+            </div>
+            <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
+              <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
+            </div>
+            <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" id="wishlist" onclick="addWishlist('<%=product._id %>')">
+                <i class="bi bi-heart" style="font-size: 15px;"></i>
+              </button>
+              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" onclick="">
+                <i class="bi bi-eye" style="font-size: 15px;"></i>
+              </button>
+            </div>
+            <div class="card-body text-center" style="text-align: start;">
+              <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
+                <%= product.name %>
+              </p>
+              <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.variants[0].price %></h5>
+              <div class="text-warning">
+                <% for (let i = 0; i < product.rating; i++) { %>
+                  <i class="bi bi-star-fill"></i>
+                <% } %>
+                <% for (let i = product.rating; i < 5; i++) { %>
+                  <i class="bi bi-star"></i>
+                <% } %>
+                <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
+      <button type="button" class="btn btn-danger btn-lg" onclick="showimages()" id="section1-button">View All Products</button>
+    </div>
+  </div>
+
+<script>
+    // Function to fetch products from the server with filters applie
+    // Function to navigate to product details page
+    function productdeatails (productId,category){
+        console.log("............");
+        console.log(productId);
+        console.log("............");
+        
+  fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
+ if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
+  }).catch((err)=>{
+console.log(err);
+
+  })
+      }
+
+    function addWishlist(productId) {
+  fetch(`/addwishlist/${productId}`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to add product to wishlist");
+      }
+      return response.json(); 
+    })
+    .then((data) => {
+      if (data.success) {
+        alert(data.message || "Product added to wishlist!");
+        window.location.reload(); 
+      } else {
+        alert(data.message || "Unable to add product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error adding product to wishlist:", error);
+      alert("An error occurred. Please try again later.");
+    });
+}
+
+    window.onload = applyFilters; 
+</script>
+
+<%- include('../partials/user/footer') %>

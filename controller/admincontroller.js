@@ -1,7 +1,10 @@
 const {Admin, Coupen,Product,Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const {User,Order,Return,Wallet,Offer} = require("../model/user/usermodel")
-
+const cron = require('node-cron');
+const moment = require('moment-timezone');
+const ExcelJS = require('exceljs');
+const PDFDocument = require('pdfkit');
 // const {  } = require("../model/admin/adminmodel");
 // const {} = require("../model/admin/adminmodel")
 const mongoose = require('mongoose')
@@ -236,9 +239,10 @@ const deleteCategory = async (req, res) => {
         if (!category) {
           return res.status(404).send('Category not found');
         }
+        const offers = await Offer.find({offerType:"category",isActive:true})
     
         // Render the edit page with the category details
-        res.render('admins/updatecategory', { category });
+        res.render('admins/updatecategory', { category ,offers,message:false});
       } catch (err) {
         console.error('Error rendering edit category page:', err);
         res.status(500).send('An error occurred');
@@ -248,11 +252,19 @@ const deleteCategory = async (req, res) => {
 
   const updatecategory = async (req,res)=>{
     try {
-      const {id,name,description,is_listed} = req.body;
+      console.log(req.body);
+      
+      const {id,name,description,is_listed,offer} = req.body;
       const image_url = req.file ? `/uploads/${req.file.filename}` : null;
       const category = await Category.findOne({_id:id});
       if(!category){
         res.render("/admins/updatecategory",{message:"category dont exist"})
+      }
+      let offerId = null;  
+      const OFFer = await Offer.findOne({ offerName:offer }); 
+      console.log(OFFer);
+      if (OFFer) {  // If an offer is found
+        offerId = OFFer._id;  // Assign offerId the _id of the found offer
       }
       listcehck = is_listed === "true";
       category.name = name || category.name;
@@ -261,10 +273,15 @@ const deleteCategory = async (req, res) => {
       if(image_url){
         category.image_url = image_url;
       }
+      console.log(category.offerId);
+        category.offerId = offerId; // Update the offer reference
+        console.log(category.offerId);
+        
+      
       await category.save();
 
       const categories = await Category.find();
-      res.render("admins/category",{categories})
+      res.render("admins/category",{categories,message:"successfull"})
     } catch (error) {
       res.status(500).send("err")
     }
@@ -352,9 +369,10 @@ try {
   const productId = new mongoose.Types.ObjectId(req.params.productId);
   const product = await Product.findOne({_id:productId})
   const categories = await Category.find({is_listed:true})
+  const offers = await Offer.find({offerType:"product",isActive:true})
   console.log(product.image);
   
-  res.render("admins/updateproduct",{product,categories})
+  res.render("admins/updateproduct",{product,categories,offers})
 } catch (error) {
   console.log(error);
   
@@ -394,7 +412,7 @@ const updateproduct = async (req, res) => {
   try {
     console.log(req.body);
     
-    const { name, description, category, price,  brand, variants, id } = req.body;
+    const { name, description, category, price,  brand, variants, id,offer } = req.body;
 
     const existingProduct = await Product.findById(id);
     if (!existingProduct) {
@@ -402,6 +420,20 @@ const updateproduct = async (req, res) => {
     }
     const parsevariants = variants ? JSON.parse(variants) : existingProduct.variants;
     const images = req.files ? req.files.map(file => file.filename) : [];
+
+    let offerId = null;  
+    const OFFer = await Offer.findOne({ offerName:offer }); 
+    console.log(OFFer);
+    if (OFFer) {  // If an offer is found
+      offerId = OFFer._id;  // Assign offerId the _id of the found offer
+    }
+    console.log("gasvfdgafsdgas",offerId);
+    const categoryName = await Category.findOne({name:category})
+    const categoryId = categoryName._id;
+
+    console.log("gasvfdgafsdgas",categoryName);
+    
+
     const updatedProduct = {
       name: name || existingProduct.name,
       description: description || existingProduct.description,
@@ -409,6 +441,8 @@ const updateproduct = async (req, res) => {
       price: price || existingProduct.price,
       brand: brand || existingProduct.brand,
       variants: parsevariants || existingProduct.variants,
+      categoryId:categoryId ||  existingProduct.categoryId,
+      offerId:offerId 
     };
     await Product.updateOne({ _id: id }, { $set: updatedProduct,$push: { image: { $each: images } } });
     const products = await Product.find({});
@@ -448,6 +482,27 @@ const updateStatus = async (req,res) => {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
+        if(status == "Cancelled" && order.paymentMethod == "RazorPay" && order.razorpay.paymentStatus == "Success"){
+          const userId = order.userId;
+          const wallet = await Wallet.findOne({ userId }); 
+          if (wallet) {
+              console.log(wallet);
+              wallet.balance += order.totalPrice;
+              wallet.transactions.push({
+                  transactionId: `Refund-${order._id}`,
+                  date: new Date(),
+                  description: `Refund for cancelled order ${order._id}`,
+                  type: "credit", 
+                  amount: order.totalPrice,  
+              });
+              order.razorpay.paymentStatus = "Refunded"
+              await wallet.save();
+          } else {
+              console.log("Wallet not found for user:", userId);
+          }
+      }
+      
+
         order.orderStatus = status;
         await order.save();
         res.status(200).json({ status: order.orderStatus });
@@ -472,7 +527,7 @@ const returnAccept = async (req,res) => {
   
    
     
-      if (order.paymentMethod === "RazorPay") {
+  
         const wallet = await Wallet.findOne({ userId });
       if(!wallet){
           return res.status(404).json({ message: "Wallet not found for the user." });
@@ -501,13 +556,14 @@ const returnAccept = async (req,res) => {
                 type: "credit", 
                 amount: walletbalance,
             });
+            order.razorpay.paymentStatus = "Refunded"
             await wallet.save();
             await order.save();
         } else {
             console.error("Wallet not found for user:", userId);
             return res.status(404).json({ message: "User wallet not found" });
         }
-    }
+    
       item.status = "Accepted";
       await order.save();
       return res.status(200).json({ success: true, message: "Return request accepted successfully." });
@@ -547,7 +603,7 @@ const returnReject = async (req,res) => {
 const getCoupens = async (req,res) => {
   try {
     const coupens = await Coupen.find({});
-    res.render("admins/coupen",{coupens})
+    res.render("admins/coupen",{coupens,message:false})
   } catch (error) {
     console.error("Error accepting return request:", error);
     return res.status(500).json({
@@ -563,7 +619,8 @@ const createCoupen = async (req,res) => {
     const {couponCode,discount,expiryDate,description} = req.body;
     const existingCoupen = await Coupen.findOne({couponCode});
     if(existingCoupen){
-      return res.status(400).json({ message: 'Coupon code already exists.' });
+      const coupens = await Coupen.find({});
+    res.render("admins/coupen",{coupens,message:"coupen Alredy Exist"})
     }
     const newCoupen = new Coupen({
       couponCode,
@@ -572,12 +629,28 @@ const createCoupen = async (req,res) => {
       description
     })
     await newCoupen.save()
-    res.status(201).json({ message: 'Coupon created successfully', });
+    const coupens = await Coupen.find({});
+    res.render("admins/coupen",{coupens,message:"coupen Created Successfully"})
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Server error' });
   }
 }
+
+
+
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const expiredCoupons = await Coupen.updateMany(
+      { expiryDate: { $lt: moment().tz('Asia/Kolkata').toDate() }, status: 'active' },
+      { status: 'inactive' }
+    );
+    console.log(`Updated ${expiredCoupons.nModified} expired coupons.`);
+  } catch (error) {
+    console.error('Error updating expired coupons:', error);
+  }
+});
+
 
 const deleteCoupen = async (req, res) => {
   try {
@@ -595,13 +668,70 @@ const deleteCoupen = async (req, res) => {
   }
 };
 
+const OffersGet = async (req,res) => {
+  try {
+    const offers = await Offer.find();
+    res.render("admins/offers",{offers})
+  } catch (error) {
+    console.error("Error getting order page:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+const editOffers = async (req,res) => {
+  try {
+    const {offerId} = req.params;
+    const offer = await Offer.findById(offerId)
+    console.log(offer);
+    
+    res.render("admins/editOffer",{offer,message:false})
+  } catch (error) {
+    console.error("Error getting edit Offer page:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+
+const editOfferPost = async (req, res) => {
+  try {
+    const { id, offerName, offerType, discountType, discountValue, minimumOrderValue, expiryDate, StartingDate, isActive } = req.body;
+    if (!id || !offerName || !offerType) {
+      return res.status(400).json({ message: 'Offer ID, name, and type are required.' });
+    }
+    const updatedOffer = await Offer.findByIdAndUpdate(id, {
+      $set: {
+        offerName,
+        offerType,
+        discountType,
+        discountValue,
+        minimumOrderValue,
+        expiryDate,
+        StartingDate,
+        isActive
+      }
+    }, { new: true });
+    if (!updatedOffer) {
+      return res.status(404).json({ message: 'Offer not found.' });
+    }
+    const offer = await Offer.findById(id)
+    res.render("admins/editOffer",{offer,message:"offerUpdated Successfully"})
+    // res.status(200).json({ message: 'Offer updated successfully', offer: updatedOffer });
+    
+
+  } catch (error) {
+    console.error('Error updating offer:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+};
+
 
 const createOffer = async (req,res) => {
   try {
     console.log(req.body);
     
     const { offerName,offerType, discountType, discountValue, minimumOrderValue, expiryDate,StartingDate, isActive } = req.body;
-    const newOffer = new Offer({
+    
+
+     const newOffer = new Offer({
          offerName,
           offerType,
           discountType,
@@ -613,12 +743,223 @@ const createOffer = async (req,res) => {
     })   
 
     await newOffer.save()
- 
+   res.render("admins/createOffer",{message:"offer Created Succeffully"})
   } catch (error) {
     console.error("Error deleting coupon:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
   }
 }
+
+const deleteOfferPost = async (req,res) => {
+  try {
+    const {offerId} = req.params;
+    await Offer.findByIdAndDelete(offerId)
+    res.status(200).json({ success: true, message: "deleted successfully" });
+    console.log("delete");
+    
+  } catch (error) {
+    console.error("Error deleting Offer:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+}
+const Getsales = async (req,res) => {
+  try {
+    const orders = await Order.find({orderStatus:"Delivered"})
+    const totalSalesResult = await Order.aggregate([
+      {
+        $match: { orderStatus: "Delivered" },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
+    console.log(totalSales);
+
+
+    const totalOfferResult = await Order.aggregate([
+      {
+        $match: { orderStatus: "Delivered" },
+      },
+      {
+        $group: {
+          _id: null,
+          totalSales: { $sum: "$CartTotalOffer" },
+        },
+      },
+    ]);
+    const totalOffers = totalOfferResult.length > 0 ? totalOfferResult[0].totalSales : 0;
+   console.log(totalOffers);
+   
+    res.render("admins/sales",{orders,totalSales,totalOffers})
+  } catch (error) {
+    console.error("Error deleting Offer:", error);
+    res.status(500).json({ success: false, message: "Internal server error" })
+  }
+}
+
+function parseDateRange(predefinedRange) {
+  const now = new Date();
+  let startDate, endDate;
+
+  switch (predefinedRange) {
+    case '1-day':
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 1);
+      break;
+    case '1-week':
+      startDate = new Date();
+      startDate.setDate(now.getDate() - 7);
+      break;
+    case '1-month':
+      startDate = new Date();
+      startDate.setMonth(now.getMonth() - 1);
+      break;
+    default:
+      startDate = null;
+      endDate = null;
+  }
+
+  return { startDate, endDate: now };
+}
+
+// Controller function to fetch filtered orders
+const getFilteredOrders = async (req, res) => {
+  try {
+    const { predefinedRange, startDate, endDate } = req.body;
+    let filters = {};
+   console.log("dgvfgshdf");
+   
+    // Apply date filters
+    if (predefinedRange && predefinedRange !== 'custom') {
+      const dateRange = parseDateRange(predefinedRange);
+      filters.createdAt = { $gte: dateRange.startDate, $lte: dateRange.endDate };
+    } else if (startDate && endDate) {
+      filters.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    }
+    filters.orderStatus = 'Delivered';
+    // Fetch filtered orders from the database
+    const orders = await Order.find(filters).sort({ createdAt: 1 });
+
+
+    const totalSales = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+    const totalOffers = orders.reduce((sum, order) => sum + (order.CartTotalOffer || 0) + (order.coupenDiscountAmount || 0), 0);
+
+    res.json({ orders, totalSales, totalOffers });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error generating report', error });
+  }
+};
+
+const downloadExcel = async (req, res) => {
+  console.log(req.body);
+  
+  const { orders } = req.body;
+
+  try {
+    // Create workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Sales Report');
+
+    // Add header row
+    worksheet.columns = [
+      { header: 'Date', key: 'date', width: 20 },
+      { header: 'Order ID', key: 'orderId', width: 20 },
+      { header: 'Total Amount', key: 'totalPrice', width: 15 },
+      { header: 'Discount', key: 'CartTotalOffer', width: 15 },
+      { header: 'Coupon Discount', key: 'coupenDiscountAmount', width: 20 },
+      { header: 'Net Sales', key: 'netSales', width: 15 },
+    ];
+
+    // Add data rows
+    orders.forEach(order => {
+      worksheet.addRow({
+        date: new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+        orderId: order.orderId,
+        totalPrice: `₹${order.totalPrice}`,
+        CartTotalOffer: `₹${order.CartTotalOffer || 0}`,
+        coupenDiscountAmount: `₹${order.coupenDiscountAmount || 0}`,
+        netSales: `₹${order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0)}`,
+      });
+    });
+
+    // Apply formatting (Optional)
+    worksheet.eachRow((row, rowNumber) => {
+      row.eachCell((cell) => {
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+        if (rowNumber === 1) {
+          cell.font = { bold: true };
+        }
+      });
+    });
+
+    // Set headers for download
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.xlsx');
+
+    // Send workbook to response
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    console.error('Error generating Excel report:', error);
+    res.status(500).send('Failed to generate Excel report.');
+  }
+};
+
+
+
+
+const downloadPDF = async (req, res) => {
+  const { orders } = req.body;
+
+  const doc = new PDFDocument();
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'attachment; filename=SalesReport.pdf');
+
+  doc.pipe(res);
+
+  // Title
+  doc.fontSize(16).text('Sales Report', { align: 'center' });
+
+  let yPosition = 60;
+
+  // Add headers with standard spacing and alignment
+  const headerTitles = ['Date', 'Order ID', 'Total Amount', 'Discount', 'Coupon Discount', 'Net Sales'];
+  const headerPositions = [20, 100, 180, 260, 340, 420]; // Standard positions for each column
+
+  doc.fontSize(12);
+  headerTitles.forEach((title, index) => {
+    doc.text(title, headerPositions[index], yPosition);
+  });
+
+  yPosition += 20; // Move to the next row after headers
+
+  // Add data rows with consistent alignment and spacing
+  orders.forEach(order => {
+    doc.text(new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), headerPositions[0], yPosition);
+    doc.text(order.orderId.toString(), headerPositions[1], yPosition);
+    doc.text(`₹${order.totalPrice}`, headerPositions[2], yPosition);
+    doc.text(`₹${order.CartTotalOffer || 0}`, headerPositions[3], yPosition);
+    doc.text(`₹${order.coupenDiscountAmount || 0}`, headerPositions[4], yPosition);
+    doc.text(`₹${order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0)}`, headerPositions[5], yPosition);
+
+    yPosition += 20; // Increment yPosition for the next row
+  });
+
+  doc.end();
+};
+
+
+
+
+
+
 
 
 module.exports = {
@@ -653,4 +994,13 @@ returnReject,
 createCoupen,
 getCoupens,
 deleteCoupen,
-createOffer}
+createOffer,
+OffersGet,
+editOffers,
+editOfferPost,
+Getsales,
+deleteOfferPost,
+getFilteredOrders,
+downloadExcel,
+downloadPDF,
+}

@@ -1,0 +1,299 @@
+<%- include('../partials/admin/header') %>
+<%- include('../partials/admin/sidebar') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+
+<div class="col-md-10 p-4" style="width: 1150px; margin: 20px 40px;">
+  <div class="card" style="border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);">
+    <div class="card-body" style="padding: 20px;">
+      <h3 style="font-size: 24px; color: #333;">Generate Sales Report</h3>
+
+      <!-- Summary Section -->
+      <div class="row text-center mb-4">
+        <!-- Total Sales -->
+        <div class="col-md-4">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="card-title">Total Sales</h5>
+              <p id="totalSales" class="card-text">₹<%= totalSales.toLocaleString() %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Count -->
+        <div class="col-md-4">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="card-title">Orders Count</h5>
+              <p id="orderCount" class="card-text"><%= orders.length %></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Discounts -->
+        <div class="col-md-4">
+          <div class="card summary-card">
+            <div class="card-body">
+              <h5 class="card-title">Total Discounts</h5>
+              <p id="totalDiscount" class="card-text">₹<%= totalOffers.toLocaleString() %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <form id="filterForm" class="mb-4" style="margin: 0px; height: auto; width: auto; ">
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label for="predefinedRange" class="form-label"><strong>Quick Filters</strong></label>
+            <select id="predefinedRange" class="form-select" onchange="toggleDateFields()">
+              <option value="1-day">Last 1 Day</option>
+              <option value="1-week">Last 1 Week</option>
+              <option value="1-month">Last 1 Month</option>
+              <option value="custom" selected>Custom Date Range</option>
+            </select>
+          </div>
+
+          <!-- Custom Date Range -->
+          <div class="col-md-6" id="startDateContainer">
+            <label for="startDate" class="form-label"><strong>Start Date</strong></label>
+            <input type="date" id="startDate" class="form-control">
+          </div>
+          <div class="col-md-6" id="endDateContainer">
+            <label for="endDate" class="form-label"><strong>End Date</strong></label>
+            <input type="date" id="endDate" class="form-control">
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="text-end mt-3">
+          <button type="button" class="btn btn-primary" onclick="generateReport()">Submit</button>
+          <button type="button" class="btn btn-success" id="downloadReportBtn">Download PDF</button>
+          <button type="button" class="btn btn-success" id="downloadReportBtnExcel">Download Excel</button>
+        </div>
+      </form>
+
+      <!-- Report Table -->
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Date</th>
+              <th>Order ID</th>
+              <th>Total Amount</th>
+              <th>Discount</th>
+              <th>Coupon</th>
+              <th>Net Sales</th>
+            </tr>
+          </thead>
+          <tbody id="productTableBody">
+            <% orders.forEach(order => { %>
+            <tr>
+              <td><%= new Date(order.createdAt).toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              }) %></td>
+              <td><%= order.orderId %></td>
+              <td><%= order.totalPrice %></td>
+              <td><%= order.CartTotalOffer || '0' %></td>
+              <td><%= order.coupenDiscountAmount || '0' %></td>
+              <td><%= order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0) %></td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div class="d-flex justify-content-between align-items-center">
+          <span><strong>Showing 1-10 from <%= orders.length %></strong></span>
+          <nav>
+            <ul class="pagination">
+              <li class="page-item">
+                <button class="page-link" id="prevPage">&laquo;</button>
+              </li>
+              <li class="page-item">
+                <button class="page-link" id="nextPage">&raquo;</button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleDateFields() {
+    const predefinedRange = document.getElementById("predefinedRange").value;
+    const isCustom = predefinedRange === "custom";
+    document.getElementById("startDateContainer").style.display = isCustom ? "block" : "none";
+    document.getElementById("endDateContainer").style.display = isCustom ? "block" : "none";
+  }
+
+  function generateReport() {
+    const predefinedRange = document.getElementById("predefinedRange").value;
+    const startDate = document.getElementById("startDate").value;
+    const endDate = document.getElementById("endDate").value;
+
+    const filters = predefinedRange === "custom"
+      ? { startDate, endDate }
+      : { predefinedRange };
+
+    fetch('/admin/generate-report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(filters),
+    })
+      .then(response => response.json())
+      .then(data => updateTable(data.orders))
+      .catch(err => console.error(err));
+  }
+
+  function updateTable(orders) {
+    const tableBody = document.getElementById("productTableBody");
+    tableBody.innerHTML = '';
+
+    orders.forEach(order => {
+      const row = `
+        <tr>
+          <td>${new Date(order.createdAt).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+          })}</td>
+          <td>${order.orderId}</td>
+          <td>₹${order.totalPrice}</td>
+          <td>₹${order.CartTotalOffer || '0'}</td>
+          <td>₹${order.coupenDiscountAmount || '0'}</td>
+          <td>₹${order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0)}</td>
+        </tr>`;
+      tableBody.insertAdjacentHTML('beforeend', row);
+    });
+  }
+
+  
+
+//   document.getElementById("downloadReportBtn").addEventListener("click", () => {
+//   // Parse the stringified orders data to an array
+//   const orders = JSON.parse('<%- JSON.stringify(orders) %>');
+//   console.log('Orders:', orders);
+
+//   fetch('/admin/download-report/pdf', {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify({ orders }), // Send the actual orders array
+//   })
+//   .then(response => response.blob())
+//   .then(blob => {
+//     const link = document.createElement('a');
+//     link.href = window.URL.createObjectURL(blob);
+//     link.download = 'SalesReport.pdf';
+//     link.click();
+//   })
+//   .catch(err => console.error(err));
+// });
+
+
+document.getElementById("downloadReportBtn").addEventListener("click", () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    doc.setFontSize(18);
+    doc.text('Sales Report', 14, 20);
+
+    const headers = ['Date', 'Order ID', 'Total Amount', 'Discount', 'Coupon', 'Net Sales'];
+    const data = [];
+    let totalPrice = 0;
+    let totalOfferPrice = 0;
+    let totalOrders = 0;
+    
+    // Get the table rows
+    const tbody = document.querySelector('tbody');
+    const rows = tbody.querySelectorAll('tr');
+    console.log(rows);
+    
+    // Iterate through each row and extract data
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        console.log(cells);
+        
+        const rowData = [
+            cells[0].innerText, // Date
+            cells[1].innerText, // Order ID
+            cells[2].innerText, // Total Amount
+            cells[3].innerText, // Discount
+            cells[4].innerText, // Coupon
+            cells[5].innerText, // Net Sales
+        ];
+        data.push(rowData);
+        
+        // Accumulate totals
+        totalPrice += parseFloat(cells[2].innerText.replace('₹', '').replace(/,/g, '')) || 0;
+        totalOfferPrice += parseFloat(cells[3].innerText.replace('₹', '').replace(/,/g, '')) || 0;
+        totalOrders++;
+    });
+
+    // Add the data table to the PDF
+    doc.autoTable({
+        head: [headers],
+        body: data,
+        startY: 30,
+        theme: 'striped',
+        styles: { fontSize: 10 },
+    });
+
+    // Add totals to the bottom of the PDF
+    const totalStartY = doc.lastAutoTable.finalY + 10; // Positioning the totals below the table
+    doc.setFontSize(12);
+    doc.text('Total Price: ' + totalPrice.toLocaleString(), 14, totalStartY);
+    doc.text('Total Offer Price: ' + totalOfferPrice.toLocaleString(), 14, totalStartY + 10);
+    doc.text('Total Orders: ' + totalOrders, 14, totalStartY + 20);
+
+    // Save the PDF
+    doc.save('Sales_Report.pdf');
+});
+
+
+document.getElementById("downloadReportBtnExcel").addEventListener("click", () => {
+  // Parse the stringified orders data to an array
+  const orders = JSON.parse('<%- JSON.stringify(orders) %>');
+  console.log('Orders:', orders);
+
+  fetch('/admin/download-report/excel', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ orders }), // Send the actual orders array
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to download Excel file');
+    }
+    return response.blob();
+  })
+  .then(blob => {
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = 'SalesReport.xlsx';
+    link.click();
+    window.URL.revokeObjectURL(link.href);
+  })
+  .catch(err => console.error('Error:', err));
+});
+
+
+
+
+
+</script>
+
+<%- include('../partials/admin/footer') %>

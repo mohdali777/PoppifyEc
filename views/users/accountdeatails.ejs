@@ -25,6 +25,10 @@
         <label for="phone-accountdetails">Phone</label>
         <input type="text" id="phone-accountdeatails" name="phone" placeholder="Phone" value="<%= usertake.phone %>">
       </div>
+      <div class="form-group-accountdetails">
+        <label for="reffer-accountdetails">Refferel Code</label>
+        <input type="text" id="reffer-accountdeatails"  placeholder="Refferel Code" value="<%= usertake.referralCode? usertake.referralCode : ' '%>" disabled>
+      </div>
       <div class="form-buttons-accountdetails">
         <button type="button" class="cancel-btn-accountdetails">Cancel</button>
         <button type="submit" class="save-btn-accountdetails">Save Changes</button>

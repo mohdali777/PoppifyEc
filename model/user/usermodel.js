@@ -34,6 +34,23 @@ const userSchema = new mongoose.Schema({
       ref: 'Address', // Referencing the Address model
     }
   ],
+  referralCode: {
+    type: String,
+    unique: true, // Ensure each user gets a unique referral code
+  },
+  referredBy: {
+    type: String, // Stores the referral code of the user who referred this user
+  },
+  referredUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", // Correct reference to the same User model
+    },
+  ],
+  rewards: {
+    type: Number,
+    default: 0, // Keeps track of rewards earned through referrals
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -49,6 +66,14 @@ userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
+
+userSchema.pre('save', function (next) {
+  if (!this.referralCode) {
+    this.referralCode = `${this.username}_${Math.random().toString(36).substr(2, 6)}`;
+  }
+  next();
+});
+
 
 // OTP schema
 const otpSchema = new mongoose.Schema({
@@ -129,6 +154,13 @@ const cartSchema = new mongoose.Schema({
       type:String,
       required:true,
       },
+      totalOfferPrice:{
+        type:Number,
+        default:0
+      },discoundOfferPricePer:{
+        type:Number,
+        default:0
+      },
       price: {
         type: Number,
         required: true,
@@ -152,6 +184,10 @@ const cartSchema = new mongoose.Schema({
     type: Number,
     required: true,
     default: 0,
+  }, 
+  CartTotalOffer: {
+    type:Number,
+    default:0
   },
   updatedAt: {
     type: Date,
@@ -162,6 +198,7 @@ const cartSchema = new mongoose.Schema({
 cartSchema.pre('save', function (next) {
   this.totalQuantity = this.items.reduce((sum, item) => sum + item.quantity, 0);
   this.totalPrice = this.items.reduce((sum, item) => sum + item.total, 0);
+  this.CartTotalOffer = this.items.reduce((sum, item) => sum + item.totalOfferPrice, 0);
   next();
 });
 
@@ -199,7 +236,16 @@ const orderSchema = new mongoose.Schema({
       total: {
         type: Number,
         required: true,
-      },reason: { type: String,default:null},
+      }, 
+      totalOfferPrice:
+      {
+        type:Number,
+        default:0
+      },discoundOfferPricePer:{
+        type:Number,
+        default:0
+      },
+      reason: { type: String,default:null},
       status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: null },
     },
   ],
@@ -227,7 +273,7 @@ const orderSchema = new mongoose.Schema({
     signature: { type: String ,default:null}, 
     paymentStatus: { 
       type: String, 
-      enum: ['Pending', 'Failed', 'Success','Returned'], 
+      enum: ['Pending', 'Failed', 'Success','Refunded'], 
       default: 'Pending' 
     },
   },
@@ -239,6 +285,14 @@ const orderSchema = new mongoose.Schema({
   coupenId:{
     type:String,
     default:null
+  },
+  coupenDiscountAmount:{
+    type:String,
+    default:null
+  },
+  CartTotalOffer: {
+    type:Number,
+    default:0
   },
   createdAt: {
       type: Date,

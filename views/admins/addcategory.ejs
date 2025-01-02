@@ -19,6 +19,7 @@
     
     <label for="offers">Offers</label>
     <select id="offers" name="offer">
+      <option value="">selectOffer</option>
       <% offers.forEach(offer => { %>
         <option value="<%= offer.offerName %>"><%= offer.offerName %></option>
             <% }) %>

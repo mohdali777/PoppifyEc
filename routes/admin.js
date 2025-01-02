@@ -20,16 +20,20 @@ router.get("/editproduct/:productId",AdminRoutes.geteditproducts)
 router.get("/logout",AdminRoutes.logout)
 router.get("/order-management",session.sessionCheck,AdminRoutes.orderManagment)
 router.get("/order-deatails/:orderId",session.sessionCheck,AdminRoutes.orderDeatail)
-router.get("/coupon-management",AdminRoutes.getCoupens)
-router.get("/create-coupen",(req,res)=>{
+router.get("/coupon-management",session.sessionCheck,AdminRoutes.getCoupens)
+router.get("/create-coupen",session.sessionCheck,(req,res)=>{
     res.render("admins/addcoupen")
 })
-router.get("/add-offer",(req,res)=>{
-    res.render("admins/createOffer")
+router.get("/add-offer",session.sessionCheck,(req,res)=>{
+    res.render("admins/createOffer",{message:false})
 })
-router.get("/offer",(req,res)=>{
-    res.render("admins/offers")
-})
+router.get("/offer",session.sessionCheck,AdminRoutes.OffersGet)
+router.get("/edit-Offer/:offerId",session.sessionCheck,AdminRoutes.editOffers)
+router.get("/sales",session.sessionCheck,AdminRoutes.Getsales)
+
+
+
+router.post('/generate-report',AdminRoutes.getFilteredOrders);
 
 
 router.post("/login",AdminRoutes.postlogin)
@@ -51,6 +55,10 @@ router.post("/returnreject",AdminRoutes.returnReject)
 router.post("/create-coupon",AdminRoutes.createCoupen)
 router.delete("/deletecoupen/:coupenId",AdminRoutes.deleteCoupen)
 router.post("/create-offer",AdminRoutes.createOffer)
+router.post("/edit-offer-post",AdminRoutes.editOfferPost)
+router.post("/delete-Offer/:offerId",AdminRoutes.deleteOfferPost)
+router.post('/download-report/excel', AdminRoutes.downloadExcel)
+router.post('/download-report/pdf', AdminRoutes.downloadPDF)
 
 
 

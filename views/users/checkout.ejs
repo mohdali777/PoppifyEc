@@ -156,6 +156,7 @@
                 </div>
                 <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
                 <input type="text" id="copen-container" hidden>
+                <input type="text" id="coupenDiscountAmount" hidden>
             </div>
         </div>
     </div>
@@ -190,7 +191,8 @@ const orderDetails = {
     city: useDefaultAddress ? "<%= address?.city || '' %>" : document.getElementById("city").value,
     phone: useDefaultAddress ? "<%= address?.phone || '' %>" : document.getElementById("phone").value,
     email: useDefaultAddress ? "<%= address?.email || '' %>" : document.getElementById("email").value,
-    coupenId: document.getElementById("copen-container").value ? document.getElementById("copen-container").value  : null 
+    coupenId: document.getElementById("copen-container").value ? document.getElementById("copen-container").value  : null ,
+    coupenDiscountAmount: document.getElementById("coupenDiscountAmount").value ? document.getElementById("coupenDiscountAmount").value  : null 
 };
 
 if(orderDetails.firstName ==""||orderDetails.companyName=="" || orderDetails.streetAddress==""||orderDetails.apartment==""||orderDetails.city==""||orderDetails.phone==""||orderDetails.email==""){
@@ -342,7 +344,8 @@ function selectAddress(id, name, companyname, streetaddress, appartment, city, p
         document.getElementById("discountedPrice").style.display = "block"
         document.getElementById('totalPrice2').innerText = `$${data.newTotal}`;
         document.getElementById("couponAppliedMessage").style.display = "block"
-        document.getElementById("copen-container").value = data.coupenId
+        document.getElementById("copen-container").value = data.coupenId;
+        document.getElementById("coupenDiscountAmount").value = data.totalDiscount;
         console.log(data.coupenId);
         
       } else {

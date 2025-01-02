@@ -1,6 +1,6 @@
 const {OTP,User,Address,Cart,Order,Wishlist,Return,Wallet} = require("../model/user/usermodel")
-const{Product, Coupen} = require("../model/admin/adminmodel")
-const {Category} = require("../model/admin/adminmodel")
+const{Product, Coupen, Category} = require("../model/admin/adminmodel")
+// const {Category} = require("../model/admin/adminmodel")
 const bcrypt = require("bcrypt")
 const nodemailer = require('nodemailer');
 const env = require("dotenv");
@@ -112,7 +112,7 @@ async function otpTransport(email,otp) {
 // siginup post
 let postsignup = async (req,res)=>{
     try{
-        const {username,email,password,phone} = req.body;
+        const {username,email,password,phone,referralCode} = req.body;
         let user = await User.findOne({email})
         let name = await User.findOne({username})
         if(user){
@@ -144,6 +144,7 @@ let postsignup = async (req,res)=>{
         req.session.pass = password;
         req.session.username = username;
         req.session.phone = phone;
+        req.session.reffer = referralCode;
         res.render("users/verifyotp", { message: null});
        
     }catch(err){
@@ -169,24 +170,121 @@ let postverifyotp = async(req,res)=>{
         const username = req.session.username;
         const password = req.session.pass;
         const phone = req.session.phone;
+        const referralCode = req.session.reffer;
         console.log(username,password);
         
         const saltRounds = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
 
         
-        const newUser = new User({ username, email, password: hashedPassword ,phone});
+        const newUser = new User({ username, email, password: hashedPassword ,phone,referredBy:referralCode});
         await newUser.save();
 
-        
+if(referralCode){
+        const user = await User.findOne({referralCode:referralCode})
+        user.referredUsers.push(newUser._id)
+       let wallet = await Wallet.findOne({ userId: user._id });
+       function generateCardNumber() {
+        const prefix = Math.floor(Math.random() * 5) + 51;  // Generates a number between 51 and 55
+        const cardNumber = `${prefix}${Math.floor(Math.random() * 1000000000000000)}`.slice(0, 16);
+        return cardNumber;
+    }
+  
+    function generateTransactionId(prefix, userId) {
+      const timestamp = Date.now(); // Get the current timestamp
+      return `${prefix}-${user._id}-${timestamp}`;
+    }
+
+    const expiryDate = new Date();
+    expiryDate.setFullYear(expiryDate.getFullYear() + 5);  // Set expiry to 5 years from now
+    const cardExpiry = `${("0" + (expiryDate.getMonth() + 1)).slice(-2)}/${expiryDate.getFullYear().toString().slice(-2)}`;
+      if(!wallet){
+        wallet = new Wallet({
+          userId: user._id,
+          cardNumber: generateCardNumber(), 
+          balance: 0.0,   
+          cardExpiry: cardExpiry,
+          cardHolderName: user.username, 
+          cardType: 'MasterCard', 
+          transactions: []  
+  
+        })
+      }
+
+
+    wallet.balance += 50;
+  wallet.transactions.push({
+    transactionId: generateTransactionId(),
+    date: new Date(),
+    description: `Referral bonus for inviting ${newUser.username}`,
+    type: "credit",
+    amount: 50, // Fixed referral bonus amount
+  });
+
+  await wallet.save();
+}
+
+
+
+
+if(referralCode){
+  
+ let wallet = await Wallet.findOne({ userId: newUser._id });
+ function generateCardNumber() {
+  const prefix = Math.floor(Math.random() * 5) + 51;  // Generates a number between 51 and 55
+  const cardNumber = `${prefix}${Math.floor(Math.random() * 1000000000000000)}`.slice(0, 16);
+  return cardNumber;
+}
+
+const expiryDate = new Date();
+expiryDate.setFullYear(expiryDate.getFullYear() + 5);  // Set expiry to 5 years from now
+const cardExpiry = `${("0" + (expiryDate.getMonth() + 1)).slice(-2)}/${expiryDate.getFullYear().toString().slice(-2)}`;
+
+function generateTransactionId(prefix, userId) {
+  const timestamp = Date.now(); // Get the current timestamp
+  return `${prefix}-${newUser._id}-${timestamp}`;
+}
+if(!wallet){
+  wallet = new Wallet({
+    userId: newUser._id,
+    cardNumber: generateCardNumber(), 
+    balance: 0.0,   
+    cardExpiry: cardExpiry,
+    cardHolderName: newUser.username, 
+    cardType: 'MasterCard', 
+    transactions: []  
+
+  })
+}
+
+
+wallet.balance += 50; // Adding referral bonus to the balance
+wallet.transactions.push({
+  transactionId: generateTransactionId(),
+  date: new Date(),
+  description: `Referral bonus for signing up using referral code`,
+  type: "credit",
+  amount: 50, // Fixed referral bonus amount
+});
+
+await wallet.save();
+}
+
+
+
+
+
+
+
         await OTP.deleteOne({ email });
 
         req.session.user = true;
         req.session.username = username;
-        const user = await User.findOne({username})
-        console.log("-------------------");
-        console.log(user._id);
-        console.log("-------------------");
+        const userId = await User.findOne({username})
+        console.log(userId);
+        req.session.userId = userId._id;
+
+        
         
         console.log('OTP verified, redirecting to home...');
         
@@ -526,7 +624,7 @@ let postlogin = async (req,res)=>{
       const addtocartPost = async(req,res)=>{
         try {
             console.log(req.body);
-            const { productId, price, quantity,variant,totalquantity} = req.body;
+            const { productId, price, quantity,variant,totalquantity,discoundOfferPrice} = req.body;
             const userId = req.session.userId;
           console.log(userId);
             let cart = await Cart.findOne({ userId });
@@ -553,6 +651,7 @@ let postlogin = async (req,res)=>{
                 error: `You cannot add more than ${existingItem.totalquantity} items. Current quantity in cart: ${existingItem.quantity}, available stock: ${existingItem.totalquantity}`})}
               existingItem.quantity += parseInt(quantity);
               existingItem.total = existingItem.quantity * existingItem.price;
+              existingItem.totalOfferPrice = existingItem.quantity * existingItem.discoundOfferPricePer
             } else {
               cart.items.push({
                 productId,
@@ -561,6 +660,9 @@ let postlogin = async (req,res)=>{
                 variant,
                 totalquantity,
                 total: price * quantity,
+                discoundOfferPricePer:discoundOfferPrice,
+                totalOfferPrice:discoundOfferPrice*quantity
+                
               });
             }
             cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
@@ -593,6 +695,7 @@ let postlogin = async (req,res)=>{
           }
           item.quantity = quantity;
           item.total = item.price * quantity;
+          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
           cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
           cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
           await cart.save();
@@ -670,7 +773,7 @@ let postlogin = async (req,res)=>{
     const placeOrder = async (req,res)=>{
       console.log(req.body);
       
-      const {paymentMethod, useDefaultAddress, totalPrice,coupenId,...newAddress} = req.body
+      const {paymentMethod, useDefaultAddress, totalPrice,coupenId,coupenDiscountAmount,...newAddress} = req.body
       try {
         const userId = req.session.userId;
        const cart = await Cart.findOne({ userId: userId })
@@ -683,6 +786,7 @@ let postlogin = async (req,res)=>{
       return res.status(400).json({ message: "please Add Address" });
     }
        const cartItems = cart.items;
+      const cartDiscount = cart.CartTotalOffer;
        console.log(cartItems);
        
         let finalAddress;
@@ -731,7 +835,9 @@ let postlogin = async (req,res)=>{
             paymentStatus: "Pending",
           },
           orderStatus:"Pending",
-          coupenId:coupenId
+          coupenId:coupenId,
+          coupenDiscountAmount:coupenDiscountAmount,
+          CartTotalOffer:cartDiscount
         })
       for (let item of cartItems) {
         const product = await Product.findById(item.productId);
@@ -805,7 +911,7 @@ let postlogin = async (req,res)=>{
               }
           }
 
-          if (order.paymentMethod === "RazorPay") {
+          if (order.paymentMethod === "RazorPay" && order.razorpay.paymentStatus == "Success" ) {
             const wallet = await Wallet.findOne({ userId });
           if(!wallet){
               return res.status(404).json({ message: "Wallet not found for the user." });
@@ -822,6 +928,7 @@ let postlogin = async (req,res)=>{
                     type: "credit", 
                     amount: order.totalPrice,
                 });
+                order.razorpay.paymentStatus = "Refunded"
                 await wallet.save();
                 await order.save();
             } else {
@@ -890,11 +997,17 @@ let postlogin = async (req,res)=>{
         wishlist = new Wishlist({
           userId,
           items:[]
+
+
         })
       }
+      console.log(productId);
       const existingItem = wishlist.items.find((product)=> product.productId.toString() == productId)
+      console.log("item",existingItem);
+      
+
       if(existingItem){
-        return res.status(409).json({success:false,message:"product alredy in wishlist"})
+        return res.status(401).json({success:false,message:"product alredy in wishlist"})
       }
       wishlist.items.push({productId})
       await wishlist.save();
@@ -987,7 +1100,13 @@ let postlogin = async (req,res)=>{
     const originalTotal = totalPrice; 
     console.log(originalTotal);
     const newTotal = originalTotal - (originalTotal * (discount / 100));
+
+    const totalDiscount = originalTotal - newTotal
+    console.log(totalDiscount);
+
+
     console.log(newTotal);
+    console.log(totalDiscount);
     coupen.count++;
     if (coupen.count >= 3) {
       coupen.status = "redeemed"; 
@@ -1000,7 +1119,7 @@ let postlogin = async (req,res)=>{
     console.log(coupenId);
     
     await coupen.save();
-    return res.status(200).json({ success: true, message: `Coupon applied! You saved ${discount}%.`, newTotal ,coupenId});
+    return res.status(200).json({ success: true, message: `Coupon applied! You saved ${discount}%.`, newTotal ,coupenId,totalDiscount});
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "An error occurred while applying the coupon." });
@@ -1056,7 +1175,7 @@ let postlogin = async (req,res)=>{
       );
   
       console.log("Payment verified and order updated", updatedOrder);
-      res.status(200).json({ message: "Payment verified successfully", updatedOrder });
+      res.status(200).json({ success:true,message: "Payment verified successfully", updatedOrder });
     } else {
       // Update the order as failed and cancelled
       const updatedOrder = await Order.findOneAndUpdate(
@@ -1117,6 +1236,22 @@ let postlogin = async (req,res)=>{
     }
    
   }
+  const categoryFilter = async (req,res) => {
+    try {
+      const {categoryId} = req.params
+      console.log(categoryId);
+      const category = await Category.findById(categoryId)
+      const name = category.name;
+      
+      const products = await Product.find({categoryId:categoryId})
+      console.log(products);
+      
+      res.render("users/categoryshop", { products,name }); 
+    } catch (error) {
+      console.error("Error deleting Offer:", error);
+      res.status(500).json({ success: false, message: "Internal server error" })
+    }
+  }
     
 module.exports = {login,
     signup,
@@ -1158,4 +1293,5 @@ removeWishlist,
 returnrequiest,
 applyCoupens,
 verifyPayment,
-getWallet}
+getWallet,
+categoryFilter}

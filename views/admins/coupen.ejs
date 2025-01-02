@@ -3,6 +3,11 @@
 <link rel="stylesheet" href="/admincss/coupen.css">
 <div class="coupon-table-container">
     <h2>Coupon Management</h2>
+    <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+    color: #d32f2f; /* Red color for error messages */
+    font-weight: 500; /* Medium weight */
+    text-align: center; /* Center align */
+    margin-top: 5px;"><%= message %></p> <% } %>
     <table>
         <a href="/admin/create-coupen" style="margin-top: 0px; display: inline-block; background-color: #28a745; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-size: 16px; cursor: pointer ;">
             Create New Coupon

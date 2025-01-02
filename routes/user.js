@@ -38,8 +38,9 @@ router.get("/google", passport.authenticate("google", {
   router.get("/shop",sessions.sessionCheck,userControl.getShop)
   router.get("/products-shop",userControl.sort)
   router.get("/edit-address/:addressId",sessions.sessionCheck,userControl.editaddressGet)
-  router.get("/getwishlist",userControl.getwishlist)
-  router.get("/wallet", userControl.getWallet)
+  router.get("/getwishlist",sessions.sessionCheck,userControl.getwishlist)
+  router.get("/wallet", sessions.sessionCheck,userControl.getWallet)
+  router.get("/categoryFilter/:categoryId",sessions.sessionCheck,userControl.categoryFilter)
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)
