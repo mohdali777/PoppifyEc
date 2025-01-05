@@ -56,38 +56,21 @@
               text-align: center;"> </p>
               <p id="stock-status" > </p>
 
+
+            
+
             <h5><%= products.description%> </h5>
           </div>
          <hr>
          <form class="product-details-form">
-          <label for="color">Color</label>
           <div class="color-options">
-            <div class="color-option">
-              <input type="radio" name="color" id="red" value="red">
-              <label for="red" class="color-circle" style="background-color: red;"></label>
-              <span>Red</span>
-            </div>
-            <div class="color-option">
-              <input type="radio" name="color" id="blue" value="blue">
-              <label for="blue" class="color-circle" style="background-color: blue;"></label>
-              <span>Blue</span>
-            </div>
-            <div class="color-option">
-              <input type="radio" name="color" id="green" value="green">
-              <label for="green" class="color-circle" style="background-color: green;"></label>
-              <span>Green</span>
-            </div>
-          </div>
-
-
-         
-
           
+          </div>
           <label for="size">Size</label>
           <select id="size" name="size" required>
             <option value="">Select Variant</option>
             <% products.variants.forEach(variant => { %>
-              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>" data-offer="<%= products.offerId ? products.offerId.discountValue : '' %>"
+              <option value="<%= variant.variant %>" data-price="<%= variant.price %>" data-quantity="<%= variant.quantity %>"    data-colors='<%= JSON.stringify(variant.colors) %>'  data-offer="<%= products.offerId ? products.offerId.discountValue : '' %>"
                 ><%= variant.variant %> </option>
             <% }); %>
           </select>
@@ -158,7 +141,7 @@
             <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;"  onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
+            <button class="btn  btn-sm rounded-circle shadow-sm <%= product.WishListVerification ? 'btn-danger' : 'btn-light' %> " style="width: 34px; height: 34px;" id="wishlist"   onclick= <%= product.WishListVerification ? 'removeWishlist(\'' + product._id + '\')' : 'addWishlist(\'' + product._id + '\')' %> >
               <i class="bi bi-heart" style="font-size: 15px;"></i>
             </button>
             <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
@@ -215,6 +198,10 @@ const stockStatusElement = document.getElementById("stock-status");
 const button = document.getElementById("button_product");
 const ogprice = document.getElementById("originalprice");
 const button1 = document.getElementById("button_cart");
+const colorOptionsContainer = document.querySelector('.color-options');
+let SelectColor;
+let SelectColorQuantity;
+
 
 const discountper = document.getElementById("offer-persantage") ? parseFloat(document.getElementById("offer-persantage").value) : 0;
 const discountmini = document.getElementById("offer-minimumamount") ? parseFloat(document.getElementById("offer-minimumamount").value) : 0;
@@ -225,6 +212,7 @@ const discountminiCategory = document.getElementById("offer-minimumamount-catego
 
 sizeSelect.addEventListener('change', function () {
   const selectedOption = sizeSelect.options[sizeSelect.selectedIndex];
+  const colors = JSON.parse(selectedOption.getAttribute('data-colors') || '[]');
   const price = selectedOption.getAttribute('data-price');
   const quantity = parseInt(selectedOption.getAttribute('data-quantity'), 10); 
   const qualityvalue = document.getElementById("quantity").value;
@@ -288,8 +276,85 @@ sizeSelect.addEventListener('change', function () {
     button.disabled = false;
     button1.disabled = false;
   }
+
+
+  updateColorOptions(colors);
+
+
+  document.querySelectorAll('input[name="color"]').forEach(input => {
+  input.addEventListener("change", () => {
+    console.log("s");
+    if (input.checked) {
+      console.log(input.value);  // Logs the value of the selected radio button
+      console.log(input.getAttribute('data-quantity'));
+      const colorQuantity = input.getAttribute('data-quantity')
+      quantityElement.textContent = `${colorQuantity}`;
+      SelectColor = input.value
+      console.log(SelectColor);
+      SelectColorQuantity = (colorQuantity)
+      
+
+      if (colorQuantity === 0) {
+    stockStatusElement.textContent = "Out Of Stock";
+    stockStatusElement.style.color = "red";
+    button.disabled = true;
+    button1.disabled = true;
+  } else if (colorQuantity <= 5) {
+    stockStatusElement.textContent = "Low Stock";
+    stockStatusElement.style.color = "orange";
+    button.disabled = false;
+    button1.disabled = false;
+  } else {
+    stockStatusElement.textContent = ""; 
+    stockStatusElement.style.color = ""; 
+    button.disabled = false;
+    button1.disabled = false;
+  }
+      
+      
+    }
+    
+  });
 });
 
+
+});
+
+function updateColorOptions(colors) {
+  // Clear the previous color options
+  colorOptionsContainer.innerHTML = '';
+
+  if (colors.length > 0) {
+    colors.forEach((color, index) => {
+      // Create color option elements
+      const colorOption = document.createElement('div');
+      colorOption.className = 'color-option';
+
+      const colorInput = document.createElement('input');
+      colorInput.type = 'radio';
+      colorInput.name = 'color';
+      colorInput.id = color.color;
+      colorInput.value = color.color;
+      colorInput.setAttribute('data-quantity', color.quantity);
+
+      const colorLabel = document.createElement('label');
+      colorLabel.htmlFor = color.color;
+      colorLabel.className = 'color-circle';
+      colorLabel.style.backgroundColor = color.color;
+      
+
+      colorOption.appendChild(colorInput);
+      colorOption.appendChild(colorLabel);
+
+      colorOptionsContainer.appendChild(colorOption);
+    });
+  } else {
+    // Show a message if no colors are available
+    const noColorsMessage = document.createElement('p');
+    noColorsMessage.textContent = "No colors available for this variant.";
+    colorOptionsContainer.appendChild(noColorsMessage);
+  }
+}
 
 document.getElementById('quantity').addEventListener('input', function() {
     const quantityInput = document.getElementById('quantity');  
@@ -379,6 +444,9 @@ const offerAmount = (originalPriceValue && offerPriceValue) ? (originalPriceValu
 
 console.log("Offer Amount:", offerAmount);
 
+console.log(SelectColorQuantity)
+console.log(SelectColor);
+
 
   const selectedQuantity = document.getElementById("quantity").value;
   const variantElement = document.getElementById("size");
@@ -393,6 +461,8 @@ console.log("Offer Amount:", offerAmount);
     const selectedVariant = variantElement.options[variantElement.selectedIndex];
     const variantName = selectedVariant.value;
     const totalquantity = parseInt(selectedVariant.getAttribute("data-quantity"), 10);
+    const ColorName = SelectColor;
+    const colorQuantity = SelectColorQuantity;
 
   
   const cart = {
@@ -401,7 +471,9 @@ console.log("Offer Amount:", offerAmount);
     quantity:selectedQuantity,
     variant:variantName,
     totalquantity:totalquantity,
-    discoundOfferPrice:offerAmount
+    discoundOfferPrice:offerAmount,
+    color:ColorName,
+    colorQuantity:colorQuantity
   }
 
   fetch('/add-to-cart', {
@@ -454,5 +526,54 @@ console.log(err);
 
   })
       }
+
+
+      function addWishlist(productId) {
+  fetch(`/addwishlist/${productId}`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to add product to wishlist");
+      }
+      return response.json(); 
+    })
+    .then((data) => {
+      if (data.success) {
+        alert(data.message || "Product added to wishlist!");
+        const button = document.getElementById("wishlist");
+       button.style.backgroundColor = "red";
+        window.location.reload(); 
+      } else {
+        alert(data.message || "Unable to add product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error adding product to wishlist:", error);
+      alert("An error occurred. Please try again later.");
+    });
+}
+
+function removeWishlist(productId) {
+  fetch(`/removewishlis/${productId}`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to add product to wishlist");
+      }
+      return response.json(); 
+    })
+    .then((data) => {
+      if (data.success) {
+        alert(data.message || "Product removed to wishlist!");
+        const button = document.getElementById("wishlist");
+       button.style.backgroundColor = "red";
+        window.location.reload(); 
+      } else {
+        alert(data.message || "Unable to remove product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error removing product to wishlist:", error);
+      alert("An error occurred. Please try again later.");
+    });
+}
   </script>
 <%- include('../partials/user/footer') %>

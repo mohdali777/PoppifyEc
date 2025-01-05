@@ -173,6 +173,14 @@ const cartSchema = new mongoose.Schema({
         type: Number,
         required: true,
       },
+      color:{
+        type:String,
+        required:true
+      },
+      colorQuantity:{
+        type:Number,
+        required:true
+      }
     },
   ],
   totalQuantity: {
@@ -245,6 +253,14 @@ const orderSchema = new mongoose.Schema({
         type:Number,
         default:0
       },
+      color:{
+        type:String,
+        required:true
+      },
+      colorQuantity:{
+        type:Number,
+        required:true
+      },
       reason: { type: String,default:null},
       status: { type: String, enum: ['Pending', 'Accepted', 'Rejected'], default: null },
     },
@@ -255,7 +271,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentMethod: {
       type: String,
-      enum: ['COD', 'Card', 'RazorPay', 'NetBanking'],
+      enum: ['COD', 'Card', 'RazorPay', 'Wallet'],
       default: 'COD'
   },
   address: {
@@ -271,15 +287,15 @@ const orderSchema = new mongoose.Schema({
     orderId: { type: String ,default:null}, 
     paymentId: { type: String ,default:null}, 
     signature: { type: String ,default:null}, 
-    paymentStatus: { 
-      type: String, 
-      enum: ['Pending', 'Failed', 'Success','Refunded'], 
-      default: 'Pending' 
-    },
   },
   orderStatus: {
       type: String,
       enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled','Returned'],
+      default: 'Pending'
+  },
+  paymentStatus:{
+    type: String, 
+      enum: ['Pending', 'Failed', 'Paid','Refunded'], 
       default: 'Pending'
   },
   coupenId:{

@@ -1,7 +1,11 @@
 <%- include('../partials/admin/header') %>
 <%- include('../partials/admin/sidebar') %>
 <link rel="stylesheet" href="/admincss/addcoupen.css">
-
+<% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
+color: #d32f2f; /* Red color for error messages */
+font-weight: 500; /* Medium weight */
+text-align: center; /* Center align */
+margin-top: 5px;"><%= message %></p> <% } %>
 <div class="coupon-container">
     <h2>Create New Coupon</h2>
     <form id="createCouponForm" action="/admin/create-coupon" method="POST" style="max-width: 1150px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">

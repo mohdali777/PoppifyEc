@@ -10,6 +10,7 @@ const Razorpay = require('razorpay');
 
 
 
+
 const login = async (req,res)=> {
     res.render("users/login",{message:null})
 }
@@ -38,10 +39,11 @@ let forget = async (req,res)=>{
    }
    const getShop = async (req,res) => {
     try {
-      const categories = await Category.find({ is_listed: true });
-        const listedCategoryNames = categories.map(category => category.name);
+      const categorieS = await Category.find({ is_listed: true });
+        const listedCategoryNames = categorieS.map(category => category.name);
         const products = await Product.find({ category: { $in: listedCategoryNames } })
-        res.render("users/shop", { products });
+        const categories = await Category.find({is_listed: true})
+        res.render("users/shop", { products ,categories});
     } catch (error) {
       console.log(error);
       
@@ -68,6 +70,12 @@ let forget = async (req,res)=>{
     const products = await Product.find({ category: { $in: listedCategoryNames } }).limit(4);
     const productss = await Product.find({ category: { $in: listedCategoryNames } }).skip(4);
     req.session.user = true;
+    const username = req.user.username;
+    console.log(username);
+    const userId = await User.findOne({username});
+    console.log(userId);
+    req.session.userId = userId._id;
+    
     res.render("users/home", { products, categories, productss });
       
    }
@@ -624,7 +632,7 @@ let postlogin = async (req,res)=>{
       const addtocartPost = async(req,res)=>{
         try {
             console.log(req.body);
-            const { productId, price, quantity,variant,totalquantity,discoundOfferPrice} = req.body;
+            const { productId, price, quantity,variant,totalquantity,discoundOfferPrice,color,colorQuantity} = req.body;
             const userId = req.session.userId;
           console.log(userId);
             let cart = await Cart.findOne({ userId });
@@ -643,10 +651,11 @@ let postlogin = async (req,res)=>{
                     message: 'You cannot add more than 10 different products to your cart.',
                   });
             }
-            const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variant === variant);
+            const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variant === variant && item.color === color);
             if (existingItem ) {
+              // const totalQuantityAfterAddition = existingItem.quantity + parseInt(quantity);
               const totalQuantityAfterAddition = existingItem.quantity + parseInt(quantity);
-              if(totalQuantityAfterAddition > existingItem.totalquantity){
+              if(totalQuantityAfterAddition > existingItem.colorQuantity){
               return res.status(400).json({
                 error: `You cannot add more than ${existingItem.totalquantity} items. Current quantity in cart: ${existingItem.quantity}, available stock: ${existingItem.totalquantity}`})}
               existingItem.quantity += parseInt(quantity);
@@ -661,7 +670,9 @@ let postlogin = async (req,res)=>{
                 totalquantity,
                 total: price * quantity,
                 discoundOfferPricePer:discoundOfferPrice,
-                totalOfferPrice:discoundOfferPrice*quantity
+                totalOfferPrice:discoundOfferPrice*quantity,
+                color:color,
+                colorQuantity:colorQuantity
                 
               });
             }
@@ -682,13 +693,16 @@ let postlogin = async (req,res)=>{
 
       const updateCart = async (req, res) => {
         try {
-          const { productId, quantity ,id,variant} = req.body;
+          console.log(req.body);
+          
+          const {  quantity,id,variant,color} = req.body;
+
           const userId = req.session.userId;
           const cart = await Cart.findOne({ userId });
           if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
           }
-          const item = cart.items.find(item => item._id.toString() === id && item.variant === variant ) ;
+          const item = cart.items.find(item => item._id.toString() === id && item.variant === variant && item.color === color) ;
       
           if (!item) {
             return res.status(404).json({ success: false, message: 'Product not found in cart' });
@@ -823,6 +837,30 @@ let postlogin = async (req,res)=>{
           }
       }
 
+      let paymentStatus ;
+
+      if (paymentMethod === 'Wallet') {
+       
+        const wallet = await Wallet.findOne({ userId });
+  
+        if (!wallet) {
+          return res.status(404).json({ message: 'Wallet not found' });
+        }
+        if (wallet.balance < totalPrice) {
+          return res.status(400).json({ message: 'Insufficient wallet balance' });
+        }
+        wallet.balance -= totalPrice;
+  
+        wallet.transactions.push({
+          transactionId: `TXN-${Date.now()}`,
+          amount: totalPrice,
+          description: `Order Payment of ${orderId}`,
+          type: 'debit',
+        });
+         paymentStatus = "Paid"
+        await wallet.save();
+      }
+
         const order = new Order({
           orderId,
           userId:userId,
@@ -832,9 +870,9 @@ let postlogin = async (req,res)=>{
           address:finalAddress,
           razorpay: {
             orderId: razorpayOrderId, // Save Razorpay order ID
-            paymentStatus: "Pending",
           },
           orderStatus:"Pending",
+          paymentStatus,
           coupenId:coupenId,
           coupenDiscountAmount:coupenDiscountAmount,
           CartTotalOffer:cartDiscount
@@ -846,6 +884,10 @@ let postlogin = async (req,res)=>{
             if (variant) {
                 variant.quantity -= item.quantity;
                 if (variant.quantity < 0) variant.quantity = 0;
+                let color = variant.colors.find(color => color.color === item.color)
+                if(color){
+                  color.quantity -= item.quantity
+                }
                 await product.save(); 
             }
         }
@@ -853,13 +895,20 @@ let postlogin = async (req,res)=>{
     await Cart.updateOne({ userId: userId }, { $set: { items: [] ,totalQuantity:0,totalPrice:0} });
     await order.save();
     req.session.orderId = orderId;
+
+    
+
     res.status(201).json({ 
       message: "Order created successfully", 
       order, 
       razorpayOrderId, 
       key_id: process.env.RAZORPAY_KEY_ID,
+      orderId
     });
    
+ 
+   
+
       } catch (error) {
         console.log(error);
         
@@ -875,13 +924,27 @@ let postlogin = async (req,res)=>{
         if (!userId) {
           return res.status(404).send("User not found");
         }
-        const orders = await Order.find({ userId: userId }).populate("cartItems.productId");    
-        res.render("users/myorders", { orders });
+        const page = parseInt(req.query.page) || 1;
+        const limit = 5;
+        const skip = (page - 1) * limit;
+        const orders = await Order.find({ userId: userId })
+          .sort({ createdAt: -1 }) 
+          .skip(skip)   
+          .limit(limit) 
+          .populate("cartItems.productId");
+        const totalOrders = await Order.countDocuments({ userId: userId });
+        const totalPages = Math.ceil(totalOrders / limit); 
+        res.render("users/myorders", {
+          orders,
+          currentPage: page,
+          totalPages: totalPages
+        });
       } catch (error) {
         console.error(error);
         res.status(500).send("Something went wrong");
       }
     };
+    
 
 
 
@@ -906,12 +969,16 @@ let postlogin = async (req,res)=>{
                   const variant = product.variants.find(v => v.variant === item.variant);
                   if (variant) {
                       variant.quantity += item.quantity; 
+                  let color = variant.colors.find(color => color.color === item.color)
+                if(color){
+                  color.quantity += item.quantity
+                }
                       await product.save(); 
                   }
               }
           }
 
-          if (order.paymentMethod === "RazorPay" && order.razorpay.paymentStatus == "Success" ) {
+          if (order.paymentMethod === "RazorPay" && order.paymentStatus == "Paid" || order.paymentMethod === "Wallet" && order.paymentStatus == "Paid" ) {
             const wallet = await Wallet.findOne({ userId });
           if(!wallet){
               return res.status(404).json({ message: "Wallet not found for the user." });
@@ -928,7 +995,7 @@ let postlogin = async (req,res)=>{
                     type: "credit", 
                     amount: order.totalPrice,
                 });
-                order.razorpay.paymentStatus = "Refunded"
+                order.paymentStatus = "Refunded"
                 await wallet.save();
                 await order.save();
             } else {
@@ -946,8 +1013,16 @@ let postlogin = async (req,res)=>{
           res.status(500).json({ message: "An error occurred while canceling the order" });
       }
   };
-  const sort = async (req,res) => {
-    const { sort, search } = req.query;
+
+
+
+  const Success = async (req,res) => {
+    const {orderId} = req.params
+    res.render("users/orderSuccess",{orderId})
+  }
+
+  const sort = async (req, res) => {
+    const { sort, search, category, price, page = 1, limit = 8 } = req.query;
 
     let sortQuery = {};
     if (sort === 'priceLowToHigh') sortQuery = { 'price': 1 };
@@ -958,16 +1033,55 @@ let postlogin = async (req,res)=>{
     else if (sort === 'aToZ') sortQuery = { 'name': 1 };
     else if (sort === 'zToA') sortQuery = { 'name': -1 };
 
+ 
     const searchQuery = search ? { name: new RegExp(search, 'i') } : {};
 
+  
+    let priceQuery = {};
+    if (price) {
+        const [minPrice, maxPrice] = price.split('-');
+        priceQuery = {
+            price: {
+                $gte: parseInt(minPrice),
+                $lte: parseInt(maxPrice)
+            }
+        };
+    }
+
     try {
-        const products = await Product.find(searchQuery).sort(sortQuery);
-        res.json({ products });
+
+        let categoryQuery = {};
+        if (category) {
+            categoryQuery = { category: category };
+        }
+        const products = await Product.find({ ...searchQuery, ...categoryQuery, ...priceQuery })
+            .populate({
+                path: 'categoryId',
+                match: { is_listed: true } 
+            })
+            .sort(sortQuery)
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        
+        const filteredProducts = products.filter(product => product.categoryId !== null);
+        const totalProducts = filteredProducts.length;
+        const totalPages = Math.ceil(totalProducts / limit);
+
+        res.json({
+            products: filteredProducts,
+            totalProducts,
+            totalPages,
+            currentPage: page,
+            productsPerPage: limit
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
-  }
+};
+
+
  const getwishlist = async (req,res) => {
   try {
     const userId = req.session.userId;
@@ -983,6 +1097,8 @@ let postlogin = async (req,res)=>{
 
 
   const addtowishlist = async (req,res) => {
+    console.log("s");
+    
     try {
       const {productId} = req.params
       if(!productId){
@@ -997,8 +1113,6 @@ let postlogin = async (req,res)=>{
         wishlist = new Wishlist({
           userId,
           items:[]
-
-
         })
       }
       console.log(productId);
@@ -1011,6 +1125,7 @@ let postlogin = async (req,res)=>{
       }
       wishlist.items.push({productId})
       await wishlist.save();
+      const product = await Product.findByIdAndUpdate(productId,{$set:{WishListVerification:true}})
       res.status(200).json({success:true,message:"product added successfully"})
     } catch (error) {
       console.error(error);
@@ -1027,6 +1142,7 @@ let postlogin = async (req,res)=>{
       let wishlist = await Wishlist.findOne({userId:userId});
        wishlist.items = wishlist.items.filter((pr)=> pr.productId.toString()!== productId)
       await wishlist.save()
+      const product = await Product.findByIdAndUpdate(productId,{$set:{WishListVerification:false}})
       return res.status(200).json({success:true,message:"removed sucessfully"})
     } catch (error) {
       console.log(error);
@@ -1167,7 +1283,7 @@ let postlogin = async (req,res)=>{
           $set: {
             "razorpay.paymentId": razorpayPaymentId,
             "razorpay.signature": razorpaySignature,
-            "razorpay.paymentStatus": "Success",
+            paymentStatus: "Paid",
             orderStatus: "Pending", // Update the status accordingly
           },
         },
@@ -1184,7 +1300,7 @@ let postlogin = async (req,res)=>{
           $set: {
             "razorpay.paymentId": razorpayPaymentId,
             "razorpay.signature": razorpaySignature,
-            "razorpay.paymentStatus": "Failed",
+             paymentStatus: "Failed",
             orderStatus: "Cancelled",
           },
         },
@@ -1294,4 +1410,5 @@ returnrequiest,
 applyCoupens,
 verifyPayment,
 getWallet,
-categoryFilter}
+categoryFilter,
+Success}

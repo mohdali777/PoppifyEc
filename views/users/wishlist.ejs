@@ -31,7 +31,7 @@
               </p>
               <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= item.productId.variants[0].price %></h5>
               <div class="text-warning">
-                <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+                <button type="button" onclick="productdeatails('<%= item.productId._id %>','<%=item.productId.category %>')" class="btn btn-danger btn-lg" >View Product</button>
               </div>
             </div>
           </div>

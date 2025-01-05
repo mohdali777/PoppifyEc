@@ -12,6 +12,7 @@
                 <tr>
                     <th>Product</th>
                     <th>Variant</th>
+                    <th>Color</th>
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Subtotal</th>
@@ -25,7 +26,8 @@
                             <img style="width: 40px; height: 40px;" src="/uploads/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="me-2">
                             <span><%= item.productId.name %></span>
                         </td>
-                        <td>$<%= item.variant %></td>
+                        <td><%= item.variant %></td>
+                        <td><%= item.color %></td>
                         <td>$<%= item.price %></td>
                         <td>
                             <input 
@@ -33,8 +35,8 @@
                                 class="form-control mx-auto quantity-input" 
                                 value="<%= item.quantity %>" 
                                 min="1" 
-                                id="cart-quantity-<%= item.productId._id %>"  
-                                onchange="updateCart('<%= item.productId._id %>', '<%= item.totalquantity %>','<%= item._id %>','<%= item.variant %>')" 
+                                id="cart-quantity-<%= item._id %>"  
+                                onchange="updateCart('<%= item.productId._id %>','<%= item.color %>', '<%= item.colorQuantity %>','<%= item._id %>','<%= item.variant %>')" 
                                 style="width: 60px;">
                         </td>
                         
@@ -74,8 +76,8 @@
 </div>
 
 <script>
-function updateCart(productId,totalquantity,id,variant) {
-    const inputElement = document.getElementById(`cart-quantity-${productId}`);
+function updateCart(productId,color,totalquantity,id,variant,) {
+    const inputElement = document.getElementById(`cart-quantity-${id}`);
     const quantity = parseInt(inputElement.value);
 
     if (quantity < 1) {
@@ -102,7 +104,7 @@ function updateCart(productId,totalquantity,id,variant) {
             inputElement.disabled = false; 
         }, 2000); 
         return;
-        return;
+       
     }
 
     fetch('/update-cart', {
@@ -110,7 +112,7 @@ function updateCart(productId,totalquantity,id,variant) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ productId, quantity,id,variant }),
+        body: JSON.stringify({quantity,id,variant,color }),
     })
     .then(response => response.json())
     .then(data => {

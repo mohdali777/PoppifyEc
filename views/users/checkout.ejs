@@ -179,10 +179,11 @@ const totalPrice = discountedPriceElement && discountedPriceElement.textContent.
     }
 const rozer = document.getElementById("razorpay").checked;
 const cod = document.getElementById("cod").checked;
+const Wallet = document.getElementById("wallet").checked;
  
 
 const orderDetails = {
-    paymentMethod : rozer ? "RazorPay" : cod ? "COD" : null,
+    paymentMethod : rozer ? "RazorPay" : cod ? "COD" : Wallet ? "Wallet" : null,
     totalPrice: parseFloat(totalPrice), // Convert to number
     firstName: useDefaultAddress ? "<%= address?.name || '' %>" : document.getElementById("firstName").value,
     companyName: useDefaultAddress ? "<%= address?.companyname || '' %>" : document.getElementById("companyName").value,
@@ -223,6 +224,13 @@ if(orderDetails.firstName ==""||orderDetails.companyName=="" || orderDetails.str
                 icon: "info",
                 button: "OK",
             });
+            if(data.orderId){
+            setTimeout(()=>{
+                  window.location.href = `/succes-page/${data.orderId}`
+            },1000)
+            
+          }
+
         }
             })
             .catch(err => {

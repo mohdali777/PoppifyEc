@@ -203,8 +203,8 @@
                             hour12: true
                           }) %></div>
                         <div class="transaction-description"><%= transaction.description %></div>
-                        <div class="transaction-amount <%= transaction.amount < 0 ? 'negative' : 'positive' %>">
-                            <%= transaction.amount < 0 ? '-' : '+' %> <%= Math.abs(transaction.amount).toFixed(2) %>
+                        <div class="transaction-amount <%= transaction.type == 'debit' ? 'negative' : 'positive' %>">
+                            <%= transaction.type == 'debit' ? '-' : '+' %> <%= Math.abs(transaction.amount).toFixed(2) %>
                         </div>
                         
                     </div>

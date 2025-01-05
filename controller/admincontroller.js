@@ -108,6 +108,9 @@ const deleteuser = async(req,res)=>{
         const user = req.params.userid;
         await User.findByIdAndDelete(user)
         const users = await User.find({})
+        if(req.session.userId == user){
+          req.session.destroy()
+        }
         res.redirect("/admin/usermangement")
     }catch(err){
 console.log(err)
@@ -133,6 +136,9 @@ const blockUser = async (req, res) => {
         const { userid } = req.params;
 
         const user = await User.findByIdAndUpdate(userid, { status: "blocked" });
+        if(req.session.userId == userid){
+          req.session.destroy()
+        }
 
         if (!user) {
             return res.status(404).json({ message: "User not found" });
@@ -223,8 +229,7 @@ const deleteCategory = async (req, res) => {
     try {
       const categoryId = req.params.categoryId;
       await Category.findByIdAndDelete(categoryId);
-      const categories = await Category.find({});
-      res.render("admins/category", { categories });
+      res.status(200).json({message:"Category Deleted Successfully"})
     } catch (err) {
       console.error(err);
       res.status(500).send("An error occurred while deleting the category.");
@@ -241,7 +246,6 @@ const deleteCategory = async (req, res) => {
         }
         const offers = await Offer.find({offerType:"category",isActive:true})
     
-        // Render the edit page with the category details
         res.render('admins/updatecategory', { category ,offers,message:false});
       } catch (err) {
         console.error('Error rendering edit category page:', err);
@@ -258,7 +262,12 @@ const deleteCategory = async (req, res) => {
       const image_url = req.file ? `/uploads/${req.file.filename}` : null;
       const category = await Category.findOne({_id:id});
       if(!category){
-        res.render("/admins/updatecategory",{message:"category dont exist"})
+        return res.render("admins/category",{categories,message:"category dont exist"})
+      }
+      const exist = await Category.findOne({name})
+      if(exist && exist._id.toString() !== id){
+        const categories = await Category.find();
+        return res.render("admins/category",{categories,message:"category Alredy Exist "})
       }
       let offerId = null;  
       const OFFer = await Offer.findOne({ offerName:offer }); 
@@ -288,16 +297,23 @@ const deleteCategory = async (req, res) => {
   }
   
   const products = async (req,res)=>{
-    try {
-      const products = await Product.find({});
-
-    // Send a success response or redirect
-    res.render('admins/products',{products}); 
-    } catch (error) {
-      console.log(error);
-      
-    }
     
+    const page = parseInt(req.query.page) || 1; // Default to page 1
+    const limit = parseInt(req.query.limit) || 9; // Default to 10 products per page
+
+    try {
+        const skip = (page - 1) * limit;
+        const totalProducts = await Product.countDocuments(); // Get total product count
+        const products = await Product.find().skip(skip).limit(limit);
+    
+      res.render('admins/products', {
+          products,
+          currentPage: page,
+          totalPages: Math.ceil(totalProducts / limit),
+      });
+    } catch (error) {
+        res.status(500).send('Error fetching products');
+    }
     
   }
 
@@ -357,7 +373,7 @@ const addproductpost = async (req, res) => {
 
 
     // Send a success response or redirect
-    res.render('admins/products',{products});  // Redirect to product list after adding the product
+    res.status(200).json({success:true,message:"product Added Successfully"})
   } catch (error) {
     console.error('Error saving product:', error);
     res.status(500).send('Server Error');  // Send an error response if something goes wrong
@@ -446,16 +462,21 @@ const updateproduct = async (req, res) => {
     };
     await Product.updateOne({ _id: id }, { $set: updatedProduct,$push: { image: { $each: images } } });
     const products = await Product.find({});
-    res.render("admins/products", { products });
+    res.status(200).json({message:"updatedSuccessfully"});
   } catch (error) {
     console.error("Error updating product:", error);
     res.status(500).send("Error updating product");
   }
 };
 const orderManagment = async (req,res) => {
+  const page = parseInt(req.query.page)||1;
+  const limit = parseInt(req.query.limit)||10;
   try {
-    const order = await Order.find();
-    res.render("admins/orders",{order})
+    const skip = (page - 1) * limit
+    const totalOrders = await Order.countDocuments();
+    const order = await Order.find().skip(skip).limit(limit);
+    const orders = await Order.find()
+    res.render("admins/orders",{order,orders,currentPage:page,totalPages:Math.ceil(totalOrders/limit)})
   } catch (error) {
     
   }
@@ -556,7 +577,7 @@ const returnAccept = async (req,res) => {
                 type: "credit", 
                 amount: walletbalance,
             });
-            order.razorpay.paymentStatus = "Refunded"
+            order.paymentStatus = "Refunded"
             await wallet.save();
             await order.save();
         } else {
@@ -601,9 +622,15 @@ const returnReject = async (req,res) => {
 }
 
 const getCoupens = async (req,res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
   try {
-    const coupens = await Coupen.find({});
-    res.render("admins/coupen",{coupens,message:false})
+    const skip = (page-1)*limit;
+    const totalCoupens = await Coupen.countDocuments();
+
+    const coupens = await Coupen.find().skip(skip).limit(limit);
+    res.render("admins/coupen",{coupens,message:false,currentPage:page,totalPages:Math.ceil(totalCoupens/limit)})
+
   } catch (error) {
     console.error("Error accepting return request:", error);
     return res.status(500).json({
@@ -620,7 +647,7 @@ const createCoupen = async (req,res) => {
     const existingCoupen = await Coupen.findOne({couponCode});
     if(existingCoupen){
       const coupens = await Coupen.find({});
-    res.render("admins/coupen",{coupens,message:"coupen Alredy Exist"})
+    return res.render("admins/addcoupen",{coupens,message:"coupen Alredy Exist"})
     }
     const newCoupen = new Coupen({
       couponCode,
@@ -630,7 +657,7 @@ const createCoupen = async (req,res) => {
     })
     await newCoupen.save()
     const coupens = await Coupen.find({});
-    res.render("admins/coupen",{coupens,message:"coupen Created Successfully"})
+    res.render("admins/addcoupen",{coupens,message:"coupen Created Successfully"})
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Server error' });
@@ -669,9 +696,14 @@ const deleteCoupen = async (req, res) => {
 };
 
 const OffersGet = async (req,res) => {
+
+  const page = parseInt(req.query.page)||1;
+  const limit = parseInt(req.query.limit)||10;
   try {
-    const offers = await Offer.find();
-    res.render("admins/offers",{offers})
+    const skip =  (page - 1) * limit
+    const totalOffers = await Offer.countDocuments();
+    const offers = await Offer.find().skip(skip).limit(limit);
+    res.render("admins/offers",{offers,currentPage:page,totalPages:Math.ceil(totalOffers / limit)})
   } catch (error) {
     console.error("Error getting order page:", error);
     res.status(500).json({ success: false, message: "Internal server error" });
@@ -697,6 +729,10 @@ const editOfferPost = async (req, res) => {
     if (!id || !offerName || !offerType) {
       return res.status(400).json({ message: 'Offer ID, name, and type are required.' });
     }
+    const exist = await Offer.findOne({offerName})
+    if( exist && exist._id.toString() !== id){
+      return res.render("admins/createOffer",{message:"offer  Alredy Exist"})
+    }
     const updatedOffer = await Offer.findByIdAndUpdate(id, {
       $set: {
         offerName,
@@ -713,7 +749,7 @@ const editOfferPost = async (req, res) => {
       return res.status(404).json({ message: 'Offer not found.' });
     }
     const offer = await Offer.findById(id)
-    res.render("admins/editOffer",{offer,message:"offerUpdated Successfully"})
+    res.render("admins/editOffer",{offer,message:"offer Updated Successfully"})
     // res.status(200).json({ message: 'Offer updated successfully', offer: updatedOffer });
     
 
@@ -730,7 +766,10 @@ const createOffer = async (req,res) => {
     
     const { offerName,offerType, discountType, discountValue, minimumOrderValue, expiryDate,StartingDate, isActive } = req.body;
     
-
+    const exist = await Offer.findOne({offerName})
+    if( exist){
+      return res.render("admins/createOffer",{message:"offer Alredy Exist"})
+    }
      const newOffer = new Offer({
          offerName,
           offerType,

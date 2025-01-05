@@ -41,6 +41,7 @@ router.get("/google", passport.authenticate("google", {
   router.get("/getwishlist",sessions.sessionCheck,userControl.getwishlist)
   router.get("/wallet", sessions.sessionCheck,userControl.getWallet)
   router.get("/categoryFilter/:categoryId",sessions.sessionCheck,userControl.categoryFilter)
+  router.get("/succes-page/:orderId",userControl.Success)
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)

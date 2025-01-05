@@ -69,14 +69,16 @@
 
     <!-- Pagination -->
     <div class="pagination">
-        <button>&#8592;</button>
-        <button class="active">01</button>
-        <button>02</button>
-        <button>03</button>
-        <button>04</button>
-        <button>05</button>
-        <button>&#8594;</button>
-    </div>
+        <% if (currentPage > 1) { %>
+          <a href="/admin/coupon-management?page=<%= currentPage - 1 %>" class="page-btn">Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/admin/coupon-management?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+          <a href="/admin/coupon-management?page=<%= currentPage + 1 %>" class="page-btn">Next</a>
+        <% } %>
+      </div>
 </div>
 <script>
     function deleteCoupen(coupenId){

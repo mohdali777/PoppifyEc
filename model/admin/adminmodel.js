@@ -90,13 +90,22 @@ const productSchema = new mongoose.Schema({
         variant: { type: String, required:false }, // e.g., "64 GB"
         price: { type: Number, required:false,min: 0 }, // e.g., 100
         quantity:{type:Number,required:false,min:0},
-        colors:{type:[String],default:[]}
+        colors: [
+          {
+            color: { type: String, required: true },  // e.g., "Red"
+            quantity: { type: Number, required: true, min: 0 },  // Quantity for the color
+          }
+        ]
     }
 ],
 offerId:{
   type:mongoose.Schema.Types.ObjectId,
   ref:"Offer",
   default:null
+},
+WishListVerification:{
+  type:Boolean,
+  default:false,
 },
   createdAt: {
     type: Date,

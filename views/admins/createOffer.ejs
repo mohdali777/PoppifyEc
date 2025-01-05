@@ -167,7 +167,11 @@ document.getElementById("offer-create-btn").addEventListener("click", function (
     !StartDate ||
     !isActive
   ) {
-    alert("Please fill out all required fields correctly.");
+    Swal.fire({
+  icon: 'warning',
+  title: 'Oops...',
+  text: 'Please fill out all required fields correctly!',
+});
     return;  // Stops form submission if validation fails
   }
 
@@ -177,7 +181,11 @@ document.getElementById("offer-create-btn").addEventListener("click", function (
   const currentDate = new Date();
 
   if (expiryDateObj <= startDateObj) {
-    alert("Expiry Date should be after the Start Date.");
+    Swal.fire({
+  icon: 'warning',
+  title: 'Oops...',
+  text: 'Expiry Date should be after the Start Date.',
+});
     return;
   }
 

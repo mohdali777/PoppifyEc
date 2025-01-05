@@ -3,9 +3,11 @@
 <link rel="stylesheet" href="/admincss/order.css">
 <div class="order-table-container">
     <h2>Order Management</h2>
+    Total Orders:<%= orders.length %>
     <table>
         <thead>
             <tr>
+                <th>No</th>
                 <th>Order ID</th>
                 <th>Product</th>
                 <th>Date</th>
@@ -16,9 +18,10 @@
                 <th>Action</th>
             </tr>
         </thead>
-        <% order.forEach(order=>{ %>
+        <% order.forEach((order,index)=>{ %>
         <tbody>
             <tr>
+                <td><%= index + 1 %></td>
                 <td><a href="#"><%= order.orderId %></a></td>
                 <td><%= order.cartItems.length %> Products</td>
                 <td>11</td>
@@ -45,14 +48,16 @@
 
     <!-- Pagination -->
     <div class="pagination">
-        <button>&#8592;</button>
-        <button class="active">01</button>
-        <button>02</button>
-        <button>03</button>
-        <button>04</button>
-        <button>05</button>
-        <button>&#8594;</button>
-    </div>
+        <% if (currentPage > 1) { %>
+          <a href="/admin/order-management?page=<%= currentPage - 1 %>" class="page-btn">Previous</a>
+        <% } %>
+        <% for (let i = 1; i <= totalPages; i++) { %>
+          <a href="/admin/order-management?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+          <a href="/admin/order-management?page=<%= currentPage + 1 %>" class="page-btn">Next</a>
+        <% } %>
+      </div>
 </div>
 
 <%- include('../partials/admin/footer') %>

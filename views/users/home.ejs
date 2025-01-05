@@ -41,7 +41,7 @@
               <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
             </div>
             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-              <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" id="wishlist" onclick="addWishlist('<%=product._id %>')">
+              <button class="btn  btn-sm rounded-circle shadow-sm <%= product.WishListVerification ? 'btn-danger' : 'btn-light' %> " style="width: 34px; height: 34px;" id="wishlist"   onclick= <%= product.WishListVerification ? 'removeWishlist(\'' + product._id + '\')' : 'addWishlist(\'' + product._id + '\')' %> >
                 <i class="bi bi-heart" style="font-size: 15px;"></i>
               </button>
               <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;" onclick="">
@@ -73,48 +73,7 @@
   </div>
 
 <!-- viewproduct -->
-<!-- <div class="container py-5" style="display: none;" id="section2">
-  <div class="row row-cols-1 row-cols-md-4 g-4">
-    <% productss.forEach(product => { %>
-      <div class="col">
-        <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
-          <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">
-            -10%
-          </div>
-          <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
-          </div>
-          <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-              <i class="bi bi-heart" style="font-size: 15px;"></i>
-            </button>
-            <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-              <i class="bi bi-eye" style="font-size: 15px;"></i>
-            </button>
-          </div>
-          <div class="card-body text-center" style="text-align: start;">
-            <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
-              <%= product.name %>
-            </p>
-            <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= product.variants[0].price %></h5>
-            <div class="text-warning">
-              <% for (let i = 0; i < product.rating; i++) { %>
-                <i class="bi bi-star-fill"></i>
-              <% } %>
-              <% for (let i = product.rating; i < 5; i++) { %>
-                <i class="bi bi-star"></i>
-              <% } %>
-              <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    <% }) %>
-  </div>
-  <div class="buttoncontainer" style="display: flex; align-items: center; justify-content: center; margin-top: 20px;">
-    <button type="button" class="btn btn-danger btn-lg" id="section2-button" onclick="closeproduct()" >Close</button>
-  </div>
-</div> -->
+
  <!-- categories -->
  <section class="section">
   <div class="container">
@@ -660,20 +619,6 @@ console.log(err);
   })
       }
 
-      // function showimages(){
-      //   const btn = document.getElementById("section1-button")
-      //   const btn2 = document.getElementById("section2-button")
-      //  const showprdct = document.getElementById('section2');
-      //  showprdct.style.display = "block"
-      //  btn.style.display = "none"
-       
-      // }
-      // function closeproduct (){
-      //    const showprdct = document.getElementById('section2');
-      //    const btn = document.getElementById("section1-button")
-      //  showprdct.style.display = "none"
-      //  btn.style.display = 'block'
-      // }
       function showimages (){
         fetch("/shop",{method:"GET"}).then((response)=>{
 if(response.ok) window.location.href = "/shop" 
@@ -703,6 +648,30 @@ console.log(err);
     })
     .catch((error) => {
       console.error("Error adding product to wishlist:", error);
+      alert("An error occurred. Please try again later.");
+    });
+}
+
+function removeWishlist(productId) {
+  fetch(`/removewishlis/${productId}`, { method: "POST" })
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Failed to add product to wishlist");
+      }
+      return response.json(); 
+    })
+    .then((data) => {
+      if (data.success) {
+        alert(data.message || "Product removed to wishlist!");
+        const button = document.getElementById("wishlist");
+       button.style.backgroundColor = "red";
+        window.location.reload(); 
+      } else {
+        alert(data.message || "Unable to remove product to wishlist.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error removing product to wishlist:", error);
       alert("An error occurred. Please try again later.");
     });
 }

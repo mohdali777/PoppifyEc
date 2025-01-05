@@ -11,7 +11,7 @@ router.get("/usermangement",session.sessionCheck,AdminRoutes.usermanageside)
 router.get("/dash",session.sessionCheck,(req,res)=>{
 res.render("admins/adminhome")
 })
-router.get("/product",session.sessionCheck,AdminRoutes.products)
+router.get("/products",session.sessionCheck,AdminRoutes.products)
 router.get("/category",session.sessionCheck,AdminRoutes.category)
 router.get("/add-category",session.sessionCheck,AdminRoutes.categorybutton)
 router.get("/editcategory/:categoryId",AdminRoutes.editcategory)
@@ -22,7 +22,7 @@ router.get("/order-management",session.sessionCheck,AdminRoutes.orderManagment)
 router.get("/order-deatails/:orderId",session.sessionCheck,AdminRoutes.orderDeatail)
 router.get("/coupon-management",session.sessionCheck,AdminRoutes.getCoupens)
 router.get("/create-coupen",session.sessionCheck,(req,res)=>{
-    res.render("admins/addcoupen")
+    res.render("admins/addcoupen",{message:false})
 })
 router.get("/add-offer",session.sessionCheck,(req,res)=>{
     res.render("admins/createOffer",{message:false})

@@ -1,59 +1,99 @@
 <%- include('../partials/admin/header') %>
 <%- include('../partials/admin/sidebar') %>
- 
-    <link rel="stylesheet" href="/admincss/product.css">
-      <div class="admin-dashboard">
-        <header class="dashboard-header">
-          <h1>Product Management</h1>
-          <button class="add-product-btn" onclick="addproducts()">Add Product</button>
-        </header>
-        <div class="product-grid">
-          <!-- Dynamically Render Products -->
-          <% products.forEach(product => { %>
-          <div class="product-card">
-            <img src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" class="product-image">
-            <h2 class="product-name"><%= product.name %></h2>
-            <p class="product-price">₹<%= product.price %></p>
-            <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
-            <div class="edsp">
-                <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>
-                <!-- <span class="stock-status <%= product.stockStatus === 'Low Stock' ? 'low-stock' : product.stockStatus === 'Out of Stock' ? 'out-of-stock' : 'published' %>">
-                  <%= product.stockStatus %>
-                </span> -->
-                <img  onclick="deleteproduct('<%= product._id %>')" style="margin-top: 25px; width: 20px; height: 20px;" src="/images/fi-sr-trash.png" alt="trash" >
-            </div>  
-          </div>
-          <% }) %>
-        </div>
-      </div>
+
+<style>
+  .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-btn {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.page-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+</style>
+
+<link rel="stylesheet" href="/admincss/product.css">
+
+<div class="admin-dashboard">
+    <header class="dashboard-header">
+        <h1>Product Management</h1>
+        <button class="add-product-btn" onclick="addproducts()">Add Product</button>
+    </header>
+
+    <div class="product-grid">
+        <!-- Dynamically Render Products -->
+        <% products.forEach(product => { %>
+            <div class="product-card">
+                <img src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" class="product-image">
+                <h2 class="product-name"><%= product.name %></h2>
+                <p class="product-price">₹<%= product.price %></p>
+                <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
+                <div class="edsp">
+                    <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>
+                    <img onclick="deleteproduct('<%= product._id %>')" 
+                         style="margin-top: 25px; width: 20px; height: 20px;" 
+                         src="/images/fi-sr-trash.png" 
+                         alt="trash">
+                </div>
+            </div>
+        <% }) %>
+    </div>
+
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="/admin/products?page=<%= currentPage - 1 %>" class="page-btn">Previous</a>
+      <% } %>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/admin/products?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+        <a href="/admin/products?page=<%= currentPage + 1 %>" class="page-btn">Next</a>
+      <% } %>
+    </div>
+
     
-  <script>
-    function addproducts (){
-        fetch("/admin/addproducts",{method:"GET"}).then((response)=>{
-  if(response.ok) window.location.href = "/admin/addproducts"
-        }).catch((err)=>{
-            console.log(err);
-            
-        })
+</div>
+
+<script>
+    function addproducts() {
+        fetch("/admin/addproducts", { method: "GET" })
+            .then((response) => {
+                if (response.ok) window.location.href = "/admin/addproducts";
+            })
+            .catch((err) => {
+                console.log(err);
+            });
     }
 
     function editproduct(productId) {
-    // Directly redirect to the edit page
-    window.location.href = `/admin/editproduct/${productId}`;
-}
-async function deleteproduct(productId) {
-    
-    if(confirm("delte product")){
-        try {
-            const response = await fetch(`/admin/deleteproduct/${productId}`,{method:"POST"})
-             if (response.ok) window.location.reload()
-        } catch (error) {
-            console.log(error);
-            
-        }
-     
+        window.location.href = `/admin/editproduct/${productId}`;
     }
-}
-  </script>
+
+    async function deleteproduct(productId) {
+        if (confirm("Delete product?")) {
+            try {
+                const response = await fetch(`/admin/deleteproduct/${productId}`, { method: "POST" });
+                if (response.ok) window.location.reload();
+            } catch (error) {
+                console.log(error);
+            }
+        }
+    }
+
+</script>
 
 <%- include('../partials/admin/footer') %>

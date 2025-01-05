@@ -8,11 +8,11 @@
 
 <form class="add-product-form"  enctype="multipart/form-data" id="updateproduct"> 
     <label for="product-name">Product Name</label>
-    <input type="text" id="product-name" class="custom-width" placeholder="Enter product name" name="name" value="<%=product.name%>" required>
+    <input type="text" id="product-name" class="custom-width" placeholder="Enter product name" name="name" value="<%=product.name%>" >
     <input type="hidden" value="<%= product._id %>" id="productId" >
 
     <label for="description">Description</label>
-    <textarea id="description" class="custom-width" placeholder="Enter description" name="description" required><%=product.description%></textarea>
+    <textarea id="description" class="custom-width" placeholder="Enter description" name="description" ><%=product.description%></textarea>
 
     <label for="image-upload">Upload Product Images</label>
     <input type="file" id="image-upload" class="custom-width" accept="image/*" name="images" multiple onchange="openCropper(event)">
@@ -36,7 +36,7 @@
     </div>
 
     <label for="category">Category</label>
-    <select id="category" class="custom-width" name="category" required>
+    <select id="category" class="custom-width" name="category" >
         <option value="">Select a category</option>
         <% categories.forEach(category => { %>
             <option value="<%= category.name %>" <%= category.name === product.category ? 'selected' : '' %>><%= category.name %></option>
@@ -52,67 +52,135 @@
     </select>
 
     <label for="price">Base Price</label>
-    <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" value="<%=product.price%>" required>
+    <input type="text" id="price" class="custom-width" placeholder="Enter price" name="price" value="<%=product.price%>" >
 
     <label for="brand">Brand</label>
-    <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" value="<%=product.brand%>" required>
+    <input type="text" id="brand" class="custom-width" placeholder="Enter brand name" name="brand" value="<%=product.brand%>" >
 
-<label>Variants:</label>
-<div id="variant-container">
-    <div class="variant-row">
-        <% product.variants.forEach(variant=>{ %>
-        <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" value="<%=variant.variant%>" required>
-        <input type="number" name="price" placeholder="Price" value="<%=variant.price%>" required>
-        <label for="quantity" >Quantity</label>
-        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" value="<%=variant.quantity%>" name="quantity" required min="1">
-        <label>Select Colors:</label>
-        <% ['red', 'black', 'blue', 'green'].forEach(color => { %>
-            <div class="color-options">
-            <input type="checkbox" name="colors" id="<%= color %>" value="<%= color %>" <%= variant.colors.includes(color) ? 'checked' : '' %>>
-            <label for="<%= color %>" class="color-circle <%= color %>"></label>
+    <label>Variants:</label>
+    <div id="variant-container">
+        <% product.variants.forEach((variant, index) => { %>
+            <div class="variant-row">
+                <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" value="<%= variant.variant %>" >
+                <input type="number" name="price" placeholder="Price" value="<%= variant.price %>" >
+                <label for="quantity-<%= index %>">Quantity</label>
+                <input type="number" id="quantity-<%= index %>" class="custom-width" placeholder="Enter quantity" name="quantity" value="<%= variant.quantity %>" >
+
+                <label>Select Colors:</label>
+<div class="color-options">
+    <% 
+        // Array of default colors
+        const defaultColors = ['red', 'black', 'blue','green',];
+
+        // Loop through default colors
+        defaultColors.forEach(defaultColor => { 
+            // Check if the product variant has this color
+            let isChecked = false;
+            variant.colors.forEach(color => {
+                if(color.color === defaultColor) {
+                    isChecked = true;
+                }
+            });
+    %>
+        <div>
+            <input type="checkbox" name="colors" id="<%= defaultColor %>-<%= index %>" value="<%= defaultColor %>" <%= isChecked ? 'checked' : '' %>>
+            <label for="<%= defaultColor %>-<%= index %>" class="color-circle <%= defaultColor %>"></label>
+            <div id="quantity-<%= defaultColor %>-<%= index %>" class="quantity-section" style=  "<%= isChecked ? 'display: block;' : 'display: none;' %>">
+                <label for="quantity-<%= defaultColor %>">Quantity for <%= defaultColor.charAt(0).toUpperCase() + defaultColor.slice(1) %>:</label>
+                <input type="number" id="quantity-<%= defaultColor %>" style="width: 50px; border: 2px solid black;" value="<%= variant.colors.find(color => color.color === defaultColor)?.quantity || 0 %>">
+            </div>
         </div>
-        <% }) %>
-   
-    <% }) %>
-        <button type="button" onclick="removeVariant(this)">Remove</button>
-    </div>
+    <% }); %>
 </div>
-<button type="button" onclick="addVariant()">Add Variant</button>
 
-
+                <button type="button" onclick="removeVariant(this)">Remove</button>
+            </div>
+        <% }) %>
+    </div>
+    <button type="button" onclick="addVariant()">Add Variant</button>
     <button type="submit" class="submit-btn">Update Product</button>
+    
 </form>
 
 
 <script>
-  let imageFiles = []; // Array to store the selected files
-let cropper; // Variable to store Cropper instance
-let croppedImages = []; // Array to store cropped images
+  let imageFiles = []; 
+let cropper; 
+let croppedImages = []; 
+
+let variantCount = 0;
 
 function addVariant() {
     const container = document.getElementById('variant-container');
     const row = document.createElement('div');
     row.classList.add('variant-row');
+    variantCount++; // Increment the variant count
+
     row.innerHTML = `
-        <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" required>
-        <input type="number" name="price" placeholder="Price" required>
-          <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" class="custom-width" placeholder="Enter quantity" name="quantity" required min="1">
+        <input type="text" name="variant" placeholder="Variant (e.g., 64 GB)" >
+        <input type="number" name="price" placeholder="Price" >
+        <label for="quantity-${variantCount}">Quantity</label>
+        <input type="number" id="quantity-${variantCount}" class="custom-width" placeholder="Enter quantity" name="quantity"  min="1">
         <label>Select Colors:</label>
         <div class="color-options">
-            <input type="checkbox" name="colors" id="red" value="red">
-            <label for="red" class="color-circle red"></label>
-            <input type="checkbox" name="colors" id="black" value="black">
-            <label for="black" class="color-circle black"></label>
-            <input type="checkbox" name="colors" id="blue" value="blue">
-            <label for="blue" class="color-circle blue"></label>
-            <input type="checkbox" name="colors" id="green" value="green">
-            <label for="green" class="color-circle green"></label>
+            <div>
+                <input type="checkbox" name="colors" id="red-${variantCount}" value="red">
+                <label for="red-${variantCount}" class="color-circle red"></label>
+                <div id="quantity-red-${variantCount}" class="quantity-section" style="display: none;">
+                    <label for="quantity-red">Quantity for Red:</label>
+                    <input type="number" id="quantity-red" min="1" style="width: 50px; border: 2px solid black;">
+                </div>
+            </div>
+            <div>
+                <input type="checkbox" name="colors" id="black-${variantCount}" value="black">
+                <label for="black-${variantCount}" class="color-circle black"></label>
+                <div id="quantity-black-${variantCount}" class="quantity-section" style="display: none;">
+                    <label for="quantity-black">Quantity for Black:</label>
+                    <input type="number" id="quantity-black" min="1" style="width: 50px; border: 2px solid black;">
+                </div>
+            </div>
+            <div>
+                <input type="checkbox" name="colors" id="blue-${variantCount}" value="blue">
+                <label for="blue-${variantCount}" class="color-circle blue"></label>
+                <div id="quantity-blue-${variantCount}" class="quantity-section" style="display: none;">
+                    <label for="quantity-blue-input}">Quantity for Blue:</label>
+                    <input type="number" id="quantity-blue" min="1" style="width: 50px; border: 2px solid black;">
+                </div>
+            </div>
+            <div>
+                <input type="checkbox" name="colors" id="green-${variantCount}" value="green">
+                <label for="green-${variantCount}" class="color-circle green"></label>
+                <div id="quantity-green-${variantCount}" class="quantity-section" style="display: none;">
+                    <label for="quantity-green">Quantity for Green:</label>
+                    <input type="number" id="quantity-green" min="1" style="width: 50px; border: 2px solid black;">
+                </div>
+            </div>
         </div>
         <button type="button" onclick="removeVariant(this)">Remove</button>
     `;
     container.appendChild(row);
+
+
+    // Add event listeners to checkboxes in the new variant row
+    
 }
+
+document.getElementById('variant-container').addEventListener('change', (event) => {
+    const target = event.target;
+
+    // Check if the target is a checkbox inside the 'color-options' div
+    if (target.type === 'checkbox' && target.closest('.color-options')) {
+        const variantId = target.id.split('-')[1]; // Extract variant count from the ID
+        const color = target.value;
+        const quantitySection = document.getElementById(`quantity-${color}-${variantId}`);
+
+        if (quantitySection) {
+            quantitySection.style.display = target.checked ? 'block' : 'none';
+        }
+    }
+});
+
+
 
 function removeVariant(button) {
     button.parentElement.remove(); // Remove the row
@@ -127,6 +195,17 @@ function removeVariant(button) {
 function openCropper(event) {
     const file = event.target.files[0];
     if (!file) return;
+    
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validImageTypes.includes(file.type)) {
+        Swal.fire({
+  icon: 'error',
+  title: 'Invalid Image Format',
+  text: 'Please upload a JPEG, PNG, or WEBP image.',
+});
+        event.target.value = ""; 
+        return;
+    }
 
     const reader = new FileReader();
     reader.onload = function(e) {
@@ -214,6 +293,28 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('updateproduct').addEventListener('submit', function(e) {
         e.preventDefault(); 
 
+
+        const productName = document.getElementById('product-name').value.trim();
+    const description = document.getElementById('description').value.trim();
+    const category = document.getElementById('category').value;
+    const price = document.getElementById('price').value.trim();
+    const brand = document.getElementById('brand').value.trim();
+
+    if(productName == ""||description==""||category==""||price==""||brand==""){
+        Swal.fire({
+  icon: 'warning',
+  title: 'Incomplete Form',
+  text: 'Please fill in all required fields before submitting.',
+});
+        return false
+    }
+    
+
+
+    
+
+
+
         const formData = new FormData();
         const productIdd = document.getElementById('productId')?.value || '';
         if (!productIdd) {
@@ -229,16 +330,75 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('brand', document.getElementById('brand').value);
         formData.append('offer', document.getElementById('offers').value);
         formData.append('id', productIdd);
+
+
+        
         const variants = [];
-document.querySelectorAll('.variant-row').forEach(row => {
+document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
     const variant = row.querySelector('input[name="variant"]').value;
     const price = row.querySelector('input[name="price"]').value;
-    const quantity = row.querySelector('input[name="quantity"]').value;
+    const quantity = row.querySelector(`input[name="quantity"]`).value;
 
+    if (!variant) {
+        Swal.fire({
+    icon: 'warning',
+    title: 'Missing Variant Name',
+    text: `Variant name is missing for row ${variantIndex + 1}`,
+  });
+        variants.length = 0
+        return; 
+    }
+
+    if (isNaN(price) || price <= 0) {
+        Swal.fire({
+  icon: 'error',
+  title: 'Invalid Price',
+  text: `Invalid price for row ${variantIndex + 1}`,
+      });
+        variants.length = 0
+        return; 
+    }
+    
+    if (isNaN(quantity) || quantity <= 0) {
+        Swal.fire({
+     icon: 'error',
+    title: 'Invalid Quantity',
+     text: `Invalid quantity for row ${variantIndex + 1}`,
+   });
+        variants.length = 0
+        return; 
+    }
+
+    // Get the selected colors and their respective quantities
     const colorInputs = row.querySelectorAll('input[name="colors"]:checked');
-    const colors = Array.from(colorInputs).map(input => input.value); // Get values of checked boxes
+    const colors = Array.from(colorInputs).map(input => {
+        const colorName = input.value;
+        const colorQuantityInput = row.querySelector(`#quantity-${colorName}`);
+        const colorQuantity = colorQuantityInput ? colorQuantityInput.value : 0; // Get the quantity for the color
 
-    if (variant && price && quantity && colors.length > 0) {
+        if (!colorName || colorQuantity <= 0) { 
+            Swal.fire({
+  icon: 'error',
+  title: 'Invalid Input',
+  text: `Invalid input: Color '${colorName || "undefined"}' has quantity ${colorQuantity}. Please correct it.`,
+});
+        return null; 
+    }
+
+        return { color: colorName, quantity: parseInt(colorQuantity) };
+    }).filter(color => color !== null);
+
+    if (colors.length === 0) {
+        Swal.fire({
+  icon: 'error',
+  title: 'No Valid Colors Selected',
+  text: `No valid colors selected for row ${variantIndex + 1}.`,
+});
+        variants.length = 0
+        return;
+    }
+
+    if (variant && price && quantity && colors.length > 0 && colors !== null) {
         variants.push({ 
             variant, 
             price: parseFloat(price), 
@@ -248,9 +408,16 @@ document.querySelectorAll('.variant-row').forEach(row => {
     }
 });
 
+// Output variants for testing
+console.log(variants);
+
+
 if (variants.length === 0) {
-    variants = [];
+    return alert("No valid variants found.")
 }
+
+
+
     formData.append('variants', JSON.stringify(variants)); // Add as a JSON string
 
 
@@ -266,6 +433,7 @@ if (variants.length === 0) {
         })
         .then(async (response) => {
             if (response.ok) {
+                alert("update Successfully")
                 window.location.reload();
             } else {
                 const errorMsg = await response.text();

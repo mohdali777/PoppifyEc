@@ -112,6 +112,19 @@ tr:nth-child(even) {
       </tbody>
     <% }) %>
     </table>
+
+    <div class="pagination">
+      <% if (currentPage > 1) { %>
+        <a href="/admin//offer?page=<%= currentPage - 1 %>" class="page-btn">Previous</a>
+      <% } %>
+      <% for (let i = 1; i <= totalPages; i++) { %>
+        <a href="/admin//offer?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+      <% if (currentPage < totalPages) { %>
+        <a href="/admin//offer?page=<%= currentPage + 1 %>" class="page-btn">Next</a>
+      <% } %>
+    </div>
+
   </div>
 
 

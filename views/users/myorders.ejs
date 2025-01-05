@@ -1,6 +1,30 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
+<style>
+    .pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.page-btn {
+    margin: 0 5px;
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.page-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+</style>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
 <div class="container-order-page">
     <h2 class="heading-order-page">My Orders</h2>
     <p class="order-info-order-page">You have <%= orders.length %> items in your order</p>
@@ -12,10 +36,8 @@
             <h3><%= order.createdAt %></h3>
             <p>Order Total: <strong>₹<%= order.totalPrice %></strong></p>
             <p>Payment Method: <strong><%= order.paymentMethod %></strong></p>
-            <% if (order.paymentMethod == "RazorPay") {%>
-            <p>PaymentStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.razorpay.paymentStatus %></span></p>
-            <% }%>
             <p>OrderStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
+            <p>PaymentStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.paymentStatus %></span></p>
         </div>
 
  
@@ -95,6 +117,19 @@
     </button>
   </div>
 </div>
+
+<div class="pagination">
+  <% if (currentPage > 1) { %>
+    <a href="/myorders?page=<%= currentPage - 1 %>" class="page-btn">Previous</a>
+  <% } %>
+  <% for (let i = 1; i <= totalPages; i++) { %>
+    <a href="/myorders?page=<%= i %>" class="page-btn <%= i === currentPage ? 'active' : '' %>"><%= i %></a>
+  <% } %>
+  <% if (currentPage < totalPages) { %>
+    <a href="/myorders?page=<%= currentPage + 1 %>" class="page-btn">Next</a>
+  <% } %>
+</div>
+
 
 <script>
     function toggleProducts(button) {
