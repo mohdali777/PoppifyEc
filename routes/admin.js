@@ -8,9 +8,7 @@ const { Session } = require("express-session");
 router.get("/login",session.islogin,AdminRoutes.getlogin)
 router.get("/home",session.sessionCheck,AdminRoutes.gethome)
 router.get("/usermangement",session.sessionCheck,AdminRoutes.usermanageside)
-router.get("/dash",session.sessionCheck,(req,res)=>{
-res.render("admins/adminhome")
-})
+router.get("/dash",session.sessionCheck,AdminRoutes.gethome)
 router.get("/products",session.sessionCheck,AdminRoutes.products)
 router.get("/category",session.sessionCheck,AdminRoutes.category)
 router.get("/add-category",session.sessionCheck,AdminRoutes.categorybutton)
@@ -33,33 +31,33 @@ router.get("/sales",session.sessionCheck,AdminRoutes.Getsales)
 
 
 
-router.post('/generate-report',AdminRoutes.getFilteredOrders);
+router.post('/generate-report',session.sessionCheck,AdminRoutes.getFilteredOrders);
 
 
 router.post("/login",AdminRoutes.postlogin)
-router.post("/add-user",AdminRoutes.adduser)
-router.post("/user-delete/:userid", AdminRoutes.deleteuser);
-router.post("/edit-user",AdminRoutes.edituser)
-router.post("/user-block/:userid", AdminRoutes.blockUser);
-router.post("/user-unblock/:userid", AdminRoutes.unblockUser);
-router.post("/add-category", upload.single("image_url"), AdminRoutes.addcategory);
-router.post("/deletecategory/:categoryId",AdminRoutes.deleteCategory)
-router.post("/update-category",upload.single("image_url"),AdminRoutes.updatecategory)
-router.post("/add-product",upload.array("images"),AdminRoutes.addproductpost)
-router.post("/deleteproduct/:productId",AdminRoutes.deleteproduct)
-router.post("/removeimage/:image/:productid",AdminRoutes.removeimage)
-router.post("/update-product",upload.array("images"),AdminRoutes.updateproduct)
-router.post("/update-status",AdminRoutes.updateStatus)
-router.post("/returnaccept",AdminRoutes.returnAccept)
-router.post("/returnreject",AdminRoutes.returnReject)
-router.post("/create-coupon",AdminRoutes.createCoupen)
-router.delete("/deletecoupen/:coupenId",AdminRoutes.deleteCoupen)
-router.post("/create-offer",AdminRoutes.createOffer)
-router.post("/edit-offer-post",AdminRoutes.editOfferPost)
-router.post("/delete-Offer/:offerId",AdminRoutes.deleteOfferPost)
-router.post('/download-report/excel', AdminRoutes.downloadExcel)
-router.post('/download-report/pdf', AdminRoutes.downloadPDF)
-
+router.post("/add-user",session.sessionCheck,AdminRoutes.adduser)
+router.post("/user-delete/:userid",session.sessionCheck, AdminRoutes.deleteuser);
+router.post("/edit-user",session.sessionCheck,AdminRoutes.edituser)
+router.post("/user-block/:userid", session.sessionCheck,AdminRoutes.blockUser);
+router.post("/user-unblock/:userid",session.sessionCheck, AdminRoutes.unblockUser);
+router.post("/add-category",session.sessionCheck, upload.single("image_url"), AdminRoutes.addcategory);
+router.post("/deletecategory/:categoryId",session.sessionCheck,AdminRoutes.deleteCategory)
+router.post("/update-category",session.sessionCheck,upload.single("image_url"),AdminRoutes.updatecategory)
+router.post("/add-product",session.sessionCheck,upload.array("images"),AdminRoutes.addproductpost)
+router.post("/deleteproduct/:productId",session.sessionCheck,AdminRoutes.deleteproduct)
+router.post("/removeimage/:image/:productid",session.sessionCheck,AdminRoutes.removeimage)
+router.post("/update-product",session.sessionCheck,upload.array("images"),AdminRoutes.updateproduct)
+router.post("/update-status",session.sessionCheck,AdminRoutes.updateStatus)
+router.post("/returnaccept",session.sessionCheck,AdminRoutes.returnAccept)
+router.post("/returnreject",session.sessionCheck,AdminRoutes.returnReject)
+router.post("/create-coupon",session.sessionCheck,AdminRoutes.createCoupen)
+router.delete("/deletecoupen/:coupenId",session.sessionCheck,AdminRoutes.deleteCoupen)
+router.post("/create-offer",session.sessionCheck,AdminRoutes.createOffer)
+router.post("/edit-offer-post",session.sessionCheck,AdminRoutes.editOfferPost)
+router.post("/delete-Offer/:offerId",session.sessionCheck,AdminRoutes.deleteOfferPost)
+router.post('/download-report/excel',session.sessionCheck,AdminRoutes.downloadExcel)
+router.post('/download-report/pdf',session.sessionCheck,AdminRoutes.downloadPDF)
+router.post("/dashChart",AdminRoutes.renderChart)
 
 
 

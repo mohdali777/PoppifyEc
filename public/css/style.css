@@ -600,12 +600,13 @@ h2 {
    height: 138px;  
 }
 .productdeatails{
-  width: 300px;
+  width: 320px;
   height: auto;
   background-color: #F5F5F5;
   margin-top: 0px;
   display: flex;
   flex-direction: column;
+  border-radius: 10px;
 }
 .fontprdeatails{
   display: flex;

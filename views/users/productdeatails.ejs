@@ -2,6 +2,8 @@
 <%- include('../partials/user/navbar') %>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert/dist/sweetalert.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 
 <div class="breadcrumbss">
   <a href="/home">Home/</a>  
@@ -22,12 +24,13 @@
 
         <div class="productdeatails">
           <div class="fontprdeatails">
-            <h3><%= products.name%></h3>
+            <h3 style="margin-top: 20px;"><%= products.name%></h3>
             <p class="product-rating">⭐⭐⭐⭐⭐</p>
             <div  style="display: flex; gap: 10px;"><span  id="offerperst" style="  display: none;  font-size: 15px; margin-top: -3px;font-weight: 600;color: red"> -10  %</span>
               <h4 id="originalprice" >  ₹<%= products.price %> </h4>
             </div>
             <!-- <h4 id="price" style="display: none;" disabled>₹</h4 > -->
+             <div style="display: flex; flex-direction: column; gap: 0px; border-bottom: 2px solid #e1e1e1; ">
 
             <% if (products.offerId && products.offerId.isActive == true ) { %> 
               <input type="text" value="<%= products.offerId.discountValue %>" id="offer-persantage" hidden>
@@ -48,18 +51,34 @@
                 <span style="color: #000; font-weight: 600;">₹<%= products.categoryId.offerId.minimumOrderValue %></span>.
             </p>
             <% } %>
+           </div>
             
-              <p id="quantityid"  style="   font-size: 1rem;
-              font-weight: bold;
-              color: #333; /* Dark grey for the text */
-              margin-top: 10px;
-              text-align: center;"> </p>
-              <p id="stock-status" > </p>
+            <p id="quantityid" 
+            style="font-size: 1.2rem; 
+                   font-weight: 600; 
+                   color: #2c3e50; /* Elegant dark blue-grey */
+                   margin-top: 10px; 
+                   text-align: center; 
+                   letter-spacing: 0.5px; /* Slight spacing for clarity */
+                   line-height: 1.5; 
+                /* Comfortable line height */">
+         </p>
+         
+              <p id="stock-status" > </p>  
 
-
-            
-
-            <h5><%= products.description%> </h5>
+              <h5 style="font-size: 1rem; 
+              font-weight: normal; 
+              color: #4a4a4a; /* Neutral grey for text */
+              background-color: #f9f9f9; /* Light grey background */
+              padding: 15px; 
+              border-radius: 8px; 
+              box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+              margin-top: 15px; 
+              line-height: 1.6;  width: 300px;/* Improves readability */">
+              
+     <%= products.description %>
+   </h5>
+   
           </div>
          <hr>
          <form class="product-details-form">
@@ -141,7 +160,7 @@
             <img class="card-img-top" src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" style="width: 172px; height: 152px; object-fit: contain;"  onclick="productdeatails('<%= product._id %>','<%= product.category %>')">
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
-            <button class="btn  btn-sm rounded-circle shadow-sm <%= product.WishListVerification ? 'btn-danger' : 'btn-light' %> " style="width: 34px; height: 34px;" id="wishlist"   onclick= <%= product.WishListVerification ? 'removeWishlist(\'' + product._id + '\')' : 'addWishlist(\'' + product._id + '\')' %> >
+            <button class="btn  btn-sm rounded-circle shadow-sm <%= product.WishListVerification ? 'btn-danger' : 'btn-light' %> " style="width: 34px; height: 34px;" id="wishlist-<%= product._id %>"    onclick= <%= product.WishListVerification ? 'removeWishlist(\'' + product._id + '\')' : 'addWishlist(\'' + product._id + '\')' %> >
               <i class="bi bi-heart" style="font-size: 15px;"></i>
             </button>
             <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
@@ -254,29 +273,13 @@ sizeSelect.addEventListener('change', function () {
   }
   
   if (!isNaN(quantity)) {
-    quantityElement.textContent = `${quantity}`;
+    quantityElement.textContent = `${quantity} Products Left`;
   } else {
     quantityElement.textContent = "N/A";
   }
 
-  
-  if (quantity === 0) {
-    stockStatusElement.textContent = "Out Of Stock";
-    stockStatusElement.style.color = "red";
-    button.disabled = true;
-    button1.disabled = true;
-  } else if (quantity <= 5) {
-    stockStatusElement.textContent = "Low Stock";
-    stockStatusElement.style.color = "orange";
-    button.disabled = false;
-    button1.disabled = false;
-  } else {
-    stockStatusElement.textContent = ""; 
-    stockStatusElement.style.color = ""; 
-    button.disabled = false;
-    button1.disabled = false;
-  }
 
+  updateStockStatus(quantity);
 
   updateColorOptions(colors);
 
@@ -288,37 +291,41 @@ sizeSelect.addEventListener('change', function () {
       console.log(input.value);  // Logs the value of the selected radio button
       console.log(input.getAttribute('data-quantity'));
       const colorQuantity = input.getAttribute('data-quantity')
-      quantityElement.textContent = `${colorQuantity}`;
+      quantityElement.textContent = `${colorQuantity} Products Left`;
       SelectColor = input.value
       console.log(SelectColor);
       SelectColorQuantity = (colorQuantity)
+    
       
-
-      if (colorQuantity === 0) {
-    stockStatusElement.textContent = "Out Of Stock";
-    stockStatusElement.style.color = "red";
-    button.disabled = true;
-    button1.disabled = true;
-  } else if (colorQuantity <= 5) {
-    stockStatusElement.textContent = "Low Stock";
-    stockStatusElement.style.color = "orange";
-    button.disabled = false;
-    button1.disabled = false;
-  } else {
-    stockStatusElement.textContent = ""; 
-    stockStatusElement.style.color = ""; 
-    button.disabled = false;
-    button1.disabled = false;
-  }
-      
+      updateStockStatus(parseInt(colorQuantity));
       
     }
     
   });
 });
-
-
 });
+
+
+function updateStockStatus(quantity) {
+  if (quantity === 0) {
+    stockStatusElement.textContent = "Out Of Stock";
+    stockStatusElement.style.color = "red";
+    button.disabled = true;
+    button1.disabled = true;
+  } else if (quantity <= 5) {
+    stockStatusElement.textContent = "Low Stock";
+    stockStatusElement.style.color = "orange";
+    button.disabled = false;
+    button1.disabled = false;
+  } else {
+    stockStatusElement.textContent = "In Stock";
+    stockStatusElement.style.color = "green";
+    button.disabled = false;
+    button1.disabled = false;
+  }
+}
+
+
 
 function updateColorOptions(colors) {
   // Clear the previous color options
@@ -464,6 +471,27 @@ console.log(SelectColor);
     const ColorName = SelectColor;
     const colorQuantity = SelectColorQuantity;
 
+    if (!variantName) {
+      swal({
+    icon: 'warning',
+    title: 'Missing Variant',
+    text: 'Please choose a variant before proceeding.',
+    confirmButtonText: 'OK',
+  });
+  return;
+}
+
+if (!ColorName) {
+  swal({
+    icon: 'warning',
+    title: 'Missing Color',
+    text: 'Please choose a color before proceeding.',
+    confirmButtonText: 'OK',
+  });
+  return;
+}
+
+
   
   const cart = {
     productId :productId ,
@@ -529,51 +557,90 @@ console.log(err);
 
 
       function addWishlist(productId) {
-  fetch(`/addwishlist/${productId}`, { method: "POST" })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Failed to add product to wishlist");
-      }
-      return response.json(); 
-    })
-    .then((data) => {
-      if (data.success) {
-        alert(data.message || "Product added to wishlist!");
-        const button = document.getElementById("wishlist");
-       button.style.backgroundColor = "red";
-        window.location.reload(); 
-      } else {
-        alert(data.message || "Unable to add product to wishlist.");
-      }
-    })
-    .catch((error) => {
-      console.error("Error adding product to wishlist:", error);
-      alert("An error occurred. Please try again later.");
-    });
+    fetch(`/addwishlist/${productId}`, { method: "POST" })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to add product to wishlist");
+            }
+            return response.json(); 
+        })
+        .then((data) => {
+            if (data.success) {
+              const button = document.getElementById(`wishlist-${productId}`);
+                    button.classList.remove('btn-light');
+                    button.classList.add('btn-danger');
+                    button.setAttribute(
+                        'onclick',
+                        `removeWishlist('${productId}')`
+                    );
+                    iziToast.success({
+          title: 'Success',
+          message: data.message || 'Product removed from wishlist!',
+          position: 'topRight',
+        });
+                
+            } else {
+                swal({
+                    title: "Error!",
+                    text: data.message || "Unable to add product to wishlist.",
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch((error) => {
+            console.error("Error adding product to wishlist:", error);
+            swal({
+                title: "Error!",
+                text: "An error occurred. Please try again later.",
+                icon: "error",
+                button: "OK",
+            });
+        });
 }
+
 
 function removeWishlist(productId) {
   fetch(`/removewishlis/${productId}`, { method: "POST" })
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Failed to add product to wishlist");
+        throw new Error("Failed to remove product from wishlist");
       }
       return response.json(); 
     })
     .then((data) => {
       if (data.success) {
-        alert(data.message || "Product removed to wishlist!");
-        const button = document.getElementById("wishlist");
-       button.style.backgroundColor = "red";
-        window.location.reload(); 
+        const button = document.getElementById(`wishlist-${productId}`);
+          button.classList.add('btn-light');
+          button.setAttribute(
+                        'onclick',
+                        `addWishlist('${productId}')`
+                    );
+          iziToast.success({
+          title: 'Success',
+          message: data.message || 'Product removed from wishlist!',
+          position: 'topRight',
+        });
+       
       } else {
-        alert(data.message || "Unable to remove product to wishlist.");
+        swal({
+          title: "Error!",
+          text: data.message || "Unable to remove product from wishlist.",
+          icon: "error",
+          button: "OK",
+        });
       }
     })
     .catch((error) => {
-      console.error("Error removing product to wishlist:", error);
-      alert("An error occurred. Please try again later.");
+      console.error("Error removing product from wishlist:", error);
+      swal({
+        title: "Error!",
+        text: "An error occurred. Please try again later.",
+        icon: "error",
+        button: "OK",
+      });
     });
 }
+
   </script>
 <%- include('../partials/user/footer') %>

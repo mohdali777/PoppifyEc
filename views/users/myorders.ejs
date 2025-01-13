@@ -37,8 +37,69 @@
             <p>Order Total: <strong>₹<%= order.totalPrice %></strong></p>
             <p>Payment Method: <strong><%= order.paymentMethod %></strong></p>
             <p>OrderStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.orderStatus %></span></p>
+            <div style="display: flex;">
             <p>PaymentStatus: <span class="<%= order.orderStatus.toLowerCase() %>-order-page"><%= order.paymentStatus %></span></p>
+            <% if (order.paymentStatus.toLowerCase() === 'pending' || order.paymentStatus === "Failed") { %>
+              <button 
+                  class="btn btn-danger" 
+                  style="margin:-2px 20px; padding: 8px 12px; font-size: 1rem; font-weight: bold; border: none; border-radius: 4px;"
+                  onclick="showPaymentSection('<%= order._id %>')"
+              >
+                  Try Again Payment
+              </button>
+
+              <div class="col-lg-4 col-md-12" id="paymentMethodTry-<%= order._id %>" style=" display: none; position: absolute; right: 500px;">
+                <div class="card p-4 shadow-sm">
+                  <span id="closeModalRepay"  onclick="closePaymentSection('<%= order._id %>')" style="color:#aaa; position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer;">&times;</span>
+
+                    <h4 class="mb-4" style="font-size: 1.8rem; font-weight: bold;">Payment Details</h4>
+                    <ul class="list-unstyled">
+                        <!-- Dummy cart items -->
+                        <li class="d-flex justify-content-between mb-2">
+                          <span style="font-size: 1.2rem;">Productname</span>
+                          <span style="font-size: 1.2rem; margin-left: -43px;">Quantity</span>
+                          <strong style="font-size: 1.2rem;">Price</strong>
+                      </li>
+                        <% order.cartItems.forEach(item => { %>
+                        <li class="d-flex justify-content-between mb-2">
+                            <span style="font-size: 1.2rem;"><%= item.productName %></span>
+                            <span style="font-size: 1.2rem;"><%= item.quantity %></span>
+                            <strong style="font-size: 1.2rem;"><%= item.price %></strong>
+                        </li>
+                       <% })%>
+            
+        
+                        
+                        <hr>
+                        <li class="d-flex justify-content-between mb-3">
+                            <strong style="font-size: 1.2rem;">Total</strong>
+                            <strong style="font-size: 1.2rem;" id="totalPrice1">₹<%= order.totalPrice %></strong>
+                        </li>
+                    </ul>
+            
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="razorpay" checked>
+                            <label class="form-check-label" for="razorpay" style="font-size: 1.2rem;">Razorpay</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="wallet">
+                            <label class="form-check-label" for="wallet" style="font-size: 1.2rem;">Wallet</label>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= order._id %>','<%= order.totalPrice %>')">Place Order</button>
+      
+                </div>
+            </div>
+          <% } %>
         </div>
+        </div>
+   
+
+        
+      
+        
+        
 
  
         <button class="btn-order-page" style="background-color: black; " onclick="toggleBillingAddress('<%= order._id %>')">Show Billing Address</button>
@@ -69,15 +130,20 @@
         </div>
 
         <!-- Products Container (Initially Hidden) -->
-        <div class="products-container-order-page">
+        <div class="products-container-order-page" style="border: 2px solid black;">
             <% order.cartItems.forEach(item => { %>
             <div class="product-card-order-page">
-                <img src="/uploads/<%= item.productId.image[0] || 'placeholder.jpg' %>" 
+                <img  src="/uploads/<%= item.productImage || 'placeholder.jpg' %>" 
                      alt="<%= item.productId.name || 'Product' %>" />
                 <div class="product-details-order-page" >
-                    <h4><a href="" onclick="productdeatails('<%= item.productId._id %>','<%= item.productId.category %>')" style="text-decoration: none; color: black;" ><%= item.productId.name %></a></h4>
-                    <p>Quantity: <%= item.quantity %> - ₹<%= item.price %> per unit</p>
-                    <p>Total: ₹<%= item.total %></p>
+                    <h4><a href="" onclick="productdeatails('<%= item.productId._id %>','<%= item.productId.category %>')" style="text-decoration: none; color: black;" ><%= item.productName %></a></h4>
+                    <p style="font-size: 1rem; color: #555; margin: 5px 0;">
+                      Quantity: <%= item.quantity %> - ₹<%= item.price %> per unit
+                  </p>
+                  <p style="font-size: 1rem; color: #555; margin: 5px 0;">
+                      Total: ₹<%= item.total %>
+                  </p>
+                  
 
                     <% if (item.status) { %>
                       <p><strong>Return Status:</strong> <%= item.status %></p>
@@ -86,7 +152,7 @@
                     <% } %>
 
                     <!-- Return Button for Each Product -->
-                    <% if (order.orderStatus === 'Delivered') { %>
+                    <% if (order.orderStatus === 'Delivered' || order.orderStatus === 'Returned') { %>
                       <% if (item.status == null) { %>
                         <!-- Show return button if status is 'Pending' -->
                         <button class="btn-order-page btn-return-product-page" style="background-color: green;" onclick="handleReturn('<%= order._id %>', '<%= item.productId._id %>','<%= item._id %>')">Return Product</button>
@@ -132,6 +198,19 @@
 
 
 <script>
+
+
+function showPaymentSection(orderId) {
+ 
+    document.getElementById(`paymentMethodTry-${orderId}`).style.display = 'block';
+ 
+    
+}
+
+function closePaymentSection(orderId) {
+    document.getElementById(`paymentMethodTry-${orderId}`).style.display = 'none';
+}
+
     function toggleProducts(button) {
         const productsContainer = button.closest('.order-card-order-page').querySelector('.products-container-order-page');
         productsContainer.classList.toggle('active');
@@ -272,6 +351,145 @@ console.log(err);
   };
 }
 
+function placeorder(orderId, totalPrice) {
+    // Get the selected payment method
+    const rozer = document.getElementById("razorpay").checked;
+    const wallet = document.getElementById("wallet").checked;
+
+    // Determine the payment method
+    const paymentMethod = rozer
+        ? "RazorPay"
+        : wallet
+        ? "Wallet"
+        : null;
+
+    // Ensure a payment method is selected
+    if (!paymentMethod) {
+        swal("Error", "Please select a payment method.", "error");
+        return;
+    }
+
+    // Prepare the order details
+    const orderDetails = {
+        paymentMethod,
+        totalPrice: parseFloat(totalPrice), // Convert to number
+        orderId,
+    };
+
+    // Send the request to the server
+    fetch('/repay-order', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderDetails),
+    })
+        .then(async (response) => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to place the order");
+            }
+            return response.json(); // Parse the response JSON
+        })
+        .then((data) => {
+          if (orderDetails.paymentMethod === "RazorPay" && data.razorpayOrderId) {
+                  console.log('enterrazorpay');    
+            initializeRazorpay(data.razorpayOrderId, orderDetails.totalPrice, data.keyId,orderDetails);
+          }else{
+            swal("Success", "Order placed successfully!", "success")
+            setTimeout(()=>{
+                  window.location.href = `/succes-page/${data.orderid}`
+            },1000)
+            
+          }
+        })
+        .catch((error) => {
+            
+            console.error("Error placing order:", error.message);
+            swal("Error", error.message, "error");
+        });
+}
+
+function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
+    console.log("Initializing Razorpay...");
+    console.log("Razorpay Order ID:", razorpayOrderId);
+    console.log("Order Details:", orderDetails);
+
+    const options = {
+        key: keyId, 
+        amount: Math.round(amount * 100), // Convert to paisa
+        currency: "INR",
+        name: "Poppify",
+        description: "Order Payment",
+        order_id: razorpayOrderId,
+        handler: function (response) {
+            console.log("Payment successful response:", response);
+            verifyPayment(response, razorpayOrderId, orderDetails);
+        },
+        prefill: {
+            name: "first name",
+            email:" orderDetails.email",
+            contact: "orderDetails.phone",
+        },
+        theme: {
+            color: "#3399cc",
+        },
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+}
+
+function verifyPayment(response, razorpayOrderId, orderDetails) {
+    console.log("Verifying Payment...");
+    console.log("Response:", response);
+
+    fetch('/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            razorpayOrderId: razorpayOrderId,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            type:"repay"
+        }),
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Payment verification data:", data);
+            if (data.success) {
+                swal({
+                    title: "Payment Successful",
+                    text: "Your order has been placed successfully!",
+                    icon: "success",
+                    button: "OK",
+                });
+                
+                if(data.orderId){
+            setTimeout(()=>{
+                  window.location.href = `/succes-page/${data.orderId}`
+            },1000)
+            
+          }
+            } else {
+                swal({
+                    title: "Payment Failed",
+                    text: data.message,
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Payment verification failed:", err);
+            alert("Failed to verify payment. Please contact support.");
+        });
+}
+
+
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
 <%- include('../partials/user/footer') %>

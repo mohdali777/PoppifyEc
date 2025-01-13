@@ -51,8 +51,8 @@
             <% order.cartItems.forEach(items=>{ %>
             <tbody>
                 <tr>
-                    <td><img   src="/uploads/<%= items.productId.image[0] %>" alt="Product Image"></td>
-                    <td><%= items.productId.name %></td>
+                    <td><img   src="/uploads/<%= items.productImage %>" alt="Product Image"></td>
+                    <td><%= items.productName %></td>
                     <td><%= items.quantity %></td>
                     <td>₹<%= items.price %></td>
                     <td>₹<%= items.total %></td>

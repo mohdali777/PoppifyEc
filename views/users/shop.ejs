@@ -1,6 +1,8 @@
 <%- include('../partials/user/header') %>
 <%- include('../partials/user/navbar') %>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+<link href="https://cdn.jsdelivr.net/npm/izitoast/dist/css/iziToast.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/izitoast/dist/js/iziToast.min.js"></script>
 
 <style>
     .filter-sort-container {
@@ -131,6 +133,18 @@
         </select>
     </div>
 
+
+    <div class="filter-section">
+        <h3>Variant Range</h3>
+        <select id="variantFilter" onchange="applyFilters()">
+            <option value="">All Variants</option>
+            <option value="128GB">128GB</option>
+            <option value="256GB">256GB</option>
+            <option value="518GB">518Gb</option>
+            <option value="816GB">816GB</option>
+            <option value="1TB">1TB</option>
+        </select>
+    </div>
     <!-- Price Filter Section -->
     <div class="filter-section">
         <h3>Price Range</h3>
@@ -141,6 +155,7 @@
             <option value="5001-10000">₹5,001 - ₹10,000</option>
             <option value="10001-50000">₹10,001 - ₹50,000</option>
             <option value="50001-100000">₹50,001 - ₹1,00,000</option>
+            <option value="100000-200000">₹1,00,000 - ₹2,00,000</option>
         </select>
     </div>
 
@@ -169,15 +184,22 @@
         const searchValue = document.getElementById('searchInput').value.toLowerCase();
         const sortValue = document.getElementById('sortOptions').value;
         const categoryValue = document.getElementById('categoryFilter').value;
+        const variantValue = document.getElementById("variantFilter").value;
         const priceValue = document.getElementById('priceFilter').value;
 
-        const url = `/products-shop?sort=${sortValue}&search=${searchValue}&category=${categoryValue}&price=${priceValue}&page=${currentPage}&limit=${productsPerPage}`;
+        const url = `/products-shop?sort=${sortValue}&search=${searchValue}&category=${categoryValue}&variant=${variantValue}&price=${priceValue}&page=${currentPage}&limit=${productsPerPage}`;
         
         fetch(url)
             .then(response => response.json())
             .then(data => {
                 const productList = document.getElementById('productList');
                 const paginationControls = document.getElementById('paginationControls');
+
+                if (data.products.length === 0) {
+                productList.innerHTML = '<p>No products found matching the criteria.</p>';
+                paginationControls.style.display = 'none'; // Hide pagination controls
+                return; // Exit early
+            }
 
                 productList.innerHTML = '';  // Clear the current product list
                 data.products.forEach(product => {
@@ -259,50 +281,94 @@
             });
     }
 
-    function addWishlist(productId) {
-        fetch(`/addwishlist/${productId}`, { method: "POST" })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error("Failed to add product to wishlist");
-                }
-                return response.json(); 
-            })
-            .then((data) => {
-                if (data.success) {
-                    location.reload(); 
-                    alert(data.message || "Product added to wishlist!");
-                } else {
-                    alert(data.message || "Unable to add product to wishlist.");
-                }
-            })
-            .catch((error) => {
-                console.error("Error adding product to wishlist:", error);
-                alert("An error occurred. Please try again later.");
+    
+      function addWishlist(productId) {
+    fetch(`/addwishlist/${productId}`, { method: "POST" })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error("Failed to add product to wishlist");
+            }
+            return response.json(); 
+        })
+        .then((data) => {
+            if (data.success) {
+              const button = document.getElementById(`wishlist-${productId}`);
+                    button.classList.remove('btn-light');
+                    button.classList.add('btn-danger');
+                    button.setAttribute(
+                        'onclick',
+                        `removeWishlist('${productId}')`
+                    );
+                    iziToast.success({
+          title: 'Success',
+          message: data.message || 'Product removed from wishlist!',
+          position: 'topRight',
+        });
+                
+            } else {
+                swal({
+                    title: "Error!",
+                    text: data.message || "Unable to add product to wishlist.",
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch((error) => {
+            console.error("Error adding product to wishlist:", error);
+            swal({
+                title: "Error!",
+                text: "An error occurred. Please try again later.",
+                icon: "error",
+                button: "OK",
             });
-    }
+        });
+}
 
-    function removeWishlist(productId) {
+
+function removeWishlist(productId) {
   fetch(`/removewishlis/${productId}`, { method: "POST" })
     .then((response) => {
       if (!response.ok) {
-        throw new Error("Failed to add product to wishlist");
+        throw new Error("Failed to remove product from wishlist");
       }
       return response.json(); 
     })
     .then((data) => {
       if (data.success) {
         const button = document.getElementById(`wishlist-${productId}`);
-        button.classList.add('btn-light');
-        location.reload()
+          button.classList.add('btn-light');
+          button.setAttribute(
+                        'onclick',
+                        `addWishlist('${productId}')`
+                    );
+          iziToast.success({
+          title: 'Success',
+          message: data.message || 'Product removed from wishlist!',
+          position: 'topRight',
+        });
+       
       } else {
-        alert(data.message || "Unable to remove product to wishlist.");
+        swal({
+          title: "Error!",
+          text: data.message || "Unable to remove product from wishlist.",
+          icon: "error",
+          button: "OK",
+        });
       }
     })
     .catch((error) => {
-      console.error("Error removing product to wishlist:", error);
-      alert("An error occurred. Please try again later.");
+      console.error("Error removing product from wishlist:", error);
+      swal({
+        title: "Error!",
+        text: "An error occurred. Please try again later.",
+        icon: "error",
+        button: "OK",
+      });
     });
 }
+
+
 
     window.onload = applyFilters; 
 </script>

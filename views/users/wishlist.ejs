@@ -4,22 +4,20 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
 <div class="container py-5">
-    <div class="section_category">
-      <p class="section_category_p" style="color: red; font-size: 14px;">wishlist</p>
-    </div>
-    <div class="row row-cols-1 row-cols-md-4 g-4">
+  <div class="section_category">
+    <p class="section_category_p" style="color: red; font-size: 14px;">Wishlist</p>
+  </div>
+  <div class="row row-cols-1 row-cols-md-4 g-4">
+    <% if (wishlist.items && wishlist.items.length > 0) { %>
       <% wishlist.items.forEach(item => { %>
         <div class="col">
           <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
-            <div class="badge bg-danger text-white position-absolute top-0 start-0 m-2" style="width: 40px; height: 20px; font-size: 11px;">
-              -10%
-            </div>
             <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
               <img class="card-img-top" src="/uploads/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('<%= item.productId._id %>','<%=item.productId.category %>')">
             </div>
             <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
               <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px; background-color: red;" onclick="removewishlist('<%= item.productId._id %>')">
-                <i class="bi bi-heart" style="font-size: 15px;  fill: red; color: white;" ></i>
+                <i class="bi bi-heart" style="font-size: 15px; fill: red; color: white;" ></i>
               </button>
               <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
                 <i class="bi bi-eye" style="font-size: 15px;"></i>
@@ -31,14 +29,18 @@
               </p>
               <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹<%= item.productId.variants[0].price %></h5>
               <div class="text-warning">
-                <button type="button" onclick="productdeatails('<%= item.productId._id %>','<%=item.productId.category %>')" class="btn btn-danger btn-lg" >View Product</button>
+                <button type="button" onclick="productdeatails('<%= item.productId._id %>','<%=item.productId.category %>')" class="btn btn-danger btn-lg">View Product</button>
               </div>
             </div>
           </div>
         </div>
       <% }) %>
-    </div>
+    <% } else { %>
+      <p>No items in your wishlist</p>
+    <% } %>
   </div>
+</div>
+
   
 
   <script>
@@ -59,7 +61,6 @@ console.log(err);
  }).then((data)=>{
  if(data.success){
   alert(data.message || "Product added to wishlist!");
-        window.location.reload(); 
  } else {
       alert(data.message || "Unable to add product to wishlist.");
  }

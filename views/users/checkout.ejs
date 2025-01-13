@@ -109,21 +109,32 @@
                     
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;"><%=items.productId.name %></span>
-                        <strong style="font-size: 1.2rem;">$<%= items.price %></strong>
+                        <strong style="font-size: 1.2rem;">₹<%= items.price %></strong>
                     </li>
                 <% }) %>
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;">Subtotal</span>
-                        <strong style="font-size: 1.2rem;" id="totalPrice">$<%=cart.totalPrice %></strong>
+                        <strong style="font-size: 1.2rem;" id="totalPrice">₹<%=cart.totalPrice %></strong>
                     </li>
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;">Shipping</span>
-                        <strong style="font-size: 1.2rem;">Free</strong>
+                        <% if(cart.totalPrice <= 500 && cart.totalPrice > 0){ %>
+                        <strong style="font-size: 1.2rem;">₹40</strong>
+                        <%  }else{ %>
+                          <strong style="font-size: 1.2rem;">Free</strong>
+                          <%  } %>
                     </li>
                     <hr>
                     <li class="d-flex justify-content-between mb-3">
                         <strong style="font-size: 1.2rem;">Total</strong>
-                        <strong style="font-size: 1.2rem;" id="totalPrice1">$<%=cart.totalPrice %></strong>
+                        <% if(cart.totalPrice <= 500 && cart.totalPrice > 0 ){ %>
+                        <strong style="font-size: 1.2rem;" id="totalPrice1">₹<%=cart.totalPrice + 40%></strong>
+                        <p id="couponAppliedMessage" style="  color: blue; font-weight: bold;">
+                          Above ₹500 Orders ₹40 Added Delivery Charge!
+                        </p>
+                        <%  }else{ %>
+                          <strong style="font-size: 1.2rem;" id="totalPrice1">₹<%=cart.totalPrice%></strong>
+                          <%  } %>
                     </li>
                     <li class="d-flex justify-content-between mb-3" >
                       <strong style="font-size: 1.2rem; display: none;"  id="discountedPrice">Discount Price</strong>
@@ -145,8 +156,16 @@
                         <label class="form-check-label" for="wallet" style="font-size: 1.2rem;">Wallet</label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod">
+                      <% if(cart.totalPrice >= 1000 ){ %>
+                        <input class="form-check-input" type="radio" name="paymentMethod" id="cod" disabled>
                         <label class="form-check-label" for="cod" style="font-size: 1.2rem;">Cash on Delivery</label>
+                        <p id="couponAppliedMessage" style=" margin-top: 0px; color: red; font-weight: bold; margin-top: 10px;">
+                          Cod Only Available Order ₹1000 Above Orders!
+                        </p>
+                    <%  }else{ %>
+                      <input class="form-check-input" type="radio" name="paymentMethod" id="cod" >
+                      <label class="form-check-label" for="cod" style="font-size: 1.2rem;">Cash on Delivery</label>
+                  <%  } %>
                     </div>
                 </div>
 
@@ -174,7 +193,13 @@ const totalPrice = discountedPriceElement && discountedPriceElement.textContent.
 
     // Validate total price
     if (!totalPrice || isNaN(totalPrice)) {
-        alert("Invalid total price. Please check your cart and try again.");
+      swal({
+    title: "Invalid total price",
+    text: "Please check your cart and try again.",
+    icon: "error", // You can use "success", "info", "warning", "error", etc.
+    button: "OK", // Customize the button text
+});
+
         return;
     }
 const rozer = document.getElementById("razorpay").checked;
@@ -197,7 +222,13 @@ const orderDetails = {
 };
 
 if(orderDetails.firstName ==""||orderDetails.companyName=="" || orderDetails.streetAddress==""||orderDetails.apartment==""||orderDetails.city==""||orderDetails.phone==""||orderDetails.email==""){
-  return alert("Please Choose Address")
+  return swal({
+    title: "Please Choose Address",
+    text: "You must select an address to proceed.",
+    type: "Notification",
+    confirmButtonText: "OK"
+});
+
 }
 
         console.log("Order Details:", orderDetails);
@@ -297,6 +328,13 @@ function verifyPayment(response, razorpayOrderId, orderDetails) {
                     icon: "success",
                     button: "OK",
                 });
+                
+                if(data.orderId){
+            setTimeout(()=>{
+                  window.location.href = `/succes-page/${data.orderId}`
+            },1000)
+            
+          }
             } else {
                 swal({
                     title: "Payment Failed",
@@ -330,6 +368,10 @@ function selectAddress(id, name, companyname, streetaddress, appartment, city, p
   `;}
 
   function coupenApply(totalPrice){
+    console.log(totalPrice);
+    const Price = document.getElementById("totalPrice1");
+    const TotalPrice =  parseFloat(Price.textContent.trim().replace(/[^0-9.]/g, ""))
+    console.log(TotalPrice);
     const couponCode = document.getElementById('coupen-code').value;
   if (!couponCode) {
     document.getElementById('couponMessage').innerText = "Please enter a coupon code.";
@@ -340,17 +382,23 @@ function selectAddress(id, name, companyname, streetaddress, appartment, city, p
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ couponCode ,totalPrice}),
+    body: JSON.stringify({ couponCode ,TotalPrice}),
   })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert(data.message)
+        swal({
+    title: "Coupon Applied",
+    text: data.message, // Assuming data.message contains the message about the coupon applied
+    type: "success",
+    confirmButtonText: "OK"
+});
+
         const originalPriceElement = document.getElementById('totalPrice1');
         originalPriceElement.style.textDecoration = "line-through";
         originalPriceElement.style.color = "red"
         document.getElementById("discountedPrice").style.display = "block"
-        document.getElementById('totalPrice2').innerText = `$${data.newTotal}`;
+        document.getElementById('totalPrice2').innerText = `₹${data.newTotal}`;
         document.getElementById("couponAppliedMessage").style.display = "block"
         document.getElementById("copen-container").value = data.coupenId;
         document.getElementById("coupenDiscountAmount").value = data.totalDiscount;

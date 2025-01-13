@@ -148,6 +148,71 @@
     color: #e74c3c; /* Red for negative */
 }
 
+.wallet-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            text-align: center;
+            height: 400px;
+            position: fixed;
+            top: 100px;
+            left: 500px;
+
+        }
+
+        .wallet-container h2 {
+            margin: 0 0 20px;
+            color: #333;
+        }
+
+        .input-group-addmoney {
+            margin-bottom: 20px;
+            text-align: left;
+            
+        }
+
+        .input-group-addmoney label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .input-group-addmoney input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .add-money-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 100px;
+            width: 400px;
+            
+        }
+
+        .add-money-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .success-message {
+            margin-top: 15px;
+            color: green;
+            font-weight: bold;
+        }
+        #addMoneyForm{
+            margin-left: 50px;
+            margin-top: 50px;
+        }
 
 </style>
 <div class="container-sm">
@@ -161,7 +226,7 @@
         <div class="card-header">
           <img src="../images/mastercard_logo.png" alt="MasterCard Logo" class="card-logo">
           <div class="add-money">
-            <button>Add Money</button>
+            <button onclick="addmoney()">Add Money</button>
           </div>
         </div>
         <div class="card-info">
@@ -170,6 +235,19 @@
           <div class="card-expiry">Expiry: <%= wallet.cardExpiry %></div>
         </div>
       </div>
+    </div>
+
+    <div class="wallet-container" style="display: none;" id="addmoneyContainer">
+        <span id="closeModal" onclick="close()" style="color:#aaa; position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer;">&times;</span>
+        <h2>Add Money to Wallet</h2>
+        <form id="addMoneyForm">
+            <div class="input-group-addmoney">
+                <label for="amount">Enter Amount</label>
+                <input type="number" id="amount" name="amount" placeholder="Enter amount" required>
+            </div>
+            <button onclick="addmoneyToWallet(event)"  class="add-money-btn">Add Money</button>
+        </form>
+        <p class="success-message" id="successMessage" style="display: none;">Money added successfully!</p>
     </div>
   
     <!-- Wallet Body for Transaction History -->
@@ -218,6 +296,140 @@
 </div>
 </div>
 <script>
+function addmoney(){
+const container = document.getElementById("addmoneyContainer")
+container.style.display = "block"
+}
 
+
+// function close (){
+//     console.log("close");
+    
+    
+// } 
+document.getElementById("closeModal").addEventListener("click",function(e){
+e.preventDefault()
+const container = document.getElementById("addmoneyContainer")
+container.style.display = "none"
+})
+function addmoneyToWallet(e) {
+    e.preventDefault();
+    const amount = document.getElementById("amount").value;
+
+    // Validate the input
+    if (!amount) {
+        return alert("Please enter an amount.");
+    }
+
+    const numericAmount = parseFloat(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+        return alert("Please enter a valid positive number.");
+    }
+
+    
+    const requestBody = JSON.stringify({ amount: numericAmount });
+
+  
+    fetch("/addmoney", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: requestBody,
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Failed to add money to wallet.");
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.razorpayOrderId) {
+                  console.log('enterrazorpay');    
+            initializeRazorpay(data.razorpayOrderId, requestBody.amount, data.keyId);
+            
+        }else{
+            alert("an error occured During add money")
+        }
+    })
+    .catch(error => {
+        console.error(error);
+        alert("An error occurred. Please try again.");
+    });
+}
+
+function initializeRazorpay(razorpayOrderId, amount, keyId) {
+    console.log("Initializing Razorpay...");
+    console.log("Razorpay Order ID:", razorpayOrderId);
+
+    const options = {
+        key: keyId, 
+        amount: Math.round(amount * 100), // Convert to paisa
+        currency: "INR",
+        name: "Poppify",
+        description: "Add money to Wallet",
+        order_id: razorpayOrderId,
+        handler: function (response) {
+            console.log("Payment successful response:", response);
+            verifyPayment(response, razorpayOrderId);
+        },
+        prefill: {
+            name: "first name",
+            email:" orderDetails.email",
+            contact: "orderDetails.phone",
+        },
+        theme: {
+            color: "#3399cc",
+        },
+    };
+
+    const razorpay = new Razorpay(options);
+    razorpay.open();
+}
+
+function verifyPayment(response, razorpayOrderId) {
+    console.log("Verifying Payment...");
+    console.log("Response:", response);
+
+    fetch('/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            razorpayOrderId: razorpayOrderId,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            type:"Wallet"
+        }),
+    })
+        .then(res => res.json())
+        .then(data => {
+            console.log("Payment verification data:", data);
+            if (data.success) {
+                swal({
+                    title: "Payment Successful",
+                    text: "Money added to wallet Successfull!",
+                    icon: "success",
+                    button: "OK",
+                }).then(()=>{
+                    window.location.reload()
+                });
+                
+            } else {
+                swal({
+                    title: "Payment Failed",
+                    text: data.message,
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Payment verification failed:", err);
+            alert("Failed to verify payment. Please contact support.");
+        });
+}
 </script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <%- include('../partials/user/footer') %>

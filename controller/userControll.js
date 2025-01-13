@@ -7,6 +7,8 @@ const env = require("dotenv");
 const { category } = require("./admincontroller");
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
+const { v4: uuidv4 } = require('uuid');
+
 
 
 
@@ -662,8 +664,19 @@ let postlogin = async (req,res)=>{
               existingItem.total = existingItem.quantity * existingItem.price;
               existingItem.totalOfferPrice = existingItem.quantity * existingItem.discoundOfferPricePer
             } else {
+             let ProductDeat = await Product.findById(productId)
+              const productName = ProductDeat.name;
+              const productImage = ProductDeat.image[0];
+              const productCategory = ProductDeat.category
+              const productBrand = ProductDeat.brand
+              console.log(productName);
+              console.log(productImage);
               cart.items.push({
                 productId,
+                productName,
+                productImage,
+                productCategory,
+                productBrand,
                 price,
                 quantity,
                 variant,
@@ -818,6 +831,7 @@ let postlogin = async (req,res)=>{
 
         let razorpayOrderId = null;
 
+        let paymentStatus ;
         // If payment method is Razorpay, create a Razorpay order
         if (paymentMethod === "RazorPay") {
           try {
@@ -829,6 +843,7 @@ let postlogin = async (req,res)=>{
                   receipt: orderId,
               });
               razorpayOrderId = razorpayOrder.id;
+              paymentStatus = "Failed"
               console.log(  razorpayOrder.id);
               
           } catch (error) {
@@ -837,7 +852,7 @@ let postlogin = async (req,res)=>{
           }
       }
 
-      let paymentStatus ;
+      
 
       if (paymentMethod === 'Wallet') {
        
@@ -1003,6 +1018,10 @@ let postlogin = async (req,res)=>{
                 return res.status(404).json({ message: "User wallet not found" });
             }
         }
+
+        if(order.paymentMethod === "COD"){
+           order.paymentStatus = "Cancelled"
+        }
         
          
 
@@ -1022,7 +1041,7 @@ let postlogin = async (req,res)=>{
   }
 
   const sort = async (req, res) => {
-    const { sort, search, category, price, page = 1, limit = 8 } = req.query;
+    const { sort, search, category, variant,price, page = 1, limit = 8 } = req.query;
 
     let sortQuery = {};
     if (sort === 'priceLowToHigh') sortQuery = { 'price': 1 };
@@ -1054,7 +1073,13 @@ let postlogin = async (req,res)=>{
         if (category) {
             categoryQuery = { category: category };
         }
-        const products = await Product.find({ ...searchQuery, ...categoryQuery, ...priceQuery })
+
+        let variantQuery = {};
+        if (variant) {
+            variantQuery = { "variants.variant": variant };
+        }
+
+        const products = await Product.find({ ...searchQuery, ...categoryQuery, ...priceQuery ,...variantQuery})
             .populate({
                 path: 'categoryId',
                 match: { is_listed: true } 
@@ -1192,7 +1217,7 @@ let postlogin = async (req,res)=>{
   const applyCoupens = async (req,res) => {
     try {
       console.log(req.body);
-      const {couponCode,totalPrice} = req.body;
+      const {couponCode,TotalPrice} = req.body;
       const userId = req.session.userId;
       const coupen = await Coupen.findOne({couponCode})
       if(!coupen){
@@ -1213,7 +1238,7 @@ let postlogin = async (req,res)=>{
         return res.status(400).json({ success: false, message: "Coupon code has redeemed." });
       }
       const discount = coupen.discount; 
-    const originalTotal = totalPrice; 
+    const originalTotal = TotalPrice; 
     console.log(originalTotal);
     const newTotal = originalTotal - (originalTotal * (discount / 100));
 
@@ -1249,15 +1274,88 @@ let postlogin = async (req,res)=>{
     console.log("Entering verify payment part");
     console.log(req.body);
   
-    const { razorpayOrderId, razorpayPaymentId, razorpaySignature } = req.body;
+    const { razorpayOrderId, razorpayPaymentId, razorpaySignature ,type} = req.body;
     
     // Ensure session contains the correct orderId
+
+
+
+    if(type == "Wallet"){
+      console.log("enter wallet ", req.body);
+      
+      const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+      const expectedSignature = crypto
+          .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
+          .update(body.toString())
+          .digest("hex");
+      const userId = req.session.userId;
+      const wallet = await Wallet.findOne({userId});
+      if (!wallet) {
+          return res.status(404).json({ success: false, message: "wallet not found" });
+      }
+
+      if (expectedSignature === razorpaySignature) {
+        const amount = req.session.amount;
+        console.log(amount);
+        
+        wallet.balance += amount;
+        wallet.transactions.push({
+            transactionId: `addmoney-${razorpayOrderId}`,
+            date: new Date(),
+            description: "Add Money To Wallet",
+            type: "credit", 
+            amount: amount,
+        });
+        await wallet.save();
+        return  res.status(200).json({ success: true, message: "Payment verified successfully" });
+      } else {
+
+         return res.status(400).json({ success: false, message: "Payment verification failed" });
+      }
+    }
+
+    
     const orderId = req.session.orderId;
     if (!orderId) {
       return res.status(400).json({ message: "Order ID not found in session" });
     }
   
     console.log("Order ID from session:", orderId);
+
+    if(type == "repay"){
+      const body = `${razorpayOrderId}|${razorpayPaymentId}`;
+      const expectedSignature = crypto
+          .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
+          .update(body.toString())
+          .digest("hex");
+
+      const order = await Order.findOne( {orderId:orderId} );
+      if (!order) {
+          return res.status(404).json({ success: false, message: "Order not found" });
+      }
+
+      if (expectedSignature === razorpaySignature) {
+          order.paymentStatus = "Paid";
+          order.orderStatus = "Pending"; 
+          order.paymentMethod = "RazorPay"
+          order.razorpay = { paymentId: razorpayPaymentId, signature: razorpaySignature };
+          await order.save();
+
+        return  res.status(200).json({ success: true, message: "Payment verified successfully", orderId });
+      } else {
+          order.paymentStatus = "Failed";
+          order.orderStatus = "Cancelled";
+          order.razorpay = { paymentId: razorpayPaymentId, signature: razorpaySignature };
+          await order.save();
+
+         return res.status(400).json({ success: false, message: "Payment verification failed" });
+      }
+    }
+
+
+    
+
+
   
     // Generate the expected signature
     const body = `${razorpayOrderId}|${razorpayPaymentId}`;
@@ -1291,7 +1389,7 @@ let postlogin = async (req,res)=>{
       );
   
       console.log("Payment verified and order updated", updatedOrder);
-      res.status(200).json({ success:true,message: "Payment verified successfully", updatedOrder });
+      res.status(200).json({ success:true,message: "Payment verified successfully", updatedOrder ,orderId});
     } else {
       // Update the order as failed and cancelled
       const updatedOrder = await Order.findOneAndUpdate(
@@ -1368,6 +1466,154 @@ let postlogin = async (req,res)=>{
       res.status(500).json({ success: false, message: "Internal server error" })
     }
   }
+
+  const repayOrder = async (req, res) => {
+    try {
+        console.log(req.body);
+        
+        const { orderId, paymentMethod, totalPrice } = req.body;
+        const userId = req.session.userId;
+         
+        // Check if user is authenticated
+        if (!userId) {
+            return res.status(401).json({ success: false, message: "User not authenticated" });
+        }
+
+       
+        const order = await Order.findById(orderId);
+        console.log(order);
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+        req.session.orderId = order.orderId;
+        const orderid = order.orderId
+
+        
+        if (paymentMethod === 'Wallet') {
+            const wallet = await Wallet.findOne({ userId });
+
+            if (!wallet) {
+                return res.status(404).json({ success: false, message: "Wallet not found" });
+            }
+
+            console.log(wallet);
+
+           
+            if (wallet.balance < totalPrice) {
+                return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
+            }
+
+          
+            wallet.balance -= totalPrice;
+            wallet.transactions.push({
+                transactionId: `TXN-${Date.now()}`,
+                amount: totalPrice,
+                description: `Order Payment for ${orderId}`,
+                type: 'debit',
+            });
+            order.paymentStatus = "Paid";
+            order.paymentMethod = "Wallet";
+            order.orderStatus = "Pending"
+            await wallet.save();
+            await order.save();
+
+            return res.status(200).json({ success: true, message: "Payment successful", order,orderid });
+        }
+
+
+        if (paymentMethod === "RazorPay") {
+          try {
+              const razorpayOrder = await razorpay.orders.create({
+                  amount: Math.round(totalPrice * 100), // Amount in paisa
+                  currency: "INR",
+                  receipt: orderId,
+              });
+      
+              let razorpayOrderId = razorpayOrder.id;
+      
+              
+              return res.status(200).json({
+                  success: true,
+                  message: "Razorpay order created successfully",
+                  razorpayOrderId,
+                  key_id: process.env.RAZORPAY_KEY_ID
+              });
+
+
+          } catch (error) {
+              console.error("Error creating Razorpay order:", error);
+              return res.status(500).json({
+                  success: false,
+                  message: "Failed to create Razorpay order. Please try again.",
+              });
+          }
+      }
+      
+
+        
+
+
+        return res.status(400).json({ success: false, message: "Invalid payment method" });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Internal server error", error: error.message });
+    }
+};
+
+const downloadInvoice = async (req, res) => {
+  const { orderId } = req.params;
+
+  try {
+    // Fetch the order from the database
+    const order = await Order.findOne({ orderId });
+
+    if (!order) {
+      return res.status(404).json({ ok: false, message: "Order not found" });
+    }
+    res.status(200).json({ ok: true, order, message: "Invoice details retrieved successfully" });
+  } catch (error) {
+    console.error("Error generating invoice:", error);
+    res.status(500).json({ ok: false, message: "Internal Server Error" });
+  }
+};
+
+const addMoneyWallet = async (req,res) => {
+ 
+  
+  const {amount} = req.body;
+  console.log(amount);
+ req.session.amount = amount;
+    try {
+      const receiptId = `rec_${uuidv4().slice(0, 30)}`;
+      const razorpayOrder = await razorpay.orders.create({
+          amount: Math.round(amount * 100), // Amount in paisa
+          currency: "INR",
+          receipt: receiptId,
+      });
+
+      let razorpayOrderId = razorpayOrder.id;
+
+      
+      return res.status(200).json({
+          success: true,
+          message: "Razorpay order created successfully",
+          razorpayOrderId,
+          key_id: process.env.RAZORPAY_KEY_ID
+      });
+
+
+  } catch (error) {
+      console.error("Error creating Razorpay order:", error);
+      return res.status(500).json({
+          success: false,
+          message: "Failed to create Razorpay order. Please try again.",
+      });
+  }
+}
+
+
     
 module.exports = {login,
     signup,
@@ -1411,4 +1657,7 @@ applyCoupens,
 verifyPayment,
 getWallet,
 categoryFilter,
-Success}
+Success,
+repayOrder,
+downloadInvoice,
+addMoneyWallet}

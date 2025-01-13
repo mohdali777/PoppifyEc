@@ -111,7 +111,7 @@
 
         <!-- Pagination -->
         <div class="d-flex justify-content-between align-items-center">
-          <span><strong>Showing 1-10 from <%= orders.length %></strong></span>
+          <span><strong>Showing <span id="pageInfo">1-10</span> from <%= orders.length %></strong></span>
           <nav>
             <ul class="pagination">
               <li class="page-item">
@@ -129,6 +129,10 @@
 </div>
 
 <script>
+  const rowsPerPage = 10; // Number of rows to display per page
+  let currentPage = 1; // Current page number
+
+  // Function to toggle the visibility of the date fields
   function toggleDateFields() {
     const predefinedRange = document.getElementById("predefinedRange").value;
     const isCustom = predefinedRange === "custom";
@@ -136,6 +140,7 @@
     document.getElementById("endDateContainer").style.display = isCustom ? "block" : "none";
   }
 
+  // Function to generate the report
   function generateReport() {
     const predefinedRange = document.getElementById("predefinedRange").value;
     const startDate = document.getElementById("startDate").value;
@@ -151,10 +156,14 @@
       body: JSON.stringify(filters),
     })
       .then(response => response.json())
-      .then(data => updateTable(data.orders))
+      .then(data => {
+        updateTable(data.orders);
+        paginateTable();
+      })
       .catch(err => console.error(err));
   }
 
+  // Function to update the table with data
   function updateTable(orders) {
     const tableBody = document.getElementById("productTableBody");
     tableBody.innerHTML = '';
@@ -179,32 +188,54 @@
         </tr>`;
       tableBody.insertAdjacentHTML('beforeend', row);
     });
+
+    paginateTable();
   }
 
-  
+  // Function to handle pagination logic
+  function paginateTable() {
+    const tableBody = document.getElementById("productTableBody");
+    const rows = tableBody.querySelectorAll("tr");
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
 
-//   document.getElementById("downloadReportBtn").addEventListener("click", () => {
-//   // Parse the stringified orders data to an array
-//   const orders = JSON.parse('<%- JSON.stringify(orders) %>');
-//   console.log('Orders:', orders);
+    // Hide all rows initially
+    rows.forEach(row => row.style.display = "none");
 
-//   fetch('/admin/download-report/pdf', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ orders }), // Send the actual orders array
-//   })
-//   .then(response => response.blob())
-//   .then(blob => {
-//     const link = document.createElement('a');
-//     link.href = window.URL.createObjectURL(blob);
-//     link.download = 'SalesReport.pdf';
-//     link.click();
-//   })
-//   .catch(err => console.error(err));
-// });
+    // Show rows for the current page
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    for (let i = start; i < end && i < totalRows; i++) {
+      rows[i].style.display = "table-row";
+    }
+
+    
+    document.getElementById("pageInfo").innerText = `${start + 1}-${Math.min(end, totalRows)} of ${totalRows}`;
+
+    
+    document.getElementById("prevPage").disabled = currentPage === 1;
+    document.getElementById("nextPage").disabled = currentPage === totalPages;
+
+   
+    document.getElementById("prevPage").onclick = () => {
+      if (currentPage > 1) {
+        currentPage--;
+        paginateTable();
+      }
+    };
+
+    document.getElementById("nextPage").onclick = () => {
+      if (currentPage < totalPages) {
+        currentPage++;
+        paginateTable();
+      }
+    };
+  }
 
 
-document.getElementById("downloadReportBtn").addEventListener("click", () => {
+  document.addEventListener("DOMContentLoaded", paginateTable);
+
+  document.getElementById("downloadReportBtn").addEventListener("click", () => {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -292,8 +323,4 @@ document.getElementById("downloadReportBtnExcel").addEventListener("click", () =
 
 
 
-
-
 </script>
-
-<%- include('../partials/admin/footer') %>

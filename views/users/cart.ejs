@@ -23,8 +23,8 @@
                 <% cart.items.forEach(item => { %>
                     <tr>
                         <td class="d-flex align-items-center">
-                            <img style="width: 40px; height: 40px;" src="/uploads/<%= item.productId.image[0] %>" alt="<%= item.productId.name %>" class="me-2">
-                            <span><%= item.productId.name %></span>
+                            <img style="width: 40px; height: 40px;" src="/uploads/<%= item.productImage %>" alt="<%= item.productId.name %>" class="me-2">
+                            <span><%= item.productName %></span>
                         </td>
                         <td><%= item.variant %></td>
                         <td><%= item.color %></td>
@@ -117,10 +117,21 @@ function updateCart(productId,color,totalquantity,id,variant,) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            alert('Cart updated successfully!');
-            location.reload(); 
+            swal({
+                title: "Cart Updated!",
+                text: "Your cart has been updated successfully.",
+                icon: "success",
+                button: "OK",
+            }).then(() => {
+                location.reload();
+            });
         } else {
-            alert('Failed to update cart.');
+            swal({
+                title: "Failed to Update!",
+                text: "There was an issue updating your cart. Please try again.",
+                icon: "error",
+                button: "OK",
+            });
         }
     })
     .catch(error => {

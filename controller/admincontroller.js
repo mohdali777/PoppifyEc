@@ -58,7 +58,23 @@ let postlogin = async(req,res)=>{
             return res.render('admins/signin',{message:"Password dosen't Match"});
         } 
         req.session.admin = true;
-        res.render("admins/adminhome")
+        const Users = await User.find({})
+        const Orders = await Order.find({orderStatus:"Delivered"})
+        const BestProduct = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productId",
+          productName:{$first: "$cartItems.productName"},
+          totalSold:{$sum:"$cartItems.quantity"}
+        }},{$sort:{totalSold:-1}}])
+
+        const BestCategory = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productCategory",
+          totalSold:{$sum:"$cartItems.quantity"}
+        }},{$sort:{totalSold:-1}}])
+
+        const BestBrand = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productBrand",
+          totalSold:{$sum:"$cartItems.quantity"}
+        }},{$sort:{totalSold:-1}}])
+        
+
+        res.render("admins/adminhome",{Users,Orders,BestProduct,BestCategory,BestBrand})
     } catch (err) {
         res.status(500).send(`${err} error found`)
     }
@@ -67,8 +83,22 @@ let postlogin = async(req,res)=>{
 }
 
 let gethome = async (req,res)=>{
+  const BestProduct = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productId",
+    productName:{$first: "$cartItems.productName"},
+    totalSold:{$sum:"$cartItems.quantity"}
+  }},{$sort:{totalSold:-1}},{$limit:5}])
+
+  const BestCategory = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productCategory",
+    totalSold:{$sum:"$cartItems.quantity"}
+  }},{$sort:{totalSold:-1}},{$limit:5}])
+
+  const BestBrand = await Order.aggregate([{$match:{orderStatus:"Delivered"}},{$unwind:"$cartItems"},{$group:{_id:"$cartItems.productBrand",
+    totalSold:{$sum:"$cartItems.quantity"}
+  }},{$sort:{totalSold:-1}},{$limit:5}])
     
-res.render("admins/adminhome")
+  const Users = await User.find({})
+  const Orders = await Order.find({orderStatus:"Delivered"})
+  res.render("admins/adminhome",{Users,Orders,BestProduct,BestCategory,BestBrand})
 }
 
 //add user post
@@ -474,7 +504,7 @@ const orderManagment = async (req,res) => {
   try {
     const skip = (page - 1) * limit
     const totalOrders = await Order.countDocuments();
-    const order = await Order.find().skip(skip).limit(limit);
+    const order = await Order.find().sort({createdAt:-1}).skip(skip).limit(limit);
     const orders = await Order.find()
     res.render("admins/orders",{order,orders,currentPage:page,totalPages:Math.ceil(totalOrders/limit)})
   } catch (error) {
@@ -503,7 +533,7 @@ const updateStatus = async (req,res) => {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        if(status == "Cancelled" && order.paymentMethod == "RazorPay" && order.razorpay.paymentStatus == "Success"){
+        if(status == "Cancelled" && order.paymentMethod === "RazorPay" && order.paymentStatus == "Paid" ||status == "Cancelled" && order.paymentMethod === "Wallet" && order.paymentStatus == "Paid"){
           const userId = order.userId;
           const wallet = await Wallet.findOne({ userId }); 
           if (wallet) {
@@ -516,13 +546,18 @@ const updateStatus = async (req,res) => {
                   type: "credit", 
                   amount: order.totalPrice,  
               });
-              order.razorpay.paymentStatus = "Refunded"
+              order.paymentStatus = "Refunded"
               await wallet.save();
           } else {
               console.log("Wallet not found for user:", userId);
           }
       }
-      
+       
+      if(status == "Cancelled" && order.paymentMethod === "COD"){
+        order.paymentStatus = "Cancelled"
+      }else if(status == "Delivered" && order.paymentMethod === "COD"){
+        order.paymentStatus = "Paid"
+      }
 
         order.orderStatus = status;
         await order.save();
@@ -545,9 +580,6 @@ const returnAccept = async (req,res) => {
       }
 
 
-  
-   
-    
   
         const wallet = await Wallet.findOne({ userId });
       if(!wallet){
@@ -586,6 +618,7 @@ const returnAccept = async (req,res) => {
         }
     
       item.status = "Accepted";
+      order.orderStatus = "Returned"
       await order.save();
       return res.status(200).json({ success: true, message: "Return request accepted successfully." });
     } catch (error) {
@@ -994,6 +1027,80 @@ const downloadPDF = async (req, res) => {
   doc.end();
 };
 
+const renderChart = async (req, res) => {
+  try {
+    const { filter } = req.body; // Extract filter (e.g., "yearly" or "monthly")
+    console.log(filter);
+    
+    let matchCondition = {};
+    let groupBy = {};
+    let labels = [];
+    
+    // Determine the query condition based on the filter
+    if (filter === "yearly") {
+      const currentYear = new Date().getFullYear();
+      matchCondition = { 
+        createdAt: { 
+          $gte: new Date(`${currentYear}-01-01`),  // Start date: January 1st of the current year
+          $lt: new Date(`${currentYear + 1}-01-01`) // End date: January 1st of the next year
+        },
+        orderStatus: "Delivered" 
+      };
+      groupBy = { $month: "$createdAt" };
+      labels = [
+        "January", "February", "March", "April", "May", "June", 
+        "July", "August", "September", "October", "November", "December"
+      ];
+    } else if (filter === "monthly") {
+      const currentMonth = new Date().getMonth() + 1; // Current month (1-based index)
+      const currentYear = new Date().getFullYear();
+      matchCondition = { 
+        createdAt: { 
+          $gte: new Date(`${currentYear}-${currentMonth}-01`), 
+          $lt: new Date(`${currentYear}-${currentMonth + 1}-01`) 
+        } ,orderStatus: "Delivered"
+      };
+      groupBy = { $dayOfMonth: "$createdAt" }; 
+      labels = Array.from({ length: 31 }, (_, i) => i + 1); // Generate an array from 1 to 31
+    } 
+
+    // Fetch data from the database using aggregation
+    const chartData = await Order.aggregate([
+      { $match: matchCondition }, // Apply the date filter (e.g., only for current month/year)
+      { $group: { 
+          _id: groupBy, 
+          totalRevenue: { $sum: "$totalPrice" }, // Calculate total revenue
+          count: { $sum: 1 } // Count orders
+        }
+      },
+      { $sort: { _id: 1 } } // Sort by group (month/day)
+    ]);
+
+    // Format data for the chart
+    const data = new Array(labels.length).fill(0); // Initialize data array with zero values
+    chartData.forEach(item => {
+      const index = item._id - 1; // Adjust index for 0-based array
+      if (index >= 0 && index < labels.length) {
+        data[index] = item.totalRevenue; // Assign revenue for the corresponding day/month
+      }
+    });
+
+    console.log(labels);
+    console.log(data);
+    
+    // Send response
+    res.status(200).json({
+      success: true,
+      labels,
+      data,
+    });
+  } catch (error) {
+    console.error("Error rendering chart:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch chart data" });
+  }
+};
+
+
 
 
 
@@ -1042,4 +1149,5 @@ deleteOfferPost,
 getFilteredOrders,
 downloadExcel,
 downloadPDF,
+renderChart
 }

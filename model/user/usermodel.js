@@ -145,6 +145,18 @@ const cartSchema = new mongoose.Schema({
         ref: 'Product', // Assumes you have a 'Product' model
         required: true,
       },
+      productName:{
+        type: String,
+      },
+      productImage:{
+        type:String
+      },
+      productCategory:{
+      type:String
+      },
+      productBrand:{
+        type:String
+      },
       quantity: {
         type: Number,
         required: true,
@@ -224,6 +236,18 @@ const orderSchema = new mongoose.Schema({
         ref: 'Product', // Assumes you have a 'Product' model
         required: true,
       },
+      productName:{
+        type: String,
+      },
+      productImage:{
+        type:String
+      },
+      productCategory:{
+        type:String
+        },
+        productBrand:{
+          type:String
+        },
       quantity: {
         type: Number,
         required: true,
@@ -295,7 +319,7 @@ const orderSchema = new mongoose.Schema({
   },
   paymentStatus:{
     type: String, 
-      enum: ['Pending', 'Failed', 'Paid','Refunded'], 
+      enum: ['Pending', 'Failed', 'Paid','Refunded',"Cancelled"], 
       default: 'Pending'
   },
   coupenId:{
@@ -414,7 +438,6 @@ const walletSchema = new mongoose.Schema({
       transactionId: {
           type: String,
           required: true,
-          unique: true
       },
       amount: {
           type: Number,
