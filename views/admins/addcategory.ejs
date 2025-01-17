@@ -7,7 +7,7 @@
   font-weight: 500; /* Medium weight */
   text-align: center; /* Center align */
   margin-top: 5px;"><%= message %></p> <% } %>
-  <form enctype="multipart/form-data" id="category-form" class="form" action="/admin/add-category" method="post">
+  <form enctype="multipart/form-data" id="category-form" class="form" >
     <label for="category-name">Category Name</label>
     <input type="text" id="category-name" name="name" placeholder="Enter category name" >
 
@@ -34,57 +34,7 @@
   </form>
 </div>
 
-<script>
-  document.getElementById('category-form').addEventListener('submit', function (e) {
-    const categoryName = document.getElementById('category-name').value.trim();
-    const categoryDescription = document.getElementById('category-description').value.trim();
-    const categoryImage = document.getElementById('category-image').files[0];
-    const isListed = document.getElementById('is-listed').value;
+<script src="/jsAdmin/addCategories.js"></script>
 
-   
-    if (!categoryName || !categoryDescription  || !isListed) {
-      Swal.fire({
-  icon: 'warning',
-  title: 'Please fill out all required fields.',
-  text: 'Make sure all fields are filled out before submitting.',
-});
-
-      e.preventDefault(); 
-      return;
-    }
-
-    
-    if (!categoryImage) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'No image uploaded',
-      text: 'Please upload an image for the category.',
-    });
-    e.preventDefault();
-    return;
-  }
-
-  const validImageTypes = ['image/jpeg', 'image/png', 'image/webp'];
-  if (!validImageTypes.includes(categoryImage.type)) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Invalid image format',
-      text: 'Please upload a JPEG, PNG, or WEBP image.',
-    });
-    e.preventDefault();
-    return;
-  }
-
-  const maxSize = 2 * 1024 * 1024; 
-  if (categoryImage.size > maxSize) {
-    Swal.fire({
-      icon: 'error',
-      title: 'Image size exceeds limit',
-      text: 'Image size exceeds 2MB. Please upload a smaller image.',
-    });
-    e.preventDefault();
-  }
-  });
-</script>
 
 <%- include('../partials/admin/footer') %>

@@ -1,10 +1,10 @@
 const express = require("express")
 const router = express.Router()
 const userControl = require("../controller/userControll")
+const userControl2 = require("../controller/userControl2")
 const sessions = require("../middleware/usersession")
 const passport = require("passport")
-const { Session } = require("express-session")
-const { route } = require("./admin")
+
 
 
 // getMethods
@@ -12,7 +12,7 @@ router.get("/login",sessions.islogin,userControl.login)
 router.get("/signup",sessions.islogin,userControl.signup)
 router.get("/forgetpass",userControl.forgetPass)
 router.get("/newpassword",userControl.newpassword)
-router.get("/home",sessions.sessionCheck,userControl.home)
+router.get("/home",userControl.home)
 router.get("/google", passport.authenticate("google", {
     scope: ["profile", "email"] 
   }));
@@ -20,7 +20,7 @@ router.get("/google", passport.authenticate("google", {
     passport.authenticate("google", {
       failureRedirect: "/login"
     }),userControl.google);
-  router.get("/productdeatails/:productId/:category",sessions.sessionCheck,userControl.productdeatails)
+  router.get("/productdeatails/:productId/:category",userControl.productdeatails)
   router.get("/resend-otp",userControl.resendOtp)
   router.get("/resend-otp-forget",userControl.resendOtpForget)
   router.get("/signout",(req,res)=>{
@@ -35,16 +35,19 @@ router.get("/google", passport.authenticate("google", {
   router.get("/cart",sessions.sessionCheck,userControl.getCart)
   router.get("/check-out",sessions.sessionCheck,userControl.checkOut)
   router.get("/myorders",sessions.sessionCheck,userControl.getOrdersPage)
-  router.get("/shop",sessions.sessionCheck,userControl.getShop)
-  router.get("/products-shop",sessions.sessionCheck,userControl.sort)
+  router.get("/shop",userControl.getShop)
+  router.get("/products-shop",userControl.sort)
   router.get("/edit-address/:addressId",sessions.sessionCheck,userControl.editaddressGet)
   router.get("/getwishlist",sessions.sessionCheck,userControl.getwishlist)
   router.get("/wallet", sessions.sessionCheck,userControl.getWallet)
-  router.get("/categoryFilter/:categoryId",sessions.sessionCheck,userControl.categoryFilter)
+  router.get("/categoryFilter/:categoryId",userControl.categoryFilter)
   router.get("/succes-page/:orderId",sessions.sessionCheck,userControl.Success)
-  router.get("/verify-Otp-page",(req,res)=>{
+  router.get("/verify-Otp-page/:otp",(req,res)=>{
+    const otp = req.params.otp; 
     res.render("users/verifyotp", { message: null});
   })
+  router.get("/fethWishlsit",sessions.sessionCheck,userControl.fetchWishlistData)
+  router.get("/transactionDeatails",userControl.getTransaction)
 // postMethods
 router.post("/signup",userControl.postsignup)
 router.post("/login",userControl.postlogin)
@@ -65,9 +68,9 @@ router.post("/removewishlis/:productId",sessions.sessionCheck,userControl.remove
 router.post("/orders/:orderId/return/:productId",sessions.sessionCheck,userControl.returnrequiest)
 router.post("/apply-coupon",sessions.sessionCheck,userControl.applyCoupens)
 router.post("/verify-payment",sessions.sessionCheck,userControl.verifyPayment)
-router.post("/repay-order",userControl.repayOrder)
-router.post("/download-invoice/:orderId",userControl.downloadInvoice)
-router.post("/addmoney",userControl.addMoneyWallet)
+router.post("/repay-order",sessions.sessionCheck,userControl.repayOrder)
+router.post("/download-invoice/:orderId",sessions.sessionCheck,userControl.downloadInvoice)
+router.post("/addmoney",sessions.sessionCheck,userControl.addMoneyWallet)
 
 
 

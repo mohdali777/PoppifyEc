@@ -259,177 +259,36 @@
                     <p>No transaction history available</p>
                 </div>
             <% } else { %>
-                <!-- Transaction Table with Headers -->
-                <div class="transaction-header">
-                    <div class="transaction-id">Transaction ID</div>
-                    <div class="transaction-date">Date</div>
-                    <div class="transaction-description">Description</div>
-                    <div class="transaction-amount">Amount</div>
-                </div>
-    
-                <!-- Transaction Items -->
-                <% wallet.transactions.forEach(transaction => { %>
-                    <div class="transaction-item">
-                        <div class="transaction-id"><%= transaction.transactionId %></div>
-                        <div class="transaction-date"><%= new Date(transaction.transactionDate).toLocaleString('en-IN', {
-                            timeZone: 'Asia/Kolkata',
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                          }) %></div>
-                        <div class="transaction-description"><%= transaction.description %></div>
-                        <div class="transaction-amount <%= transaction.type == 'debit' ? 'negative' : 'positive' %>">
-                            <%= transaction.type == 'debit' ? '-' : '+' %> <%= Math.abs(transaction.amount).toFixed(2) %>
-                        </div>
-                        
-                    </div>
-                <% }); %>
+                <!-- Transaction Table -->
+                <table class="table table-striped table-bordered" >
+                    <thead >
+                        <tr>
+                            <th scope="col" style="width: 30%;">Transaction ID</th>
+                            <th scope="col" style="width: 20%;">Date</th>
+                            <th scope="col" style="width: 35%;">Description</th>
+                            <th scope="col" style="width: 15%;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionTableBody">
+
+                    </tbody>
+                </table>
+                <div class="pagination">
+                    <button id="prevPage" onclick="changePage(-1)" class="btn btn-primary">
+                        Previous
+                    </button>
+                        <span id="pageInfo"></span>
+                <button id="nextPage" onclick="changePage(1)" class="btn btn-primary">Next</button>
+            </div>
             <% } %>
         </div>
     </div>
+    
     
   </div>
 
 </div>
 </div>
-<script>
-function addmoney(){
-const container = document.getElementById("addmoneyContainer")
-container.style.display = "block"
-}
-
-
-// function close (){
-//     console.log("close");
-    
-    
-// } 
-document.getElementById("closeModal").addEventListener("click",function(e){
-e.preventDefault()
-const container = document.getElementById("addmoneyContainer")
-container.style.display = "none"
-})
-function addmoneyToWallet(e) {
-    e.preventDefault();
-    const amount = document.getElementById("amount").value;
-
-    // Validate the input
-    if (!amount) {
-        return alert("Please enter an amount.");
-    }
-
-    const numericAmount = parseFloat(amount);
-    if (isNaN(numericAmount) || numericAmount <= 0) {
-        return alert("Please enter a valid positive number.");
-    }
-
-    
-    const requestBody = JSON.stringify({ amount: numericAmount });
-
-  
-    fetch("/addmoney", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: requestBody,
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Failed to add money to wallet.");
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.razorpayOrderId) {
-                  console.log('enterrazorpay');    
-            initializeRazorpay(data.razorpayOrderId, requestBody.amount, data.keyId);
-            
-        }else{
-            alert("an error occured During add money")
-        }
-    })
-    .catch(error => {
-        console.error(error);
-        alert("An error occurred. Please try again.");
-    });
-}
-
-function initializeRazorpay(razorpayOrderId, amount, keyId) {
-    console.log("Initializing Razorpay...");
-    console.log("Razorpay Order ID:", razorpayOrderId);
-
-    const options = {
-        key: keyId, 
-        amount: Math.round(amount * 100), // Convert to paisa
-        currency: "INR",
-        name: "Poppify",
-        description: "Add money to Wallet",
-        order_id: razorpayOrderId,
-        handler: function (response) {
-            console.log("Payment successful response:", response);
-            verifyPayment(response, razorpayOrderId);
-        },
-        prefill: {
-            name: "first name",
-            email:" orderDetails.email",
-            contact: "orderDetails.phone",
-        },
-        theme: {
-            color: "#3399cc",
-        },
-    };
-
-    const razorpay = new Razorpay(options);
-    razorpay.open();
-}
-
-function verifyPayment(response, razorpayOrderId) {
-    console.log("Verifying Payment...");
-    console.log("Response:", response);
-
-    fetch('/verify-payment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            razorpayOrderId: razorpayOrderId,
-            razorpayPaymentId: response.razorpay_payment_id,
-            razorpaySignature: response.razorpay_signature,
-            type:"Wallet"
-        }),
-    })
-        .then(res => res.json())
-        .then(data => {
-            console.log("Payment verification data:", data);
-            if (data.success) {
-                swal({
-                    title: "Payment Successful",
-                    text: "Money added to wallet Successfull!",
-                    icon: "success",
-                    button: "OK",
-                }).then(()=>{
-                    window.location.reload()
-                });
-                
-            } else {
-                swal({
-                    title: "Payment Failed",
-                    text: data.message,
-                    icon: "error",
-                    button: "OK",
-                });
-            }
-        })
-        .catch(err => {
-            console.error("Payment verification failed:", err);
-            alert("Failed to verify payment. Please contact support.");
-        });
-}
-</script>
+<script src="/js/wallet.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <%- include('../partials/user/footer') %>

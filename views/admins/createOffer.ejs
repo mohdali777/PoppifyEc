@@ -87,7 +87,7 @@ margin-top: 5px;"><%= message %></p> <% } %>
 
 <div class="offer-form-container">
     <h2>Create Offer</h2>
-    <form id="create-offer-form" action="/admin/create-offer" method="post">
+    <form id="create-offer-form" >
       <div class="form-group">
         <label for="offer-name" >Offer Name:</label>
         <input type="text" name="offerName" id="offer-name" placeholder="Offer Name">
@@ -141,59 +141,7 @@ margin-top: 5px;"><%= message %></p> <% } %>
     </form>
 </div>
 
-<script>
-document.getElementById("offer-create-btn").addEventListener("click", function (e) {
-  // Prevent form submission to validate first
-  e.preventDefault();
+<script src="/jsAdmin/addOffers.js"></script>
 
-  // Get form values
-  const offerType = document.getElementById("offer-type").value;
-  const discountType = document.getElementById("discount-type").value;
-  const discountValue = document.getElementById("discount-value").value;
-  const minimum = document.getElementById("minimum-order-value").value;
-  const expiryDate = document.getElementById("expiry-date").value;
-  const StartDate = document.getElementById("Starting-Date").value;
-  const isActive = document.getElementById("is-active").value;
-
-  // Validate form fields
-  if (
-    !offerType || 
-    !discountType || 
-    !discountValue || 
-    discountValue <= 0 || 
-    discountValue > 100 || 
-    (minimum && minimum < 0) || 
-    !expiryDate ||
-    !StartDate ||
-    !isActive
-  ) {
-    Swal.fire({
-  icon: 'warning',
-  title: 'Oops...',
-  text: 'Please fill out all required fields correctly!',
-});
-    return;  // Stops form submission if validation fails
-  }
-
-
-  const startDateObj = new Date(StartDate);
-  const expiryDateObj = new Date(expiryDate);
-  const currentDate = new Date();
-
-  if (expiryDateObj <= startDateObj) {
-    Swal.fire({
-  icon: 'warning',
-  title: 'Oops...',
-  text: 'Expiry Date should be after the Start Date.',
-});
-    return;
-  }
-
-
-  document.getElementById("create-offer-form").submit();
-});
-
-
-</script>
 
 <%- include('../partials/admin/footer') %>

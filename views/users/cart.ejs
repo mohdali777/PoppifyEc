@@ -21,7 +21,7 @@
             </thead>
             <tbody>
                 <% cart.items.forEach(item => { %>
-                    <tr>
+                    <tr data-item-id="<%= item._id %>"> 
                         <td class="d-flex align-items-center">
                             <img style="width: 40px; height: 40px;" src="/uploads/<%= item.productImage %>" alt="<%= item.productId.name %>" class="me-2">
                             <span><%= item.productName %></span>
@@ -40,7 +40,7 @@
                                 style="width: 60px;">
                         </td>
                         
-                        <td>$<%= item.total %></td>
+                        <td id="item.total-<%= item._id%>">$<%= item.total %></td>
                         <td>
                             <button class="btn btn-black btn-sm" onclick="deleteCartItem('<%= item.productId._id %>','<%= item.variant %>','<%= item._id %>')">
                                 <i class="fas fa-trash"></i>
@@ -59,7 +59,7 @@
             <hr>
             <p class="d-flex justify-content-between">
                 <span>Subtotal:</span>
-                <span>$<%= cart.totalPrice %></span>
+                <span class="CartTotalPrice">$<%= cart.totalPrice %></span>
             </p>
             <p class="d-flex justify-content-between">
                 <span>Shipping:</span>
@@ -68,137 +68,13 @@
             <hr>
             <p class="d-flex justify-content-between fw-bold">
                 <span>Total:</span>
-                <span>$<%= cart.totalPrice %></span>
+                <span class="CartTotalPrice">$<%= cart.totalPrice %></span>
             </p>
             <a href="#" class="btn btn-checkout w-100 text-uppercase" style=" background-color: #dc3545; color: white; font-weight: bold;" onclick="proceedtoPayment()">Proceed to Checkout</a>
         </div>
     </div>
 </div>
 
-<script>
-function updateCart(productId,color,totalquantity,id,variant,) {
-    const inputElement = document.getElementById(`cart-quantity-${id}`);
-    const quantity = parseInt(inputElement.value);
-
-    if (quantity < 1) {
-        swal({
-  title: "Invalid Quantity",
-  text: "Quantity must be at least 1.",
-  icon: "warning", 
-  button: "OK",     
-});
-
-        return;
-    }
-    if (quantity > totalquantity) {
-        swal({
-  title: "Limit Exceeded",
-  text: `You can only add up to ${totalquantity} items.`,
-  icon: "warning", 
-  button: "OK",    
-});
-
-        inputElement.value = totalquantity; 
-        inputElement.disabled = true; 
-        setTimeout(() => {
-            inputElement.disabled = false; 
-        }, 2000); 
-        return;
-       
-    }
-
-    fetch('/update-cart', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({quantity,id,variant,color }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            swal({
-                title: "Cart Updated!",
-                text: "Your cart has been updated successfully.",
-                icon: "success",
-                button: "OK",
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            swal({
-                title: "Failed to Update!",
-                text: "There was an issue updating your cart. Please try again.",
-                icon: "error",
-                button: "OK",
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Something went wrong.');
-    });
-}
-
-function deleteCartItem(productId, variant, id) {
-  swal({
-    title: "Are you sure?",
-    text: "Do you really want to remove this item from the cart?",
-    icon: "warning",
-    buttons: ["Cancel", "Yes, Remove It"],
-    dangerMode: true,
-  }).then((willDelete) => {
-    if (!willDelete) {
-      return; 
-    }
-
-    fetch('/delete-cart-item', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ productId, id }),
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          swal({
-            title: "Removed!",
-            text: "Item removed from cart successfully!",
-            icon: "success",
-            button: "OK",
-          }).then(() => {
-            location.reload(); 
-          });
-        } else {
-          swal({
-            title: "Error!",
-            text: data.message || "Failed to remove the item from the cart.",
-            icon: "error",
-            button: "OK",
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Error:', error);
-        swal({
-          title: "Error!",
-          text: "Something went wrong. Please try again.",
-          icon: "error",
-          button: "OK",
-        });
-      });
-  });
-}
-
-function proceedtoPayment (){
-    fetch("/check-out",{method:"GET"}).then((response)=>{
-if(response.ok) window.location.href = "/check-out"
-    }).catch((err)=>{
-console.log(err);
-
-    })
-}
-</script>
+<script src="/js/cart.js"></script>
 
 <%- include('../partials/user/footer') %>

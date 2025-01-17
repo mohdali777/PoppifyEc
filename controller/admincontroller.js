@@ -104,43 +104,43 @@ let gethome = async (req,res)=>{
 //add user post
 
 const adduser = async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
+  try {
+      const { username, email, password } = req.body;
+      const userByUsername = await User.findOne({ username });
+      const userByEmail = await User.findOne({ email });
 
-        // Check if the user already exists
-        const user = await User.findOne({ username });
-        if (user) {
-            const users = await User.find(); // Fetch existing users
-            return res.render("admins/users", { users, message: "User already exists" });
-        }
+      if (userByUsername) {
+          return res.status(400).json({ success: false, message: "Username already exists" });
+      }
 
-        // Hash the password
-        const saltRounds = 10;
-        const hashedpassword = await bcrypt.hash(password, saltRounds);
+      if (userByEmail) {
+          return res.status(400).json({ success: false, message: "Email already exists" });
+      }
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+      const newUser = new User({
+          email,
+          username,
+          password: hashedPassword
+      });
+      await newUser.save();
 
-        // Create and save the new user
-        const newUser = new User({
-            email,
-            username,
-            password: hashedpassword
-        });
-        await newUser.save();
-        res.redirect("/admin/usermangement")
-        
-    } catch (err) {
-        console.error(err);
-        res.render("admins/users", { message: "Error adding user. Please try again later." });
-    }
+      res.status(200).json({ success: true, message: "User added successfully" });
+  } catch (err) {
+      console.error(err);
+      res.status(500).json({ success: false, message: "Error adding user. Please try again later." });
+  }
 };
+
 
 const deleteuser = async(req,res)=>{
     try{
         const user = req.params.userid;
         await User.findByIdAndDelete(user)
-        const users = await User.find({})
         if(req.session.userId == user){
-          req.session.destroy()
+          req.session.userId = null;
         }
+        const users = await User.find({})
         res.redirect("/admin/usermangement")
     }catch(err){
 console.log(err)
@@ -164,16 +164,10 @@ const edituser = async (req,res)=>{
 const blockUser = async (req, res) => {
     try {
         const { userid } = req.params;
-
         const user = await User.findByIdAndUpdate(userid, { status: "blocked" });
-        if(req.session.userId == userid){
-          req.session.destroy()
-        }
-
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
         res.status(200).json({ message: "User blocked successfully" });
     } catch (err) {
         console.error("Error blocking user:", err);
@@ -212,49 +206,42 @@ res.render("admins/addcategory",{message:false,offers})
 
 const addcategory = async (req, res) => {
   try {
-    const { name, description, is_listed ,offer} = req.body;
-
-    // Get the uploaded image file (if any)
+    const { name, description, is_listed, offer } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-
-    // Check if the category already exists
     const existingCategory = await Category.findOne({ name });
     if (existingCategory) {
-      const categories = await Category.find({})
-      return res.render("admins/addcategory", {
-        message: "Category already exists",
-        categories
+      return res.status(400).json({
+        success:false, message: "Category already exists",
       });
     }
-
     let offerId = null;  
-    const OFFer = await Offer.findOne({ offerName:offer }); 
-    console.log(OFFer);
+    const OFFer = await Offer.findOne({ offerName: offer }); 
     if (OFFer) {  // If an offer is found
       offerId = OFFer._id;  // Assign offerId the _id of the found offer
     }
-
-    // Create a new category
     const newCategory = new Category({
       name,
       description,
       is_listed: is_listed === "true",
       image_url,
-      offerId
+      offerId,
     });
 
     await newCategory.save();
     const categories = await Category.find();
-    res.render("admins/category", {
-      message: "Category added successfully!",categories
+    res.status(201).json({
+      success:true, message: "Category added successfully!",
+      categories,
     });
+
   } catch (err) {
     console.error("Error adding category:", err);
-    res.status(500).render("admins/addcategory", {
+    res.status(500).json({
       message: "Error adding category. Please try again.",
     });
   }
 };
+
 const deleteCategory = async (req, res) => {
     try {
       const categoryId = req.params.categoryId;
@@ -284,47 +271,58 @@ const deleteCategory = async (req, res) => {
   }
 
 
-  const updatecategory = async (req,res)=>{
+  const updatecategory = async (req, res) => {
     try {
       console.log(req.body);
-      
-      const {id,name,description,is_listed,offer} = req.body;
+  
+      const { id, name, description, is_listed, offer } = req.body;
       const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-      const category = await Category.findOne({_id:id});
-      if(!category){
-        return res.render("admins/category",{categories,message:"category dont exist"})
+      const category = await Category.findOne({ _id: id });
+      if (!category) {
+        return res.status(404).json({ message: "Category doesn't exist" });
+      }    
+      const exist = await Category.findOne({ name });
+      if (exist && exist._id.toString() !== id) {
+        return res.status(400).json({ message: "Category already exists" });
       }
-      const exist = await Category.findOne({name})
-      if(exist && exist._id.toString() !== id){
-        const categories = await Category.find();
-        return res.render("admins/category",{categories,message:"category Alredy Exist "})
+  
+
+      let offerId = null;
+      if (offer) {
+        const OFFer = await Offer.findOne({ offerName: offer });
+        console.log(OFFer);
+        if (OFFer) {
+          offerId = OFFer._id;  
+        } else {
+          offerId = null;  
+        }
       }
-      let offerId = null;  
-      const OFFer = await Offer.findOne({ offerName:offer }); 
-      console.log(OFFer);
-      if (OFFer) {  // If an offer is found
-        offerId = OFFer._id;  // Assign offerId the _id of the found offer
-      }
-      listcehck = is_listed === "true";
+  
+      const listCheck = is_listed === "true";
+  
+      
       category.name = name || category.name;
       category.description = description || category.description;
-      category.is_listed = listcehck;
-      if(image_url){
-        category.image_url = image_url;
+      category.is_listed = listCheck;
+      if (image_url) {
+        category.image_url = image_url;  
       }
-      console.log(category.offerId);
-        category.offerId = offerId; // Update the offer reference
-        console.log(category.offerId);
-        
-      
+      category.offerId = offerId;  
+  
+     
       await category.save();
-
-      const categories = await Category.find();
-      res.render("admins/category",{categories,message:"successfull"})
+  
+      res.status(200).json({
+        success:true,
+        message: "Category updated successfully",
+        category, 
+      });
     } catch (error) {
-      res.status(500).send("err")
+      console.error(error);
+      res.status(500).json({ message: "An error occurred while updating the category." });
     }
-  }
+  };
+  
   
   const products = async (req,res)=>{
     
@@ -430,7 +428,7 @@ const deleteproduct = async (req,res)=>{
     productId = req.params.productId;
     await Product.findByIdAndDelete(productId);
     const products = await Product.find({});
-    res.render('admins/products',{products}); 
+    res.status(200).json({message:"deleteed Succesfully"}); 
   } catch (error) {
     console.log(error);
     
@@ -661,7 +659,7 @@ const getCoupens = async (req,res) => {
     const skip = (page-1)*limit;
     const totalCoupens = await Coupen.countDocuments();
 
-    const coupens = await Coupen.find().skip(skip).limit(limit);
+    const coupens = await Coupen.find().sort({createdAt:-1}).skip(skip).limit(limit);
     res.render("admins/coupen",{coupens,message:false,currentPage:page,totalPages:Math.ceil(totalCoupens/limit)})
 
   } catch (error) {
@@ -675,13 +673,15 @@ const getCoupens = async (req,res) => {
 
 
 const createCoupen = async (req,res) => {
+  console.log(req.body);
+  
   try {
     const {couponCode,discount,expiryDate,description} = req.body;
     const existingCoupen = await Coupen.findOne({couponCode});
     if(existingCoupen){
       const coupens = await Coupen.find({});
-    return res.render("admins/addcoupen",{coupens,message:"coupen Alredy Exist"})
-    }
+      return res.status(400).json({ success:false,message: "Coupon code already exists." })  
+      };
     const newCoupen = new Coupen({
       couponCode,
       discount,
@@ -690,10 +690,16 @@ const createCoupen = async (req,res) => {
     })
     await newCoupen.save()
     const coupens = await Coupen.find({});
-    res.render("admins/addcoupen",{coupens,message:"coupen Created Successfully"})
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(201).json({
+      success:true,message: "Coupon created successfully!",
+    })
+
+    } catch (error) {
+     console.error("Error creating coupon:", error);
+    res.status(500).json({
+      message: "Error creating coupon. Please try again.",
+    });
+
   }
 }
 
@@ -764,7 +770,10 @@ const editOfferPost = async (req, res) => {
     }
     const exist = await Offer.findOne({offerName})
     if( exist && exist._id.toString() !== id){
-      return res.render("admins/createOffer",{message:"offer  Alredy Exist"})
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Offer already exists with the same name.' 
+      });
     }
     const updatedOffer = await Offer.findByIdAndUpdate(id, {
       $set: {
@@ -779,16 +788,25 @@ const editOfferPost = async (req, res) => {
       }
     }, { new: true });
     if (!updatedOffer) {
-      return res.status(404).json({ message: 'Offer not found.' });
+      return res.status(404).json({ 
+        success: false, 
+        message: 'Offer not found.' 
+      });
     }
     const offer = await Offer.findById(id)
-    res.render("admins/editOffer",{offer,message:"offer Updated Successfully"})
-    // res.status(200).json({ message: 'Offer updated successfully', offer: updatedOffer });
-    
+    res.status(200).json({ 
+      success: true, 
+      message: 'Offer updated successfully.', 
+      offer: updatedOffer 
+    });
 
   } catch (error) {
     console.error('Error updating offer:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error.', 
+      error: error.message 
+    });
   }
 };
 
@@ -801,7 +819,7 @@ const createOffer = async (req,res) => {
     
     const exist = await Offer.findOne({offerName})
     if( exist){
-      return res.render("admins/createOffer",{message:"offer Alredy Exist"})
+      return res.status(400).json({ success: false, message: "Offer already exists." });
     }
      const newOffer = new Offer({
          offerName,
@@ -815,10 +833,10 @@ const createOffer = async (req,res) => {
     })   
 
     await newOffer.save()
-   res.render("admins/createOffer",{message:"offer Created Succeffully"})
-  } catch (error) {
-    console.error("Error deleting coupon:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    res.status(201).json({ success: true, message: "Offer created successfully." });
+    } catch (error) {
+      console.error("Error creating offer:", error);
+      res.status(500).json({ success: false, message: "Internal server error. Please try again later." });
   }
 }
 
@@ -1036,13 +1054,13 @@ const renderChart = async (req, res) => {
     let groupBy = {};
     let labels = [];
     
-    // Determine the query condition based on the filter
+    
     if (filter === "yearly") {
       const currentYear = new Date().getFullYear();
       matchCondition = { 
         createdAt: { 
-          $gte: new Date(`${currentYear}-01-01`),  // Start date: January 1st of the current year
-          $lt: new Date(`${currentYear + 1}-01-01`) // End date: January 1st of the next year
+          $gte: new Date(`${currentYear}-01-01`),  
+          $lt: new Date(`${currentYear + 1}-01-01`) 
         },
         orderStatus: "Delivered" 
       };

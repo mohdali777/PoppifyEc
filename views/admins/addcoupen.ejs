@@ -8,7 +8,7 @@ text-align: center; /* Center align */
 margin-top: 5px;"><%= message %></p> <% } %>
 <div class="coupon-container">
     <h2>Create New Coupon</h2>
-    <form id="createCouponForm" action="/admin/create-coupon" method="POST" style="max-width: 1150px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
+    <form id="createCouponForm"  style="max-width: 1150px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
         <div class="form-group">
             <label for="couponCode">Coupon Code:</label>
             <input type="text" id="couponCode" name="couponCode" placeholder="Enter Coupon Code"
@@ -44,56 +44,8 @@ margin-top: 5px;"><%= message %></p> <% } %>
     </form>
 </div>
 
+<script src="/jsAdmin/Addcoupens.js"></script>
 <%- include('../partials/admin/footer') %>
 
-<script>
-    // Add client-side validation for the form
-    document.getElementById("createCouponForm").addEventListener("submit", function(event) {
-        let valid = true;
-        
-        // Validate Coupon Code
-        const couponCode = document.getElementById("couponCode").value;
-        if (!couponCode) {
-            document.getElementById("couponCodeError").style.display = "inline";
-            valid = false;
-        } else {
-            document.getElementById("couponCodeError").style.display = "none";
-        }
-
-        // Validate Discount
-        const discount = document.getElementById("discount").value;
-        if (!discount || discount < 1 || discount > 100) {
-            document.getElementById("discountError").style.display = "inline";
-            valid = false;
-        } else {
-            document.getElementById("discountError").style.display = "none";
-        }
-
-        // Validate Expiry Date
-        const expiryDate = document.getElementById("expiryDate").value;
-        if (!expiryDate) {
-            document.getElementById("expiryDateError").style.display = "inline";
-            valid = false;
-        } else {
-            document.getElementById("expiryDateError").style.display = "none";
-        }
-
-        // Validate Description
-        const description = document.getElementById("description").value;
-        if (!description) {
-            document.getElementById("descriptionError").style.display = "inline";
-            valid = false;
-        } else {
-            document.getElementById("descriptionError").style.display = "none";
-        }
-
-        // If any validation failed, prevent form submission
-        if (!valid) {
-            event.preventDefault();
-        }
-    });
 
 
-
-    
-</script>

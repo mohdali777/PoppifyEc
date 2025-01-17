@@ -104,8 +104,8 @@ offerId:{
   default:null
 },
 WishListVerification:{
-  type:Boolean,
-  default:false,
+  type:[String],
+  default:[],
 },
   createdAt: {
     type: Date,

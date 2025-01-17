@@ -57,7 +57,7 @@ router.post("/edit-offer-post",session.sessionCheck,AdminRoutes.editOfferPost)
 router.post("/delete-Offer/:offerId",session.sessionCheck,AdminRoutes.deleteOfferPost)
 router.post('/download-report/excel',session.sessionCheck,AdminRoutes.downloadExcel)
 router.post('/download-report/pdf',session.sessionCheck,AdminRoutes.downloadPDF)
-router.post("/dashChart",AdminRoutes.renderChart)
+router.post("/dashChart",session.sessionCheck,AdminRoutes.renderChart)
 
 
 
