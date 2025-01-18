@@ -1,3 +1,20 @@
+
+document.getElementById("changeAddressButton").addEventListener("click", () => {
+  const allAddressesSection = document.getElementById("allAddresses");
+  allAddressesSection.style.display =
+    allAddressesSection.style.display === "none" ? "block" : "none";
+  });
+  
+  function selectAddress(id, name, companyname, streetaddress, appartment, city, phone, email) {
+  const addressDisplay = document.getElementById("addressDisplay");
+  addressDisplay.innerHTML = `
+    <textarea class="form-control" rows="4" readonly style="font-size: 1.2rem;">
+      ${name}, ${companyname}, ${streetaddress}, ${appartment}, ${city}, ${phone}, ${email}
+    </textarea>
+  `;
+}
+
+
 function placeorder(pricee) {
     const useDefaultAddress = document.getElementById("defaultAddress").checked;
 const priceElement = document.getElementById("totalPrice1");
@@ -23,17 +40,26 @@ const rozer = document.getElementById("razorpay").checked;
 const cod = document.getElementById("cod").checked;
 const Wallet = document.getElementById("wallet").checked;
 
+const defaultAddress = {
+  name: "<%= address?.name || '' %>",
+  companyName: "<%= address?.companyname || '' %>",
+  streetAddress: "<%= address?.streetaddress || '' %>",
+  apartment: "<%= address?.appartment || '' %>",
+  city: "<%= address?.city || '' %>",
+  phone: "<%= address?.phone || '' %>",
+  email: "<%= address?.email || '' %>"
+};
 
 const orderDetails = {
   paymentMethod : rozer ? "RazorPay" : cod ? "COD" : Wallet ? "Wallet" : null,
   totalPrice: parseFloat(totalPrice), // Convert to number
-  firstName: useDefaultAddress ? "<%= address?.name || '' %>" : document.getElementById("firstName").value,
-  companyName: useDefaultAddress ? "<%= address?.companyname || '' %>" : document.getElementById("companyName").value,
-  streetAddress: useDefaultAddress ? "<%= address?.streetaddress || '' %>" : document.getElementById("streetAddress").value,
-  apartment: useDefaultAddress ? "<%= address?.appartment || '' %>" : document.getElementById("apartment").value,
-  city: useDefaultAddress ? "<%= address?.city || '' %>" : document.getElementById("city").value,
-  phone: useDefaultAddress ? "<%= address?.phone || '' %>" : document.getElementById("phone").value,
-  email: useDefaultAddress ? "<%= address?.email || '' %>" : document.getElementById("email").value,
+  firstName: useDefaultAddress? defaultAddress.name: document.getElementById("firstName").value,
+  companyName: useDefaultAddress? defaultAddress.companyName: document.getElementById("companyName").value,
+  streetAddress: useDefaultAddress? defaultAddress.streetAddress: document.getElementById("streetAddress").value,
+  apartment: useDefaultAddress? defaultAddress.apartment: document.getElementById("apartment").value,
+  city: useDefaultAddress? defaultAddress.city: document.getElementById("city").value,
+  phone: useDefaultAddress? defaultAddress.phone: document.getElementById("phone").value,
+  email: useDefaultAddress ? defaultAddress.email: document.getElementById("email").value,
   coupenId: document.getElementById("copen-container").value ? document.getElementById("copen-container").value  : null ,
   coupenDiscountAmount: document.getElementById("coupenDiscountAmount").value ? document.getElementById("coupenDiscountAmount").value  : null 
 };
@@ -169,20 +195,7 @@ function verifyPayment(response, razorpayOrderId, orderDetails) {
 
 
 
-  document.getElementById("changeAddressButton").addEventListener("click", () => {
-const allAddressesSection = document.getElementById("allAddresses");
-allAddressesSection.style.display =
-  allAddressesSection.style.display === "none" ? "block" : "none";
-});
 
-function selectAddress(id, name, companyname, streetaddress, appartment, city, phone, email) {
-// Update the default address display
-const addressDisplay = document.getElementById("addressDisplay");
-addressDisplay.innerHTML = `
-  <textarea class="form-control" rows="4" readonly style="font-size: 1.2rem;">
-    ${name}, ${companyname}, ${streetaddress}, ${appartment}, ${city}, ${phone}, ${email}
-  </textarea>
-`;}
 
 function coupenApply(totalPrice){
   console.log(totalPrice);

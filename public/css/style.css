@@ -1058,3 +1058,23 @@ h2.heading-order-page {
 .product-details-order-page {
   flex: 1;
 }
+
+
+
+
+.password-container {
+  position: relative;
+}
+
+#toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 40px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+#toggle-password i {
+  font-size: 12px;
+}

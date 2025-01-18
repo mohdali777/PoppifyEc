@@ -1,0 +1,210 @@
+.offer-form-container {
+    width: 1150px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin: 10px 40px;
+    height: fit-content;
+  }
+  
+  .offer-form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  #create-offer-form {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: fit-content;
+    height: fit-content;
+    margin: 50px auto;
+  }
+  
+  .form-group {
+    width: 48%;
+    margin-bottom: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  
+  
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .submit-btn:hover {
+    background-color: #0056b3;
+  }
+  
+  #offer-create-btn.create-offer-btn {
+    background-color: #28a745;
+  }
+  
+  #offer-create-btn.create-offer-btn:hover {
+    background-color: #218838;
+  }
+
+
+
+
+
+  .offer-form-container {
+  width: 1150px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin: 10px 40px;
+  height: fit-content;
+}
+
+.offer-form-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+#create-offer-form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  width: fit-content;
+  height: fit-content;
+  margin: 50px auto;
+}
+
+.form-group {
+  width: 48%;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 18px;
+  color: #fff;
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+#offer-create-btn.create-offer-btn {
+  background-color: #28a745;
+}
+
+#offer-create-btn.create-offer-btn:hover {
+  background-color: #218838;
+}
+
+
+
+h1 {
+    margin: 0;
+    font-size: 2rem;
+  }
+  
+  main {
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .table-container {
+    width: 1150px;
+    overflow-x: auto;
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px 40px;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  
+  thead {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  th, td {
+    padding: 1rem;
+    border: 1px solid #ddd;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  .active {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .inactive {
+    color: red;
+    font-weight: bold;
+  }

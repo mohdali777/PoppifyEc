@@ -18,6 +18,7 @@ function addmoney(){
                 })
                 .then((data) => {
                     transactions = data.transactions;
+                    Cardbalance = data.balance
                     displayTransactions();
                 })
                 .catch((error) => {
@@ -29,6 +30,7 @@ function addmoney(){
             const startIndex = (currentPage - 1) * rowsPerPage;
             const endIndex = startIndex + rowsPerPage;
             const currentTransactions = transactions.slice(startIndex, endIndex);
+            const balance = document.getElementById("card-balance");
     
             const tableBody = document.getElementById('transactionTableBody');
             tableBody.innerHTML = ''; // Clear previous rows
@@ -45,6 +47,9 @@ function addmoney(){
                 `;
                 tableBody.appendChild(row);
             });
+            console.log(balance);
+            
+            balance.textContent = Cardbalance;
     
             updatePaginationInfo();
         }

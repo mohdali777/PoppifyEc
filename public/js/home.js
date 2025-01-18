@@ -1,8 +1,4 @@
 function productdeatails (productId,category){
-    console.log("............");
-    console.log(productId);
-    console.log("............");
-    
 fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
 if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
 }).catch((err)=>{

@@ -1,0 +1,47 @@
+.success-card {
+    width: 600px;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.icon {
+    font-size: 4rem;
+    color: #28a745;
+}
+
+.card-body h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.card-body p {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.btn-lg {
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    border-radius: 8px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-outline-secondary {
+    border-color: #6c757d;
+    color: #6c757d;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #6c757d;
+    color: #fff;
+}

@@ -1,84 +1,8 @@
 <%- include('../partials/admin/header') %>
 <%- include('../partials/admin/sidebar') %>
 
-<style>
-.offer-form-container {
-  width: 1150px;
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin: 10px 40px;
-  height: fit-content;
-}
+<link rel="stylesheet" href="/admincss/createOffer.css">
 
-.offer-form-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-#create-offer-form {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  width: fit-content;
-  height: fit-content;
-  margin: 50px auto;
-}
-
-.form-group {
-  width: 48%;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-size: 14px;
-  color: #555;
-  margin-bottom: 8px;
-}
-
-.form-group input,
-.form-group select {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-}
-
-
-.form-group input:focus,
-.form-group select:focus {
-  border-color: #007bff;
-  outline: none;
-}
-
-.submit-btn {
-  width: 100%;
-  padding: 15px;
-  font-size: 18px;
-  color: #fff;
-  background-color: #007bff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.submit-btn:hover {
-  background-color: #0056b3;
-}
-
-#offer-create-btn.create-offer-btn {
-  background-color: #28a745;
-}
-
-#offer-create-btn.create-offer-btn:hover {
-  background-color: #218838;
-}
-</style>
 <% if (message) { %> <p class="message " style=" font-size: 16px; /* Slightly smaller than the timer */
 color: #d32f2f; /* Red color for error messages */
 font-weight: 500; /* Medium weight */
