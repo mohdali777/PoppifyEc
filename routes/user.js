@@ -13,7 +13,7 @@ router.get("/login",sessions.islogin,userControl.login)
 router.get("/signup",sessions.islogin,userControl.signup)
 router.get("/forgetpass",userControl.forgetPass)
 router.get("/newpassword",userControl.newpassword)
-router.get("/home",userControl.home)
+router.get("/",userControl.home)
 router.get("/google", passport.authenticate("google", {
     scope: ["profile", "email"] 
   }));

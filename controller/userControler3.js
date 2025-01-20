@@ -15,13 +15,8 @@ const razorpay = new Razorpay({
 });
 
 const verifyPayment = async (req, res) => {
-    console.log("Entering verify payment part");
-    console.log(req.body);
-  
     const { razorpayOrderId, razorpayPaymentId, razorpaySignature ,type} = req.body;
-    if(type == "Wallet"){
-      console.log("enter wallet ", req.body);
-      
+    if(type == "Wallet"){      
       const body = `${razorpayOrderId}|${razorpayPaymentId}`;
       const expectedSignature = crypto
           .createHmac("sha256", process.env.RAZORPAY_SECRET_KEY)
@@ -35,7 +30,6 @@ const verifyPayment = async (req, res) => {
 
       if (expectedSignature === razorpaySignature) {
         const amount = req.session.amount;
-        console.log(amount);
         
         wallet.balance += amount;
         wallet.transactions.push({
@@ -59,8 +53,6 @@ const verifyPayment = async (req, res) => {
       return res.status(400).json({ message: "Order ID not found in session" });
     }
   
-    console.log("Order ID from session:", orderId);
-
     if(type == "repay"){
       const body = `${razorpayOrderId}|${razorpayPaymentId}`;
       const expectedSignature = crypto
@@ -103,7 +95,6 @@ const verifyPayment = async (req, res) => {
       .update(body.toString())
       .digest("hex");
     const order = await Order.findOne({ orderId });
-    console.log("Order found:", order);
   
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
@@ -122,8 +113,7 @@ const verifyPayment = async (req, res) => {
         },
         { new: true } // This option returns the updated document
       );
-  
-      console.log("Payment verified and order updated", updatedOrder);
+
       res.status(200).json({ success:true,message: "Payment verified successfully", updatedOrder ,orderId});
     } else {
       // Update the order as failed and cancelled
@@ -140,20 +130,17 @@ const verifyPayment = async (req, res) => {
         { new: true }
       );
   
-      console.log("Signature mismatch - payment verification failed", updatedOrder);
       res.status(400).json({ message: "Payment verification failed" });
     }
   };
 
 
   const placeOrder = async (req,res)=>{
-    console.log(req.body);
     const {paymentMethod, useDefaultAddress, totalPrice,coupenId,coupenDiscountAmount,...newAddress} = req.body
     try {
       const userId = req.session.userId;
      const cart = await Cart.findOne({ userId: userId })
      if (!cart || cart.items.length === 0) {
-      console.log("empty cart");
       
       return res.status(400).json({ message: "Cart is empty" });
   }
@@ -162,7 +149,6 @@ const verifyPayment = async (req, res) => {
   }
      const cartItems = cart.items;
     const cartDiscount = cart.CartTotalOffer;
-     console.log(cartItems);
      
       let finalAddress;
       if(useDefaultAddress){
@@ -191,7 +177,6 @@ const verifyPayment = async (req, res) => {
       let paymentStatus ;
       if (paymentMethod === "RazorPay") {
         try {
-          console.log("razorpay");
           
             const razorpayOrder = await razorpay.orders.create({
                 amount: Math.round(totalPrice * 100), // Amount in paisa
@@ -319,7 +304,6 @@ const verifyPayment = async (req, res) => {
 
   const cancelOrder = async (req, res) => {
     try {
-      console.log(req.params.orderId); 
       const userId = req.session.userId;      
         const orderId = req.params.orderId;
         const order = await Order.findById(orderId);
@@ -397,7 +381,6 @@ const returnrequiest = async (req,res) => {
     try {
       const {productId,orderId} = req.params;
       const userId = req.session.userId;
-      console.log(req.body);
       const {reason,itemId} = req.body;
       if (!productId || !orderId || !userId || !reason) {
         return res.status(400).json({
@@ -413,7 +396,6 @@ const returnrequiest = async (req,res) => {
     items.reason = reason;
     items.status = "Pending"
     await order.save()
-    console.log(items);
     
     const returnrequiest = new Return({
      orderId,
@@ -435,7 +417,6 @@ const returnrequiest = async (req,res) => {
   }
   const applyCoupens = async (req,res) => {
     try {
-      console.log(req.body);
       const {couponCode,TotalPrice} = req.body;
       const userId = req.session.userId;
       const coupen = await Coupen.findOne({couponCode})
@@ -452,13 +433,11 @@ const returnrequiest = async (req,res) => {
       }
       const redeem = coupen.status == "redeemed";
       if(redeem){
-        console.log("coupen");
         
         return res.status(400).json({ success: false, message: "Coupon code has redeemed." });
       }
       const discount = coupen.discount; 
     const originalTotal = TotalPrice; 
-    console.log(originalTotal);
     const newTotal = originalTotal - (originalTotal * (discount / 100));
     const totalDiscount = originalTotal - newTotal
     const coupenId = coupen._id;
@@ -519,7 +498,6 @@ const returnrequiest = async (req,res) => {
             return res.status(401).json({ success: false, message: "User not authenticated" });
         }
         const order = await Order.findById(orderId);
-        console.log(order);
 
         if (!order) {
             return res.status(404).json({ success: false, message: "Order not found" });
@@ -531,7 +509,6 @@ const returnrequiest = async (req,res) => {
             if (!wallet) {
                 return res.status(404).json({ success: false, message: "Wallet not found" });
             }
-            console.log(wallet);           
             if (wallet.balance < totalPrice) {
                 return res.status(400).json({ success: false, message: "Insufficient wallet balance" });
             }
@@ -582,7 +559,6 @@ const returnrequiest = async (req,res) => {
 
 const addMoneyWallet = async (req,res) => {
     const {amount} = req.body;
-    console.log(amount);
    req.session.amount = amount;
       try {
         const receiptId = `rec_${uuidv4().slice(0, 30)}`;

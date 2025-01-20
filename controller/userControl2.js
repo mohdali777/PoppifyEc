@@ -176,7 +176,6 @@ const getCart = async (req, res) => {
 
   const addtocartPost = async(req,res)=>{
     try {
-        console.log(req.body);
         const { productId, price, quantity,variant,totalquantity,discoundOfferPrice,color,colorQuantity} = req.body;
         const userId = req.session.userId;
         if (!userId) {
@@ -251,7 +250,6 @@ const getCart = async (req, res) => {
 
   const updateCart = async (req, res) => {
     try {
-      console.log(req.body);
       
       const {  quantity,id,variant,color} = req.body;
 
@@ -282,7 +280,6 @@ const getCart = async (req, res) => {
 
 
   const deletecart = async (req, res) => {
-    console.log(req.body); 
     try {
         const { productId ,variant,id} = req.body;
         const userId = req.session.userId;
@@ -294,7 +291,6 @@ const getCart = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
         const item = cart.items.find(item => item._id.toString() === id ) ;
-        console.log(item);
         cart.items = cart.items.filter(item => item._id.toString() !== id );
         cart.totalQuantity = cart.items.reduce((sum, item) => sum + item.quantity, 0);
         cart.totalPrice = cart.items.reduce((sum, item) => sum + item.total, 0);
@@ -314,10 +310,8 @@ const checkOut = async (req, res) => {
   try {
     const userId = req.session.userId;
       if (!userId) {
-          console.log("User is not found");
           return res.status(400).json({ success: false, message: 'User is not found' });
       }
-        console.log("User found:", userId);
 
       const cart = await Cart.findOne({ userId: userId}).populate("items.productId");
       if (!cart) {
@@ -325,7 +319,6 @@ const checkOut = async (req, res) => {
           return res.status(404).json({ success: false, message: 'Cart not found' });
       }
 
-      console.log("Cart found:", cart);
       const userAddress = await User.findById(userId).populate('addresses');
       const address = userAddress.addresses && userAddress.addresses.length > 0 ? userAddress.addresses[0] : null;
       const addresses = userAddress.addresses && userAddress.addresses.length > 0 ? userAddress.addresses : null;
@@ -380,9 +373,7 @@ const getwishlist = async (req,res) => {
             items:[]
           })
         }
-        console.log(productId);
         const existingItem = wishlist.items.find((product)=> product.productId.toString() == productId)
-        console.log("item",existingItem);
         
   
         if(existingItem){
@@ -402,7 +393,6 @@ const getwishlist = async (req,res) => {
       }
     }
     const removeWishlist = async (req,res) => {
-      console.log("remove")
       try {
         const {productId} = req.params;
         const userId = req.session.userId;

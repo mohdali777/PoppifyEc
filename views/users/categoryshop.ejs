@@ -49,7 +49,7 @@
                 <% for (let i = product.rating; i < 5; i++) { %>
                   <i class="bi bi-star"></i>
                 <% } %>
-                <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+                <button type="button" class="btn btn-danger btn-lg" onclick="productdeatails('<%= product._id %>','<%= product.category %>')">View Product</button>
               </div>
             </div>
           </div>

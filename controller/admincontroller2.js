@@ -37,7 +37,6 @@ const orderManagment = async (req,res) => {
   const updateStatus = async (req,res) => {
     const { status } = req.body;
     const orderId = req.session.orderid; 
-    console.log(orderId);
       try {
           const order = await Order.findById(orderId); 
           if (!order) {
@@ -78,7 +77,6 @@ const orderManagment = async (req,res) => {
   }
   const returnAccept = async (req,res) => {
       try {
-        console.log(req.body);
         const { orderId, itemId ,userId} = req.body;
         const order = await Order.findById(orderId);
         if (!order) {
@@ -109,7 +107,6 @@ const orderManagment = async (req,res) => {
               }else{
                 walletbalance = item.total
               }
-          console.log(`wallet balance ${walletbalance}`);
           
               wallet.balance += walletbalance;
               wallet.transactions.push({
@@ -142,7 +139,6 @@ const orderManagment = async (req,res) => {
   
   const returnReject = async (req,res) => {
     try {
-      console.log(req.body);
       const { orderId, itemId } = req.body;
       const order = await Order.findById(orderId);
       if (!order) {
@@ -223,7 +219,6 @@ const orderManagment = async (req,res) => {
         { expiryDate: { $lt: moment().tz('Asia/Kolkata').toDate() }, status: 'active' },
         { status: 'inactive' }
       );
-      console.log(`Updated ${expiredCoupons.nModified} expired coupons.`);
     } catch (error) {
       console.error('Error updating expired coupons:', error);
     }
@@ -232,7 +227,6 @@ const orderManagment = async (req,res) => {
   
   const deleteCoupen = async (req, res) => {
     try {
-      console.log(req.body);
       
       const { coupenId } = req.params;
       const coupen = await Coupen.findByIdAndDelete(coupenId);
@@ -265,7 +259,6 @@ const orderManagment = async (req,res) => {
     try {
       const {offerId} = req.params;
       const offer = await Offer.findById(offerId)
-      console.log(offer);
       
       res.render("admins/editOffer",{offer,message:false})
     } catch (error) {
@@ -357,7 +350,6 @@ const orderManagment = async (req,res) => {
       const {offerId} = req.params;
       await Offer.findByIdAndDelete(offerId)
       res.status(200).json({ success: true, message: "deleted successfully" });
-      console.log("delete");
       
     } catch (error) {
       console.error("Error deleting Offer:", error);
@@ -380,7 +372,6 @@ const orderManagment = async (req,res) => {
       ]);
   
       const totalSales = totalSalesResult.length > 0 ? totalSalesResult[0].totalSales : 0;
-      console.log(totalSales);
   
   
       const totalOfferResult = await Order.aggregate([
@@ -395,7 +386,6 @@ const orderManagment = async (req,res) => {
         },
       ]);
       const totalOffers = totalOfferResult.length > 0 ? totalOfferResult[0].totalSales : 0;
-     console.log(totalOffers);
      
       res.render("admins/sales",{orders,totalSales,totalOffers})
     } catch (error) {
@@ -434,7 +424,6 @@ const orderManagment = async (req,res) => {
     try {
       const { predefinedRange, startDate, endDate } = req.body;
       let filters = {};
-     console.log("dgvfgshdf");
      
       // Apply date filters
       if (predefinedRange && predefinedRange !== 'custom') {
@@ -459,7 +448,6 @@ const orderManagment = async (req,res) => {
   };
   
   const downloadExcel = async (req, res) => {
-    console.log(req.body);
     
     const { orders } = req.body;
   

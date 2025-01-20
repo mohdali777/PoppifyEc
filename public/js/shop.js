@@ -58,7 +58,7 @@ function applyFilters() {
                             <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹${product.price}</h5>
                             <div class="text-warning">
                                 ${renderRatingStars(product.rating)}
-                                <button type="button" class="btn btn-danger btn-lg">Add to Cart</button>
+                <button type="button" class="btn btn-danger btn-lg" onclick="productDetails('${product._id}', '${product.category}')">View Product</button>
                             </div>
                         </div>
                     </div>

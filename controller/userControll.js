@@ -107,7 +107,6 @@ async function otpTransport(email,otp) {
             text:`your OTP is${otp} its valid for 10 miniutes`,
             html: `<b> your OTP is ${otp} its valid for 10 miniutes </b>` 
         })
-        console.log("start"+info )
         return info.accepted.length > 0
 
     }catch(e){
@@ -186,7 +185,6 @@ let postverifyotp = async(req,res)=>{
         const password = req.session.pass;
         const phone = req.session.phone;
         const referralCode = req.session.reffer;
-        console.log(username,password);
         
         const saltRounds = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, saltRounds);
@@ -282,9 +280,8 @@ await wallet.save();
         req.session.user = true;
         req.session.username = username;
         const userId = await User.findOne({username})
-        console.log(userId);
         req.session.userId = userId._id;
-        res.redirect("/home");
+        res.redirect("/");
     } catch (err) {
         console.error(err);
         res.render("users/verifyotp", { message: "An error occurred during OTP verification. Please try again." });
@@ -308,7 +305,6 @@ let resendOtp = async (req, res) => {
         return res.render("users/verifyotp", { message: "Failed to resend OTP. Please try again." });
       }
   
-      console.log("New OTP sent:", otp);
       res.render("users/verifyotp", { message: "OTP resent successfully." });
     } catch (err) {
       console.error(err);
@@ -330,13 +326,10 @@ let postlogin = async (req,res)=>{
          if(user.status == "blocked"){
           return res.status(403).json({ message: "User is blocked" });
          }
-        console.log(req.body);
         req.session.user = true
         const userId = await User.findOne({username})
-        console.log(userId);
         req.session.userId = userId._id;
-        console.log(req.session.username);
-        res.status(200).json({ message: "Login successful", redirectUrl: "/home" });
+        res.status(200).json({ message: "Login successful", redirectUrl: "/" });
             console.log(req.session.username);
             
         }catch(err){
@@ -344,7 +337,6 @@ let postlogin = async (req,res)=>{
         }
     }
     const productdeatails = async (req,res)=>{
-      console.log("hello");
       
         try {
             const productId = req.params.productId;
@@ -383,7 +375,6 @@ let postlogin = async (req,res)=>{
             if (!emailsent) {
                 return res.render("users/login", { message: "Failed to send OTP" });
             }
-            console.log("otp sent",otp);
             req.session.email = email;
             res.render("users/otpforget", { message: null});
 
@@ -397,12 +388,10 @@ let postlogin = async (req,res)=>{
     let postverifyotpforget = async(req,res)=>{
         try {
             const {  otp } = req.body; // OTP entered by the user
-            console.log(otp);
             const email = req.session.email; 
             const otpRecord = await OTP.findOne({ email, otp, type: 'signup' }); // Find OTP record
     
-            console.log("Received OTP:", otp);
-            console.log("Stored OTP Record:", otpRecord);
+
             if (!otpRecord) {
                 return res.render("users/otpforget", { message: "Invalid OTP or OTP expired." });
             }
@@ -437,7 +426,6 @@ let postlogin = async (req,res)=>{
           return res.render("users/verifyotp", { message: "Failed to resend OTP. Please try again." });
         }
     
-        console.log("New OTP sent:", otp);
         res.render("users/otpforget", { message: "OTP resent successfully." });
       } catch (err) {
         console.error(err);
@@ -535,12 +523,10 @@ let postlogin = async (req,res)=>{
   const categoryFilter = async (req,res) => {
     try {
       const {categoryId} = req.params
-      console.log(categoryId);
       const category = await Category.findById(categoryId)
       const name = category.name;
       
       const products = await Product.find({categoryId:categoryId})
-      console.log(products);
       
       res.render("users/categoryshop", { products,name,userId:req.session.userId }); 
     } catch (error) {

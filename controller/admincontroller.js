@@ -36,7 +36,6 @@ const logout = (req,res)=>{
 let postlogin = async(req,res)=>{
     try {
         const {username,password} = req.body;
-        console.log(password,username);
         
         const admin = await Admin.findOne({username})
         if(!admin){
@@ -44,7 +43,6 @@ let postlogin = async(req,res)=>{
         }
         
         const isMatch = await bcrypt.compare(password, admin.password);
-        console.log(isMatch);
         
         if (!isMatch) {
             return res.render('admins/signin',{message:"Password dosen't Match"});
@@ -265,7 +263,6 @@ const deleteCategory = async (req, res) => {
 
   const updatecategory = async (req, res) => {
     try {
-      console.log(req.body);
   
       const { id, name, description, is_listed, offer } = req.body;
       const image_url = req.file ? `/uploads/${req.file.filename}` : null;
@@ -282,7 +279,6 @@ const deleteCategory = async (req, res) => {
       let offerId = null;
       if (offer) {
         const OFFer = await Offer.findOne({ offerName: offer });
-        console.log(OFFer);
         if (OFFer) {
           offerId = OFFer._id;  
         } else {
@@ -356,15 +352,12 @@ const addproductpost = async (req, res) => {
   
   try {
     const { name, description, category, price, quantity, brand, variants, colors,offer } = req.body;
-    console.log(req.files);
     
     const image = req.files.map(file => file.filename);
     const parsevariants = JSON.parse(variants)
-    console.log(parsevariants);
 
     let offerId = null;  
     const OFFer = await Offer.findOne({ offerName:offer }); 
-    console.log(OFFer);
     if (OFFer) {  // If an offer is found
       offerId = OFFer._id;  // Assign offerId the _id of the found offer
     }
@@ -406,7 +399,6 @@ try {
   const product = await Product.findOne({_id:productId})
   const categories = await Category.find({is_listed:true})
   const offers = await Offer.find({offerType:"product",isActive:true})
-  console.log(product.image);
   
   res.render("admins/updateproduct",{product,categories,offers})
 } catch (error) {
@@ -434,7 +426,6 @@ const removeimage = async(req,res) =>{
   try {
     const productId = req.params.productid;
     const imageid = req.params.image;
-    console.log(productId,imageid);
      await Product.updateOne({_id:productId},{$pull:{image:imageid}})
   } catch (error) {
     
@@ -459,15 +450,15 @@ const updateproduct = async (req, res) => {
 
     let offerId = null;  
     const OFFer = await Offer.findOne({ offerName:offer }); 
-    console.log(OFFer);
+   
     if (OFFer) {  // If an offer is found
       offerId = OFFer._id;  // Assign offerId the _id of the found offer
     }
-    console.log("gasvfdgafsdgas",offerId);
+    
     const categoryName = await Category.findOne({name:category})
     const categoryId = categoryName._id;
 
-    console.log("gasvfdgafsdgas",categoryName);
+    
     
 
     const updatedProduct = {
@@ -491,7 +482,7 @@ const updateproduct = async (req, res) => {
 const renderChart = async (req, res) => {
   try {
     const { filter } = req.body; // Extract filter (e.g., "yearly" or "monthly")
-    console.log(filter);
+    
     
     let matchCondition = {};
     let groupBy = {};
@@ -546,8 +537,7 @@ const renderChart = async (req, res) => {
       }
     });
 
-    console.log(labels);
-    console.log(data);
+  
     
     // Send response
     res.status(200).json({
