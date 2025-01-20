@@ -77,7 +77,7 @@ let forget = async (req,res)=>{
     const userId = await User.findOne({username});
     req.session.userId = userId._id;
     req.session.user = true;
-    res.redirect("/home")
+    res.redirect("/")
       
    }
    
