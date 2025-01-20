@@ -28,12 +28,13 @@
         >
           <%= address ? `${address.name}, ${address.companyname}, ${address.streetaddress}, ${address.appartment}, ${address.city}, ${address.phone}, ${address.email}` : 'No default address available.' %>
         </textarea>
-         <!-- <input
+         <input
           type="text"
           id="preAddressName"
           class="form-control mt-2"
           placeholder="Name"
           value="<%= address ? address.name : '' %>"
+          hidden
           />
         <input
           type="text"
@@ -41,6 +42,7 @@
           class="form-control mt-2"
           placeholder="Company Name"
           value="<%= address ? address.companyname : '' %>"
+          hidden
         />
         <input
           type="text"
@@ -48,6 +50,7 @@
           class="form-control mt-2"
           placeholder="Street Address"
           value="<%= address ? address.streetaddress : '' %>"
+          hidden
         />
         <input
           type="text"
@@ -55,6 +58,7 @@
           class="form-control mt-2"
           placeholder="Apartment"
           value="<%= address ? address.appartment : '' %>"
+          hidden
         />
         <input
           type="text"
@@ -62,6 +66,7 @@
           class="form-control mt-2"
           placeholder="City"
           value="<%= address ? address.city : '' %>"
+          hidden
         />
         <input
           type="text"
@@ -69,6 +74,7 @@
           class="form-control mt-2"
           placeholder="Phone"
           value="<%= address ? address.phone : '' %>"
+          hidden
         />
         <input
           type="email"
@@ -76,13 +82,15 @@
           class="form-control mt-2"
           placeholder="Email"
           value="<%= address ? address.email : '' %>"
-        /> -->
+          hidden
+        />
       </div>
       <button
         type="button"
         id="changeAddressButton"
         class="btn btn-warning"
         style="font-size: 1.2rem;"
+        
       >
         Change Address
       </button>

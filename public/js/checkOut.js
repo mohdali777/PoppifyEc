@@ -11,6 +11,62 @@ document.getElementById("changeAddressButton").addEventListener("click", () => {
     <textarea class="form-control" rows="4" readonly style="font-size: 1.2rem;">
       ${name}, ${companyname}, ${streetaddress}, ${appartment}, ${city}, ${phone}, ${email}
     </textarea>
+    <input
+          type="text"
+          id="preAddressName"
+          class="form-control mt-2"
+          placeholder="Name"
+          value= ${name}
+          hidden
+          />
+        <input
+          type="text"
+          id="preCompanyName"
+          class="form-control mt-2"
+          placeholder="Company Name"
+          value= ${companyname}
+          hidden
+        />
+        <input
+          type="text"
+          id="preStreetAddress"
+          class="form-control mt-2"
+          placeholder="Street Address"
+          value= ${streetaddress}
+          hidden
+        />
+        <input
+          type="text"
+          id="preApartment"
+          class="form-control mt-2"
+          placeholder="Apartment"
+          value=${appartment}
+          hidden
+        />
+        <input
+          type="text"
+          id="preCity"
+          class="form-control mt-2"
+          placeholder="City"
+          value=${city}
+          hidden
+        />
+        <input
+          type="text"
+          id="prePhone"
+          class="form-control mt-2"
+          placeholder="Phone"
+          value=${phone}
+          hidden
+        />
+        <input
+          type="email"
+          id="preEmail"
+          class="form-control mt-2"
+          placeholder="Email"
+          value=${email}
+          hidden
+        />
   `;
 }
 
@@ -41,13 +97,13 @@ const cod = document.getElementById("cod").checked;
 const Wallet = document.getElementById("wallet").checked;
 
 const defaultAddress = {
-  name: "<%= address?.name || '' %>",
-  companyName: "<%= address?.companyname || '' %>",
-  streetAddress: "<%= address?.streetaddress || '' %>",
-  apartment: "<%= address?.appartment || '' %>",
-  city: "<%= address?.city || '' %>",
-  phone: "<%= address?.phone || '' %>",
-  email: "<%= address?.email || '' %>"
+  name: document.getElementById("preAddressName").value,
+  companyName: document.getElementById("preCompanyName").value,
+  streetAddress: document.getElementById("preStreetAddress").value,
+  apartment: document.getElementById("preApartment").value,
+  city: document.getElementById("preCity").value,
+  phone: document.getElementById("prePhone").value,
+  email: document.getElementById("preEmail").value,
 };
 
 const orderDetails = {

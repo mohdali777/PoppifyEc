@@ -164,9 +164,9 @@ document.getElementById("downloadReportBtn").addEventListener("click", () => {
 });
 
 
-document.getElementById("downloadReportBtnExcel").addEventListener("click", () => {
+function downloadExel(orders ){
+  orders = JSON.parse(orders)
 // Parse the stringified orders data to an array
-const orders = JSON.parse('<%- JSON.stringify(orders) %>');
 console.log('Orders:', orders);
 
 fetch('/admin/download-report/excel', {
@@ -188,4 +188,7 @@ fetch('/admin/download-report/excel', {
   window.URL.revokeObjectURL(link.href);
 })
 .catch(err => console.error('Error:', err));
-});
+
+}
+
+

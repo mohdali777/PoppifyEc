@@ -70,7 +70,7 @@
         <div class="text-end mt-3">
           <button type="button" class="btn btn-primary" onclick="generateReport()">Submit</button>
           <button type="button" class="btn btn-success" id="downloadReportBtn">Download PDF</button>
-          <button type="button" class="btn btn-success" id="downloadReportBtnExcel">Download Excel</button>
+          <button type="button" class="btn btn-success" id="downloadReportBtnExcel" onclick="downloadExel('<%= JSON.stringify(orders) %>')">Download Excel</button>
         </div>
       </form>
 
