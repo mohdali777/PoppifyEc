@@ -453,6 +453,7 @@ let postlogin = async (req,res)=>{
   }
 
   const sort = async (req, res) => {
+    
     const { sort, search, category, variant,price, page = 1, limit = 8 } = req.query;
 
     let sortQuery = {};
@@ -499,6 +500,8 @@ let postlogin = async (req,res)=>{
             .sort(sortQuery)
             .skip((page - 1) * limit)
             .limit(parseInt(limit));
+
+            
 
         
         const filteredProducts = products.filter(product => product.categoryId !== null);

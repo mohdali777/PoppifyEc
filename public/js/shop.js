@@ -47,9 +47,7 @@ function applyFilters() {
                     <i class="bi bi-heart" style="font-size: 15px;"></i>
                   </button>`}
                    
-                    <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px;">
-                                <i class="bi bi-eye" style="font-size: 15px;"></i>
-                            </button>
+
                         </div>
                         <div class="card-body text-center" style="text-align: start;">
                             <p class="card-text text-muted mb-2" style="font-size: 14px; font-weight: 600; color: #333; margin-left: 10px;">
