@@ -75,6 +75,9 @@ let forget = async (req,res)=>{
    const google = async(req,res)=>{
     const username = req.user.username;
     const userId = await User.findOne({username});
+    if (userId.status == "blocked"){
+ res.redirect("/login")
+    }
     req.session.userId = userId._id;
     req.session.user = true;
     res.redirect("/")
