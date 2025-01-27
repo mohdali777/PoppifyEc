@@ -357,7 +357,7 @@ if (variants.length === 0) {
   title: 'Product Updated Successfully',
   text: 'Your product has been added.',
 }).then(()=>{
-    window.location.reload();
+    window.location.href = "/admin/products";
 })
             } else {
                 const errorMsg = await response.text();

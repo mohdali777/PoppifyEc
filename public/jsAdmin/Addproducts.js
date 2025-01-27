@@ -345,7 +345,7 @@ icon: 'success',
 title: 'Product Added Successfully',
 text: 'Your product has been added.',
 }).then(()=>{
-window.location.reload();
+window.location.href = "/admin/products";
 })
 
 
