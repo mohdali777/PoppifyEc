@@ -166,13 +166,32 @@ document.getElementById("downloadReportBtn").addEventListener("click", () => {
 
 function downloadExel(orders ){
   orders = JSON.parse(orders)
-// Parse the stringified orders data to an array
+
+  const tbody = document.querySelector('tbody');
+  const rows = tbody.querySelectorAll('tr');
+  console.log(rows);
+  let rowData = [];
+  rows.forEach(row => {
+    const cells = row.querySelectorAll('td');
+    console.log(cells);
+     rowData .push({ 
+     date        : cells[0].innerText, // Date
+     orderId     : cells[1].innerText, // Order ID
+     totalAmount : cells[2].innerText, // Total Amount
+     discount    : cells[3].innerText, // Discount
+     Coupon      : cells[4].innerText, // Coupon
+     netSale     : cells[5].innerText,}) 
+});
+
+console.log(rowData);
+
+  
 console.log('Orders:', orders);
 
 fetch('/admin/download-report/excel', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ orders }), // Send the actual orders array
+  body: JSON.stringify( {rowData} ), // Send the actual orders array
 })
 .then(response => {
   if (!response.ok) {

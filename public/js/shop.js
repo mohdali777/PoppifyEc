@@ -1,5 +1,4 @@
-let currentPage = 1;
-const productsPerPage = 8;
+
 
 
 function applyFilters() {
@@ -9,7 +8,7 @@ function applyFilters() {
     const variantValue = document.getElementById("variantFilter").value;
     const priceValue = document.getElementById('priceFilter').value;
 
-    const url = `/products-shop?sort=${sortValue}&search=${searchValue}&category=${categoryValue}&variant=${variantValue}&price=${priceValue}&page=${currentPage}&limit=${productsPerPage}`;
+    const url = `/products-shop?sort=${sortValue}&search=${searchValue}&category=${categoryValue}&variant=${variantValue}&price=${priceValue}`;
     
     fetch(url)
         .then(response => response.json())
@@ -64,22 +63,12 @@ function applyFilters() {
                 productList.appendChild(productItem);
             });
 
-            // Pagination Controls
-            document.getElementById('prevPage').disabled = currentPage <= 1;
-            document.getElementById('nextPage').disabled = data.products.length < productsPerPage;
         })
         .catch(err => console.error(err));
 }
 
 
-function changePage(direction) {
-    if (direction === 'prev') {
-        currentPage--;
-    } else if (direction === 'next') {
-        currentPage++;
-    }
-    applyFilters();
-}
+
 
 // Function to render star ratings
 function renderRatingStars(rating) {

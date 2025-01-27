@@ -49,6 +49,7 @@ router.get("/google", passport.authenticate("google", {
   router.get("/add-address",sessions.sessionCheck,userControl2.addaddress)
   router.get("/edit-address/:addressId",sessions.sessionCheck,userControl2.editaddressGet)
   router.get("/cart",sessions.sessionCheck,userControl2.getCart)
+  router.get("/fechCartdata",userControl2.fetchCart)
   router.get("/check-out",sessions.sessionCheck,userControl2.checkOut)
   router.get("/getwishlist",sessions.sessionCheck,userControl2.getwishlist)
   router.get("/fethWishlsit",sessions.sessionCheck,userControl2.fetchWishlistData)

@@ -168,8 +168,8 @@ console.log(err);
 
 function placeorder(orderId, totalPrice) {
     // Get the selected payment method
-    const rozer = document.getElementById("razorpay").checked;
-    const wallet = document.getElementById("wallet").checked;
+    const rozer = document.getElementById(`razorpay-${orderId}`).checked;
+    const wallet = document.getElementById(`wallet-${orderId}`).checked;
 
     // Determine the payment method
     const paymentMethod = rozer

@@ -1,7 +1,75 @@
+
+function fetchData () {
+  fetch('/fechCartdata') // Adjust this to match your backend API endpoint
+      .then((response) => response.json())
+      .then((data) => {
+          if (data.success) {
+              const cartItemsContainer = document.getElementById('cart-items');
+              cartItemsContainer.innerHTML = ''; // Clear any existing content
+              
+              data.cart.items.forEach((item) => {
+                  const row = document.createElement('tr');
+                  row.setAttribute('data-item-id', item._id);
+
+                  row.innerHTML = `
+                      <td class="d-flex align-items-center" style="position: relative;">
+                          <img style="width: 40px; height: 40px;" src="/uploads/${item.productImage}" alt="${item.productId.name}" class="me-2">
+                          <span>${item.productName}</span>
+                          ${item.colorQuantity === 0 ? '<span style="color: red; left: 142px; font-size: small; position: absolute;">Product Stock Not Available Now</span>' : ''}
+                      </td>
+                      <td>${item.variant}</td>
+                      <td>${item.color}</td>
+                      <td>₹${item.price}</td>
+                      <td hidden>${item.colorQuantity}</td>
+                      <td>
+                          <input 
+                              type="number" 
+                              class="form-control mx-auto quantity-input" 
+                              value="${item.quantity}" 
+                              min="1" 
+                              id="cart-quantity-${item._id}"  
+                              onchange="updateCart('${item.productId._id}', '${item.color}', '${item.colorQuantity}', '${item._id}', '${item.variant}')" 
+                              style="width: 60px;">
+                      </td>
+                      <td id="item.total-${item._id}">₹${item.total}</td>
+                      <td>
+                          <button class="btn btn-black btn-sm" onclick="deleteCartItem('${item.productId._id}', '${item.variant}', '${item._id}')">
+                              <i class="fas fa-trash"></i>
+                          </button>
+                      </td>
+                  `;
+                  cartItemsContainer.appendChild(row);
+              });
+
+              const quantity = data.cart.items.map((pr)=>{
+              return pr.colorQuantity == 0;
+              })
+              console.log(quantity);
+              
+              if(quantity.includes(true)){
+                document.getElementById("proceedButton").setAttribute("onclick","removeStock()")
+              }else if(data.cart.items.length==0){
+                document.getElementById("proceedButton").setAttribute("onclick","emptyCart()")
+              }else{
+                document.getElementById("proceedButton").setAttribute("onclick","proceedtoPayment()")
+              }
+              
+              // Update cart total
+              document.querySelectorAll('.CartTotalPrice').forEach((element) => {
+                  element.textContent = `$${data.cart.totalPrice}`;
+              });
+          } else {
+              console.error(data.message || 'Failed to load cart data.');
+          }
+      })
+      .catch((error) => console.error('Error fetching cart data:', error));
+    }
+
+  document.addEventListener('DOMContentLoaded', fetchData);
+
 function updateCart(productId,color,totalquantity,id,variant,) {
     const inputElement = document.getElementById(`cart-quantity-${id}`);
     const quantity = parseInt(inputElement.value);
-
     if (quantity < 1) {
         swal({
   title: "Invalid Quantity",
@@ -10,11 +78,10 @@ function updateCart(productId,color,totalquantity,id,variant,) {
   button: "OK",     
 
 }).then(()=>{
-  window.location.reload();
+  fetchData()
 });
      return;
     }
-
     fetch('/update-cart', {
         method: 'POST',
         headers: {
@@ -31,14 +98,7 @@ function updateCart(productId,color,totalquantity,id,variant,) {
                 icon: "success",
                 button: "OK",
             });
-            const totalPriceElements = document.querySelectorAll(".CartTotalPrice");
-if (totalPriceElements) {
-    totalPriceElements.forEach((element) => {
-        element.textContent = `$${data.updatePrice}`; // Update each element
-    });
-}
-const itemprice = document.getElementById(`item.total-${id}`)
-itemprice.textContent = data.itemPrice;
+           fetchData()
         } else {
           if(data.colorquantity){
             swal({
@@ -51,23 +111,16 @@ itemprice.textContent = data.itemPrice;
                       inputElement.disabled = true; 
                       setTimeout(() => {
                           inputElement.disabled = false; 
-                      }, 2000);
-                     
+                      }, 2000);     
               });
           }else{
-
             swal({
                 title: "Failed to Update!",
                 text: data.message,
                 icon: "error",
                 button: "OK",
             })
-              const button = document.getElementById("cart-proceed-BUTTon")
-              button.disabled = true;
-            
-
           }
-
         }
     })
     .catch(error => {
@@ -103,21 +156,9 @@ function deleteCartItem(productId, variant, id) {
             text: "Item removed from cart successfully!",
             icon: "success",
             button: "OK",
+          }).then(()=>{
+            fetchData()
           })
-
-          const itemRow = document.querySelector(`tr[data-item-id="${id}"]`);
-          if (itemRow) {
-            itemRow.remove();
-          }
-          console.log(data.updatePrice);
-          
-          const totalPriceElements = document.querySelectorAll(".CartTotalPrice");
-if (totalPriceElements) {
-    totalPriceElements.forEach((element) => {
-        element.textContent = `$${data.updatePrice}`; // Update each element
-    });
-}
-
         } else {
           swal({
             title: "Error!",
@@ -146,4 +187,21 @@ if(response.ok) window.location.href = "/check-out"
 console.log(err);
 
     })
+}
+
+function removeStock(){
+  swal({
+    title: "Stock Out Products",
+    text: "Please remove the stock-out products from your cart.",
+    icon: "warning",  // Icon style (warning, error, etc.)
+    buttons: "Okay",  // Button text
+  });
+}
+function emptyCart(){
+  swal({
+    title: "Empty Cart",
+    text: "Your Cart is Empty.",
+    icon: "warning",  // Icon style (warning, error, etc.)
+    buttons: "Okay",  // Button text
+  });
 }

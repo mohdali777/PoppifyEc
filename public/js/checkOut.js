@@ -323,3 +323,13 @@ function removeCoupen(totalPrice){
       coupenButton.textContent = "Apply Coupon"
       coupenButton.setAttribute(`onclick`,`coupenApply(${totalPrice})`)  
 }
+
+
+function stockProblem(){
+  swal({
+    title: "Stock Out Products",
+    text: "Please remove the stock-out products from your cart.",
+    icon: "warning",  // Icon style (warning, error, etc.)
+    buttons: "Okay",  // Button text
+  });
+}

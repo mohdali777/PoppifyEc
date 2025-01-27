@@ -458,7 +458,7 @@ let postlogin = async (req,res)=>{
   const sort = async (req, res) => {
     console.log(req.query);
     
-    const { sort, search, category, variant,price, page = 1, limit = 8 } = req.query;
+    const { sort, search, category, variant,price } = req.query;
 
     let sortQuery = {};
     if (sort === 'priceLowToHigh') sortQuery = { 'price': 1 };
@@ -501,23 +501,13 @@ let postlogin = async (req,res)=>{
                 path: 'categoryId',
                 match: { is_listed: true } 
             })
-            .sort(sortQuery)
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
-
-            
-
-        
+            .sort(sortQuery)        
         const filteredProducts = products.filter(product => product.categoryId !== null);
         const totalProducts = filteredProducts.length;
-        const totalPages = Math.ceil(totalProducts / limit);
 
         res.json({
             products: filteredProducts,
             totalProducts,
-            totalPages,
-            currentPage: page,
-            productsPerPage: limit,
             userId:req.session.userId
         });
     } catch (err) {

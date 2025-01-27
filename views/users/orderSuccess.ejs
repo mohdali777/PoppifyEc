@@ -8,22 +8,225 @@
 
 <link rel="stylesheet" href="/css/orderSuccess.css">
 
-<div class="container text-center py-5">
-    <div class="card mx-auto success-card">
-        <div class="card-body">
-            <div class="py-3">
-                <i class="bi bi-check-circle-fill text-success icon"></i>
-                <h1 class="my-4">Thank You!</h1>
-                <p class="text-muted">Your order has been placed successfully.</p>
-                <p class="text-muted">Order ID: <strong><%= orderId %></strong></p>
-                <p class="text-muted">You will receive a confirmation email shortly.</p>
-                <div class="mt-4">
-                    <a href="/shop" class="btn btn-primary btn-lg">Continue Shopping</a>
-                    <a href="/myorders" class="btn btn-outline-secondary btn-lg">View My Orders</a>
-                    <!-- Download Invoice Button -->
-                    <button href="" onclick="downloadInvoice('<%= orderId %>')" class="btn btn-success btn-lg">Download Invoice</button>
-                </div>
-            </div>
+<style>
+    .success-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+        padding: 40px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .success-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+        max-width: 600px;
+        width: 100%;
+        padding: 40px;
+        text-align: center;
+        animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .success-icon {
+        width: 80px;
+        height: 80px;
+        background: #ecfdf5;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        animation: scaleIn 0.5s ease-out 0.2s both;
+    }
+
+    @keyframes scaleIn {
+        from {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .checkmark {
+        color: #10b981;
+        width: 40px;
+        height: 40px;
+    }
+
+    .success-title {
+        color: #111827;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        animation: fadeIn 0.5s ease-out 0.4s both;
+    }
+
+    .success-text {
+        color: #6b7280;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 8px;
+        animation: fadeIn 0.5s ease-out 0.6s both;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+    .order-id {
+        background: #f3f4f6;
+        border-radius: 8px;
+        padding: 12px 24px;
+        margin: 24px auto;
+        max-width: 300px;
+        font-family: monospace;
+        font-size: 16px;
+        color: #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .button-group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 32px;
+        animation: fadeIn 0.5s ease-out 0.8s both;
+    }
+
+    .btn {
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 500;
+        font-size: 16px;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    .btn-secondary:hover {
+        background: #e5e7eb;
+        transform: translateY(-1px);
+    }
+
+    .btn-success {
+        background: #10b981;
+        color: white;
+    }
+
+    .btn-success:hover {
+        background: #059669;
+        transform: translateY(-1px);
+    }
+
+    @media (max-width: 640px) {
+        .success-card {
+            padding: 24px;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-card">
+        <div class="success-icon">
+            <svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </div>
+
+        <h1 class="success-title">Order Confirmed!</h1>
+        
+        <p class="success-text">Thank you for your purchase. Your order has been successfully placed.</p>
+        
+        <div class="order-id">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <span>Order ID: <%= orderId %></span>
+        </div>
+
+        <p class="success-text">
+            We've sent you a confirmation email with order details.<br>
+            You'll receive updates about your order status.
+        </p>
+
+        <div class="button-group">
+            <a href="/shop" class="btn btn-primary">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                Continue Shopping
+            </a>
+            
+            <a href="/myorders" class="btn btn-secondary">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                View Orders
+            </a>
+            
+            <button onclick="downloadInvoice('<%= orderId %>')" class="btn btn-success">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download Invoice
+            </button>
         </div>
     </div>
 </div>

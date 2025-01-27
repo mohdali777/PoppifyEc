@@ -155,51 +155,63 @@ const getCart = async (req, res) => {
       if (!userId) {
         return res.redirect('/login');
       }
-      const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
-      if (!cart) {
-        return res.render('users/cart', { cart: { items: [], totalPrice: 0, totalQuantity: 0 } });
-      }
-      for (const item of cart.items) {
-        const productDetails = await Product.findById(item.productId);
-        const variant = item.variant;
-        const color = item.color
-        const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
-        console.log(colorVariant);
-        let colorName;
-        
-        if(colorVariant){
-           colorName = colorVariant.colors.find((pr)=> pr.color == color)
-        }else{
-          colorName = null;
-        }
-        
-        console.log(colorName);
-        
-        let colorquantity;
-        if(colorName){
-          colorquantity = colorName.quantity
-        }else{
-          colorquantity = 0
-        }
-        console.log(item.productName,colorquantity);
-        console.log(item.productName); // Log additional product details
-        item.colorQuantity = colorquantity;
-        if(item.quantity == 0 || item.quantity > colorquantity){
-          item.quantity = colorquantity
-          item.total = item.price * item.quantity;
-          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
-        }
-        await cart.save();
-      }
-      res.render('users/cart', {
-        cart, 
-        success: true, 
-      });
+      res.render('users/cart');
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: 'Internal server error' });
     }
   };
+
+
+  const fetchCart = async (req,res) => {
+    try {
+    const userId = req.session.userId;
+      if (!userId) {
+        return res.redirect('/login');
+      }
+      const cart = await Cart.findOne({ userId }).populate('items.productId');
+    if (!cart) {
+      return res.json({ cart: { items: [], totalPrice: 0, totalQuantity: 0 }, success: true });
+    }
+    for (const item of cart.items) {
+      const productDetails = await Product.findById(item.productId);
+      const variant = item.variant;
+      const color = item.color
+      const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
+      let colorName;
+      if(colorVariant){
+         colorName = colorVariant.colors.find((pr)=> pr.color == color)
+      }else{
+        colorName = null;
+      }        
+      let colorquantity;
+      if(colorName){
+        colorquantity = colorName.quantity
+      }else{
+        colorquantity = 0
+      }
+      item.colorQuantity = colorquantity;
+      if(item.quantity == 0 || item.quantity > colorquantity){
+        item.quantity = colorquantity
+        item.total = item.price * item.quantity;
+        item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
+      }
+      await cart.save();
+    }
+    res.json({
+      cart: {
+        items: cart.items,
+        totalPrice:cart.totalPrice,
+      },
+      success: true,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+
+  }
   
 
 
@@ -239,7 +251,7 @@ const getCart = async (req, res) => {
           existingItem.colorQuantity = colorquantity;
           if(totalQuantityAfterAddition > colorquantity){
           return res.status(400).json({
-           success:false, message: `You cannot add more than ${colorquantity} items. Current quantity in cart: ${colorquantity}, available stock: ${colorquantity}`})
+           success:false, message: `Limit Exceed`})
           }
           existingItem.quantity += parseInt(quantity);
           existingItem.total = existingItem.quantity * existingItem.price;
@@ -377,11 +389,36 @@ const checkOut = async (req, res) => {
       if (!userId) {
           return res.status(400).json({ success: false, message: 'User is not found' });
       }
-
       const cart = await Cart.findOne({ userId: userId}).populate("items.productId");
       if (!cart) {
           console.log("Cart not found for user", userId);
           return res.status(404).json({ success: false, message: 'Cart not found' });
+      }
+      
+      for (const item of cart.items) {
+        const productDetails = await Product.findById(item.productId);
+        const variant = item.variant;
+        const color = item.color
+        const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
+        let colorName;
+        if(colorVariant){
+           colorName = colorVariant.colors.find((pr)=> pr.color == color)
+        }else{
+          colorName = null;
+        }        
+        let colorquantity;
+        if(colorName){
+          colorquantity = colorName.quantity
+        }else{
+          colorquantity = 0
+        }
+        item.colorQuantity = colorquantity;
+        if(item.quantity == 0 || item.quantity > colorquantity){
+          item.quantity = colorquantity
+          item.total = item.price * item.quantity;
+          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
+        }
+        await cart.save();
       }
 
       const userAddress = await User.findById(userId).populate('addresses');
@@ -489,6 +526,7 @@ module.exports = {manageAccount,
     editaddressPost,
     deleteAddress,
     getCart,
+    fetchCart,
     addtocartPost,
     updateCart,
     deletecart,

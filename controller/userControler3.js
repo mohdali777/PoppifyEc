@@ -147,6 +147,28 @@ const verifyPayment = async (req, res) => {
   if(!newAddress){
     return res.status(400).json({ message: "please Add Address" });
   }
+    
+  for (const item of cart.items) {
+    const productDetails = await Product.findById(item.productId);
+    const variant = item.variant;
+    const color = item.color
+    const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
+
+    if(!colorVariant){
+      return res.status(400).json({message:`Your Choosed ${item.productName} ${item.variant} Variant Not Available`})
+    }        
+     let colorName = colorVariant.colors.find((pr)=> pr.color == color)
+
+    if(!colorName){
+     return res.status(400).json({message:`Your Choosed ${item.productName} ${item.color} Color Not Available`})
+    }
+
+   let colorquantity = colorName.quantity
+   if(item.quantity > colorquantity){
+    return res.status(400).json({message:`Your Choosed ${item.productName} ${item.quantity} stock Not Available`})
+   }
+  }
+
      const cartItems = cart.items;
     const cartDiscount = cart.CartTotalOffer;
      
@@ -324,8 +346,28 @@ const verifyPayment = async (req, res) => {
                 let color = variant.colors.find(color => color.color === item.color)
               if(color){
                 color.quantity += item.quantity
+              }else{
+                let objColors = {
+                  color : item.color,
+                  quantity : item.quantity
+                }
+                variant.colors.push(objColors)
               }
                     await product.save(); 
+                }else{
+                  let objVariant = {
+                    variant : item.variant,
+                    price : item.price,
+                    quantity:item.quantity,
+                    colors:[]
+                  }
+                  let objColors = {
+                    color : item.color,
+                    quantity : item.quantity
+                  }
+                  objVariant.colors.push(objColors)
+                  product.variants.push(objVariant)
+                  await product.save(); 
                 }
             }
         }

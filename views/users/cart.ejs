@@ -10,51 +10,18 @@
         <table class="table table-bordered align-middle text-center">
             <thead class="table-light">
                 <tr>
-                    <th>Product</th>
+                    <th style="width: 30%;">Product</th>
                     <th>Variant</th>
                     <th>Color</th>
                     <th>Price</th>
-                    <th>totalquantity</th>
+                    <th hidden>totalquantity</th>
                     <th>Quantity</th>
                     <th>Subtotal</th>
                     <th>Action</th> <!-- New column for delete icon -->
                 </tr>
             </thead>
-            <tbody>
-    
-                <% cart.items.forEach(item => { %>
-                    <tr data-item-id="<%= item._id %>"> 
-                        <td class="d-flex align-items-center" style="position: relative;">
-                            <img style="width: 40px; height: 40px;" src="/uploads/<%= item.productImage %>" alt="<%= item.productId.name %>" class="me-2">
-                            <span><%= item.productName %></span>
-                           <% if(item.colorQuantity == 0){ %>
-                                <span style="color: red; left: 142px;  font-size: small; position: absolute;">Product Stock Not Available Now</span>
-                            <% } %>
-                        </td>
-                        <td><%= item.variant %></td>
-                        <td><%= item.color %></td>
-                        <td>$<%= item.price %></td>
-                        <td>$<%= item.colorQuantity %></td>
-
-                        <td>
-                            <input 
-                                type="number" 
-                                class="form-control mx-auto quantity-input" 
-                                value="<%= item.quantity %>" 
-                                min="1" 
-                                id="cart-quantity-<%= item._id %>"  
-                                onchange="updateCart('<%= item.productId._id %>','<%= item.color %>', '<%= item.colorQuantity %>','<%= item._id %>','<%= item.variant %>')" 
-                                style="width: 60px;">
-                        </td>
-                        
-                        <td id="item.total-<%= item._id%>">$<%= item.total %></td>
-                        <td>
-                            <button class="btn btn-black btn-sm" onclick="deleteCartItem('<%= item.productId._id %>','<%= item.variant %>','<%= item._id %>')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td> <!-- Delete button -->
-                    </tr>
-                <% }) %>
+            <tbody id="cart-items">
+                <!-- Dynamic cart content will be inserted here -->
             </tbody>
         </table>
     </div>
@@ -66,7 +33,7 @@
             <hr>
             <p class="d-flex justify-content-between">
                 <span>Subtotal:</span>
-                <span class="CartTotalPrice">$<%= cart.totalPrice %></span>
+                <span class="CartTotalPrice" id="subtotal-price">₹0.00</span>
             </p>
             <p class="d-flex justify-content-between">
                 <span>Shipping:</span>
@@ -75,18 +42,10 @@
             <hr>
             <p class="d-flex justify-content-between fw-bold">
                 <span>Total:</span>
-                <span class="CartTotalPrice">$<%= cart.totalPrice %></span>
+                <span class="CartTotalPrice" id="total-price">₹0.00</span>
             </p>
-            
-          <% let quantity =  cart.items.map((pr) => pr.colorQuantity == 0) %>
-          <% if(quantity.includes(true)){ %>
-            <a href="#" class="btn btn-checkout w-100 text-uppercase" style=" background-color: #dc3545; color: white; font-weight: bold;" id="cart-proceed-BUTTon"  disabled>Proceed to Checkout</a>
-            <p><%- quantity %></p>
-        <%  }else{ %>
-            <a href="#" class="btn btn-checkout w-100 text-uppercase" style=" background-color: #dc3545; color: white; font-weight: bold;" id="cart-proceed-BUTTon" onclick="proceedtoPayment()">Proceed to Checkout</a>
-     <%   } %>
-        
-        </div>
+            <a href="#" class="btn btn-checkout w-100 text-uppercase" style=" background-color: #dc3545; color: white; font-weight: bold;" id="proceedButton" onclick="proceedtoPayment()">Proceed to Checkout</a>     
+         </div>
     </div>
 </div>
 

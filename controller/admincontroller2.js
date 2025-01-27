@@ -185,7 +185,7 @@ const orderManagment = async (req,res) => {
     
     try {
       const {couponCode,discount,expiryDate,description} = req.body;
-      const existingCoupen = await Coupen.findOne({ couponCode: { $regex: `^${couponCode}$`, $options: "i" } });
+      const existingCoupen = await Coupen.findOne({ couponCode });
       if(existingCoupen){
         const coupens = await Coupen.find({});
         return res.status(400).json({ success:false,message: "Coupon code already exists." })  
@@ -448,9 +448,11 @@ const orderManagment = async (req,res) => {
   };
   
   const downloadExcel = async (req, res) => {
+    console.log(req.body);
     
-    const { orders } = req.body;
-  
+    const { rowData } = req.body;
+    console.log(rowData);
+    
     try {
       // Create workbook and worksheet
       const workbook = new ExcelJS.Workbook();
@@ -467,14 +469,13 @@ const orderManagment = async (req,res) => {
       ];
   
       // Add data rows
-      orders.forEach(order => {
+      rowData.forEach(order => {
         worksheet.addRow({
-          date: new Date(order.createdAt).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
+          date: order.date,
           orderId: order.orderId,
-          totalPrice: `₹${order.totalPrice}`,
-          CartTotalOffer: `₹${order.CartTotalOffer || 0}`,
-          coupenDiscountAmount: `₹${order.coupenDiscountAmount || 0}`,
-          netSales: `₹${order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0)}`,
+          totalPrice: `₹${order.totalAmount}`,
+          CartTotalOffer: `₹${order.discount || 0}`,
+          coupenDiscountAmount: `₹${order.Coupen || 0}`,
         });
       });
   

@@ -312,7 +312,12 @@ if (!ColorName) {
 }
 
 if(selectedQuantity == 0 || selectedQuantity < 0){
-  return alert("choose valdi")
+  return swal({
+    title: "Oops...",
+    text: "Please choose a Valid Number!",
+    icon: "warning",
+    button: "OK",
+  });
 }
   
   const cart = {

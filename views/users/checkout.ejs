@@ -149,10 +149,6 @@
                         <label for="email" class="form-label" style="font-weight: 600; font-size: 1.2rem; ">Email Address*</label>
                         <input type="email" class="form-control" id="email" placeholder="Enter email address" style="font-size: 1.2rem; height: 45px; width: 600px;">
                     </div>
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="saveInfo">
-                        <label class="form-check-label" for="saveInfo" style="font-size: 1.2rem;">Save this information for faster checkout</label>
-                    </div>
                 </form>
             </div>
         </div>
@@ -161,13 +157,27 @@
         <div class="col-lg-4 col-md-12">
             <div class="card p-4 shadow-sm">
                 <h4 class="mb-4" style="font-size: 1.8rem; font-weight: bold;">Payment Details</h4>
+               
                 <ul class="list-unstyled">
+                  
                     <% cart.items.forEach(items=>{ %>
                     
                     <li class="d-flex justify-content-between mb-2">
-                        <span style="font-size: 1.2rem;"><%=items.productId.name %></span>
+                      <% if(items.colorQuantity == 0){ %>
+                        <div style="display: flex; flex-direction: column; ">
+                        <span style="font-size: 1.2rem;"><%=items.productId.name %>(<%=items.variant %>,,<%=items.color %>)</span>
+                        <span style="color: red;"> stock out</span>
+                      </div>
+                        <strong style="font-size: 1.2rem; color: red;" ><%= items.quantity %></strong>
+                        <strong style="font-size: 1.2rem; " hidden><%= items.colorQuantity %></strong>
+                        <strong style="font-size: 1.2rem; text-decoration: line-through red;">₹<%= items.price %></strong>
+                    <%   }else{ %>
+                        <span style="font-size: 1.2rem;"><%=items.productId.name %>(<%=items.variant %>,<%=items.color %>)</span>
+                        <strong style="font-size: 1.2rem;"><%= items.quantity %></strong>
+                        <strong style="font-size: 1.2rem;"  hidden><%= items.colorQuantity %></strong>
                         <strong style="font-size: 1.2rem;">₹<%= items.price %></strong>
                     </li>
+                    <% } %>
                 <% }) %>
                     <li class="d-flex justify-content-between mb-2">
                         <span style="font-size: 1.2rem;">Subtotal</span>
@@ -230,7 +240,12 @@
                     <input type="text" class="form-control" id="coupen-code" placeholder="Coupon Code" style="font-size: 1.2rem; height: 45px;">
                     <button class="btn btn-outline-dark" onclick="coupenApply('<%= cart.totalPrice %>')" id="coupen-button-apply" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
                 </div>
-                <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
+               <% let quantity = cart.items.map((pr)=> pr.colorQuantity == 0 )%> 
+                <% if(quantity.includes(true)){ %>
+                  <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="stockProblem()">Place Order</button>
+              <%   }else{ %>
+                  <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
+               <%  } %>
                 <input type="text" id="copen-container" hidden>
                 <input type="text" id="coupenDiscountAmount" hidden>
             </div>
