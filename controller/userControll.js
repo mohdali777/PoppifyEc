@@ -456,6 +456,7 @@ let postlogin = async (req,res)=>{
   }
 
   const sort = async (req, res) => {
+    console.log(req.query);
     
     const { sort, search, category, variant,price, page = 1, limit = 8 } = req.query;
 

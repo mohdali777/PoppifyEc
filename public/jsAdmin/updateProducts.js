@@ -292,6 +292,23 @@ document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
         return;
     }
 
+
+let totalColorquantity = colors.reduce((acc,colo)=>{
+        return  acc+= colo.quantity
+    },0)
+    
+    if (totalColorquantity != quantity) {
+        iziToast.warning({
+            title: 'Quantity Mismatch',
+            message: `Total quantity and total color quantity must be equal at row ${variantIndex + 1}.`,
+            position: 'topRight', // Customize position as needed (e.g., 'topRight', 'bottomLeft', etc.)
+            timeout: 5000, // Duration for which the toast remains visible (in ms)
+        });
+        variants.length = 0
+        return;
+    }
+
+
     if (variant && price && quantity && colors.length > 0 && colors !== null) {
         variants.push({ 
             variant, 
@@ -307,8 +324,14 @@ console.log(variants);
 
 
 if (variants.length === 0) {
-    return alert("No valid variants found.")
-}
+    return iziToast.warning({
+        title: 'No Valid Variants Found',
+        message: 'Please check your inputs and try again.',
+        position: 'topRight',  // Customize position (e.g., 'topRight', 'bottomLeft')
+        timeout: 5000,         // Duration for which the toast stays visible (in ms)
+        closeOnClick: true,    // Allow the user to click to close the toast
+    });
+    }
 
 
 

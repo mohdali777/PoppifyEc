@@ -6,6 +6,9 @@ async function formvalidationsignin(e){
     
     console.log(username, password);
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+
     if(username === "" || password === "") {
       swal({
     title: "Error",
@@ -13,6 +16,14 @@ async function formvalidationsignin(e){
     icon: "error",
     button: "OK"
   });
+      return false;
+    }else if (emailRegex.test(username)) {
+      swal({
+        title: "Invalid Input",
+        text: "Please enter a username, not an email.",
+        icon: "error",
+        button: "OK"
+      });
       return false;
     } else if(password.length < 8) {
       swal({

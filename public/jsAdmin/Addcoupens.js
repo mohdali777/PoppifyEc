@@ -14,7 +14,7 @@ document.getElementById("createCouponForm").addEventListener("submit", function(
 
     // Validate Discount
     const discount = document.getElementById("discount").value;
-    if (!discount || discount < 1 || discount > 100) {
+    if (!discount || discount < 1 || discount > 90) {
         document.getElementById("discountError").style.display = "inline";
         valid = false;
     } else {

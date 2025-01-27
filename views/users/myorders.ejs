@@ -51,7 +51,13 @@
                         
                         <hr>
                         <li class="d-flex justify-content-between mb-3">
-                            <strong style="font-size: 1.2rem;">Total</strong>
+                        <% if(order.coupenDiscountAmount){ %>
+                          <strong style="font-size: 1.2rem;">Coupem Discount</strong>
+                          <strong style="font-size: 1.2rem;" id="totalPrice1">₹<%= order.coupenDiscountAmount %></strong>
+                        <% } %>
+                      </li>
+                        <li class="d-flex justify-content-between mb-3">
+                            <strong  style="font-size: 1.2rem;"> Total</strong>
                             <strong style="font-size: 1.2rem;" id="totalPrice1">₹<%= order.totalPrice %></strong>
                         </li>
                     </ul>

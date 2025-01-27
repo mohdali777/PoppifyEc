@@ -185,7 +185,7 @@ const orderManagment = async (req,res) => {
     
     try {
       const {couponCode,discount,expiryDate,description} = req.body;
-      const existingCoupen = await Coupen.findOne({couponCode});
+      const existingCoupen = await Coupen.findOne({ couponCode: { $regex: `^${couponCode}$`, $options: "i" } });
       if(existingCoupen){
         const coupens = await Coupen.find({});
         return res.status(400).json({ success:false,message: "Coupon code already exists." })  

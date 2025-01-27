@@ -198,12 +198,10 @@ function closeReviewModal (){
 document.getElementById("quantity").addEventListener('input', function () {
   const quantityInput = document.getElementById('quantity');
   const buyButton = document.getElementById('button_product');
-    if (quantityInput.value >= 1) {
+    if (quantityInput.value <= 1) {
       buyButton.disabled = false;
-      button1.disabled =false;
     } else {
       buyButton.disabled = true;
-      button1.disabled =true;
     }
   });
 
@@ -301,6 +299,8 @@ console.log(SelectColor);
   return;
 }
 
+
+
 if (!ColorName) {
   swal({
     icon: 'warning',
@@ -311,7 +311,9 @@ if (!ColorName) {
   return;
 }
 
-
+if(selectedQuantity == 0 || selectedQuantity < 0){
+  return alert("choose valdi")
+}
   
   const cart = {
     productId :productId ,
@@ -344,7 +346,7 @@ if (!ColorName) {
     } else {
       swal({
   title: "Error!",
-  text: "Failed to add product to cart. Please try again.",
+  text: data.message,
   icon: "error", // Use the error icon
   button: "OK",  // Customize button text
 });

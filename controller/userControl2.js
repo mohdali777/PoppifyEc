@@ -159,6 +159,38 @@ const getCart = async (req, res) => {
       if (!cart) {
         return res.render('users/cart', { cart: { items: [], totalPrice: 0, totalQuantity: 0 } });
       }
+      for (const item of cart.items) {
+        const productDetails = await Product.findById(item.productId);
+        const variant = item.variant;
+        const color = item.color
+        const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
+        console.log(colorVariant);
+        let colorName;
+        
+        if(colorVariant){
+           colorName = colorVariant.colors.find((pr)=> pr.color == color)
+        }else{
+          colorName = null;
+        }
+        
+        console.log(colorName);
+        
+        let colorquantity;
+        if(colorName){
+          colorquantity = colorName.quantity
+        }else{
+          colorquantity = 0
+        }
+        console.log(item.productName,colorquantity);
+        console.log(item.productName); // Log additional product details
+        item.colorQuantity = colorquantity;
+        if(item.quantity == 0 || item.quantity > colorquantity){
+          item.quantity = colorquantity
+          item.total = item.price * item.quantity;
+          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
+        }
+        await cart.save();
+      }
       res.render('users/cart', {
         cart, 
         success: true, 
@@ -199,11 +231,16 @@ const getCart = async (req, res) => {
         }
         const existingItem = cart.items.find(item => item.productId.toString() === productId && item.variant === variant && item.color === color);
         if (existingItem ) {
-          // const totalQuantityAfterAddition = existingItem.quantity + parseInt(quantity);
           const totalQuantityAfterAddition = existingItem.quantity + parseInt(quantity);
-          if(totalQuantityAfterAddition > existingItem.colorQuantity){
+          let ProductDeatailS = await Product.findById(productId)
+          const colorVariant = ProductDeatailS.variants.find((pr) => pr.variant == variant)
+          const colorName = colorVariant.colors.find((pr)=> pr.color == color)
+          const colorquantity = colorName.quantity
+          existingItem.colorQuantity = colorquantity;
+          if(totalQuantityAfterAddition > colorquantity){
           return res.status(400).json({
-            error: `You cannot add more than ${existingItem.totalquantity} items. Current quantity in cart: ${existingItem.quantity}, available stock: ${existingItem.totalquantity}`})}
+           success:false, message: `You cannot add more than ${colorquantity} items. Current quantity in cart: ${colorquantity}, available stock: ${colorquantity}`})
+          }
           existingItem.quantity += parseInt(quantity);
           existingItem.total = existingItem.quantity * existingItem.price;
           existingItem.totalOfferPrice = existingItem.quantity * existingItem.discoundOfferPricePer
@@ -213,8 +250,9 @@ const getCart = async (req, res) => {
           const productImage = ProductDeat.image[0];
           const productCategory = ProductDeat.category
           const productBrand = ProductDeat.brand
-          console.log(productName);
-          console.log(productImage);
+          const colorVariant = ProductDeat.variants.find((pr) => pr.variant == variant)
+          const colorName = colorVariant.colors.find((pr)=> pr.color == color)
+          const colorquantityFind = colorName.quantity
           cart.items.push({
             productId,
             productName,
@@ -251,7 +289,7 @@ const getCart = async (req, res) => {
   const updateCart = async (req, res) => {
     try {
       
-      const {  quantity,id,variant,color} = req.body;
+      const {  quantity,id,variant,color,productId} = req.body;
 
       const userId = req.session.userId;
       const cart = await Cart.findOne({ userId });
@@ -259,10 +297,37 @@ const getCart = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Cart not found' });
       }
       const item = cart.items.find(item => item._id.toString() === id && item.variant === variant && item.color === color) ;
+  console.log(item);
   
       if (!item) {
         return res.status(404).json({ success: false, message: 'Product not found in cart' });
       }
+      let ProductDeat = await Product.findById(productId)
+      const colorVariant = ProductDeat.variants.find((pr) => pr.variant == variant)
+     if(!colorVariant){
+      return res.status(404).json({ success: false, message: `The variant '${variant}' does not exist.`
+      });
+     }
+      const colorName = colorVariant.colors.find((pr)=> pr.color == color)
+      console.log(colorName);
+      
+      if(!colorName){
+        item.colorQuantity = 0;
+        return res.status(404).json({ success: false, message: `The color '${color}' does not exist.`
+        });
+       }
+      const colorquantity = colorName.quantity 
+      item.colorQuantity = colorquantity;
+      if(quantity>colorquantity){
+        item.colorQuantity = colorquantity;
+        item.quantity = colorquantity;
+        item.total = item.price * colorquantity;
+        item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
+        await cart.save()
+        return res.status(400 ).json({success:false,message:`You can only add up to ${colorquantity} items`,colorquantity})
+      }
+      console.log(ProductDeat,colorVariant,colorName);
+       
       item.quantity = quantity;
       item.total = item.price * quantity;
       item.totalOfferPrice = item.quantity * item.discoundOfferPricePer

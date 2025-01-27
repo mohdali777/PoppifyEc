@@ -198,7 +198,7 @@ const addcategory = async (req, res) => {
   try {
     const { name, description, is_listed, offer } = req.body;
     const image_url = req.file ? `/uploads/${req.file.filename}` : null;
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
     if (existingCategory) {
       return res.status(400).json({
         success:false, message: "Category already exists",
@@ -270,7 +270,8 @@ const deleteCategory = async (req, res) => {
       if (!category) {
         return res.status(404).json({ message: "Category doesn't exist" });
       }    
-      const exist = await Category.findOne({ name });
+      const exist = await Category.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+
       if (exist && exist._id.toString() !== id) {
         return res.status(400).json({ message: "Category already exists" });
       }

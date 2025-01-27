@@ -195,7 +195,7 @@
                     </li>
                     <li class="d-flex justify-content-between mb-3" >
                       <strong style="font-size: 1.2rem; display: none;"  id="discountedPrice">Discount Price</strong>
-                      <strong style="font-size: 1.2rem;" id="totalPrice2"></strong>
+                      <strong style="font-size: 1.2rem; display: none;" id="totalPrice2" ></strong>
                   </li> 
                   <p id="couponAppliedMessage" style=" display: none; color: green; font-weight: bold; margin-top: 10px;">
                     Coupon successfully applied!
@@ -228,7 +228,7 @@
 
                 <div class="input-group mb-3">
                     <input type="text" class="form-control" id="coupen-code" placeholder="Coupon Code" style="font-size: 1.2rem; height: 45px;">
-                    <button class="btn btn-outline-dark" onclick="coupenApply('<%= cart.totalPrice %>')" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
+                    <button class="btn btn-outline-dark" onclick="coupenApply('<%= cart.totalPrice %>')" id="coupen-button-apply" type="button" style="font-size: 1.2rem;">Apply Coupon</button>
                 </div>
                 <button class="btn btn-danger w-100" style="font-size: 1.2rem; height: 45px;" onclick="placeorder('<%= cart.totalPrice %>', )">Place Order</button>
                 <input type="text" id="copen-container" hidden>

@@ -216,31 +216,39 @@ const price = row.querySelector('input[name="price"]').value;
 const quantity = row.querySelector(`input[name="quantity"]`).value;
 
 if (!variant) {
-    Swal.fire({
-icon: 'warning',
-title: 'Missing Variant Name',
-text: `Variant name is missing for row ${variantIndex + 1}`,
-});
+    iziToast.warning({
+        title: 'Missing Variant Name',
+        message: `Variant name is missing for row ${variantIndex + 1}`,
+        position: 'topRight',  
+        timeout: 5000,         
+        closeOnClick: true     
+    });
     variants.length = 0
     return; 
 }
 
 if (isNaN(price) || price <= 0) {
-    Swal.fire({
-icon: 'error',
-title: 'Invalid Price',
-text: `Invalid price for row ${variantIndex + 1}`,
-});
+    iziToast.error({
+        title: 'Invalid Price',
+        message: `Invalid price for row ${variantIndex + 1}`,
+        position: 'topRight',  
+        timeout: 5000,         
+        closeOnClick: true     
+    });
+    
     variants.length = 0
     return; 
 }
 
 if (isNaN(quantity) || quantity <= 0) {
-    Swal.fire({
-icon: 'error',
-title: 'Invalid Quantity',
-text: `Invalid quantity for row ${variantIndex + 1}`,
-});
+    iziToast.error({
+        title: 'Invalid Quantity',
+        message: `Invalid quantity for row ${variantIndex + 1}`,
+        position: 'topRight',  
+        timeout: 5000,         
+        closeOnClick: true    
+    });
+    
     variants.length = 0
     return; 
 }
@@ -253,11 +261,14 @@ const colors = Array.from(colorInputs).map(input => {
 
 
     if (!colorName || colorQuantity <= 0) { 
-        Swal.fire({
-icon: 'error',
-title: 'Invalid Input',
-text: `Invalid input: Color '${colorName || "undefined"}' has quantity ${colorQuantity}. Please correct it.`,
-});
+        iziToast.error({
+            title: 'Invalid Input',
+            message: `Invalid input: Color '${colorName || "undefined"}' has quantity ${colorQuantity}. Please correct it.`,
+            position: 'topRight',  // Customize position (e.g., 'topRight', 'bottomLeft')
+            timeout: 5000,         // Duration for which the toast stays visible (in ms)
+            closeOnClick: true     // Allow the user to click to close the toast
+        });
+        
 
     return null; 
 }
@@ -266,15 +277,34 @@ text: `Invalid input: Color '${colorName || "undefined"}' has quantity ${colorQu
 }).filter(color => color !== null);
 
 if (colors.length === 0) {
-    Swal.fire({
-icon: 'error',
-title: 'No Valid Colors Selected',
-text: `No valid colors selected for row ${variantIndex + 1}.`,
-});
+    iziToast.error({
+        title: 'No Valid Colors Selected',
+        message: `No valid colors selected for row ${variantIndex + 1}.`,
+        position: 'topRight',  
+        timeout: 5000,         
+        closeOnClick: true     
+    });
 
     variants.length = 0
     return;
 }
+
+let totalColorquantity = colors.reduce((acc,colo)=>{
+    return  acc+= colo.quantity
+},0)
+
+if (totalColorquantity != quantity) {
+    iziToast.warning({
+        title: 'Quantity Mismatch',
+        message: `Total quantity and total color quantity must be equal at row ${variantIndex + 1}.`,
+        position: 'topRight', // Customize position as needed (e.g., 'topRight', 'bottomLeft', etc.)
+        timeout: 5000, // Duration for which the toast remains visible (in ms)
+    });
+    variants.length = 0; 
+    return;
+}
+
+
 
 if (variant && price && quantity && colors.length > 0 && colors !== null)  {
     variants.push({ 
@@ -289,13 +319,13 @@ if (variant && price && quantity && colors.length > 0 && colors !== null)  {
 
 
 if (variants.length === 0) {
-return Swal.fire({
-title: 'No Valid Variants Found',
-text: 'Please check your inputs and try again.',
-icon: 'warning',
-confirmButtonText: 'OK'
+return iziToast.warning({
+    title: 'No Valid Variants Found',
+    message: 'Please check your inputs and try again.',
+    position: 'topRight',  // Customize position (e.g., 'topRight', 'bottomLeft')
+    timeout: 5000,         // Duration for which the toast stays visible (in ms)
+    closeOnClick: true,    // Allow the user to click to close the toast
 });
-
 }
 
 formData.append('variants', JSON.stringify(variants)); // Add as a JSON string

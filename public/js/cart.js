@@ -8,25 +8,11 @@ function updateCart(productId,color,totalquantity,id,variant,) {
   text: "Quantity must be at least 1.",
   icon: "warning", 
   button: "OK",     
-});
 
-        return;
-    }
-    if (quantity > totalquantity) {
-        swal({
-  title: "Limit Exceeded",
-  text: `You can only add up to ${totalquantity} items.`,
-  icon: "warning", 
-  button: "OK",    
+}).then(()=>{
+  window.location.reload();
 });
-
-        inputElement.value = totalquantity; 
-        inputElement.disabled = true; 
-        setTimeout(() => {
-            inputElement.disabled = false; 
-        }, 2000); 
-        return;
-       
+     return;
     }
 
     fetch('/update-cart', {
@@ -34,7 +20,7 @@ function updateCart(productId,color,totalquantity,id,variant,) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({quantity,id,variant,color }),
+        body: JSON.stringify({quantity,id,variant,color,productId }),
     })
     .then(response => response.json())
     .then(data => {
@@ -54,12 +40,34 @@ if (totalPriceElements) {
 const itemprice = document.getElementById(`item.total-${id}`)
 itemprice.textContent = data.itemPrice;
         } else {
+          if(data.colorquantity){
+            swal({
+                title: "Limit Exceeded",
+                text: `You can only add up to ${data.colorquantity} items.`,
+                icon: "warning", 
+                button: "OK",    
+              }).then(()=>{
+                inputElement.value = data.colorquantity; 
+                      inputElement.disabled = true; 
+                      setTimeout(() => {
+                          inputElement.disabled = false; 
+                      }, 2000);
+                     
+              });
+          }else{
+
             swal({
                 title: "Failed to Update!",
-                text: "There was an issue updating your cart. Please try again.",
+                text: data.message,
                 icon: "error",
                 button: "OK",
-            });
+            })
+              const button = document.getElementById("cart-proceed-BUTTon")
+              button.disabled = true;
+            
+
+          }
+
         }
     })
     .catch(error => {

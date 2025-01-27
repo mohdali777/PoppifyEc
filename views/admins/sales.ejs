@@ -58,11 +58,11 @@
           <!-- Custom Date Range -->
           <div class="col-md-6" id="startDateContainer">
             <label for="startDate" class="form-label"><strong>Start Date</strong></label>
-            <input type="date" id="startDate" class="form-control">
+            <input type="date"  max="<%= new Date().toISOString().split('T')[0] %>"  id="startDate" class="form-control">
           </div>
           <div class="col-md-6" id="endDateContainer">
             <label for="endDate" class="form-label"><strong>End Date</strong></label>
-            <input type="date" id="endDate" class="form-control">
+            <input type="date" id="endDate" max="<%= new Date().toISOString().split('T')[0] %>" class="form-control">
           </div>
         </div>
 

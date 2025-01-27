@@ -284,12 +284,14 @@ fetch('/apply-coupon', {
       originalPriceElement.style.textDecoration = "line-through";
       originalPriceElement.style.color = "red"
       document.getElementById("discountedPrice").style.display = "block"
+      document.getElementById('totalPrice2').style.display = "block"
       document.getElementById('totalPrice2').innerText = `₹${data.newTotal}`;
       document.getElementById("couponAppliedMessage").style.display = "block"
       document.getElementById("copen-container").value = data.coupenId;
       document.getElementById("coupenDiscountAmount").value = data.totalDiscount;
-      console.log(data.coupenId);
-      
+      const coupenButton = document.getElementById("coupen-button-apply");
+      coupenButton.textContent = "Remove Coupon"
+      coupenButton.setAttribute(`onclick`,`removeCoupen(${totalPrice})`)    
     } else {
       swal({
   title: "Coupon Applied",
@@ -304,4 +306,20 @@ fetch('/apply-coupon', {
     console.error('Error:', error);
     // document.getElementById('couponMessage').innerText = "An error occurred. Please try again.";
   });
+}
+
+function removeCoupen(totalPrice){
+  const originalPriceElement = document.getElementById('totalPrice1');
+  originalPriceElement.style.textDecoration = "none";
+  originalPriceElement.style.color = "black"
+      document.getElementById("discountedPrice").style.display = "none"
+      document.getElementById('totalPrice2').style.display = "none"
+      document.getElementById("couponAppliedMessage").style.display = "none"
+      document.getElementById("copen-container").value = null;
+      document.getElementById("coupenDiscountAmount").value = null;
+      document.getElementById("coupen-code").value = "";
+      document.getElementById('totalPrice2').textContent = null
+      const coupenButton = document.getElementById("coupen-button-apply");
+      coupenButton.textContent = "Apply Coupon"
+      coupenButton.setAttribute(`onclick`,`coupenApply(${totalPrice})`)  
 }

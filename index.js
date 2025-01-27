@@ -44,9 +44,9 @@ app.use("/", UserRoutes);
 app.use("/admin",AdminRoutes)
 
 // Error handling route
-// app.use((req, res) => {
-//   res.render('users/error');
-// });
+app.use((req, res) => {
+  res.render('users/error');
+});
 
 // MongoDB connection and error handling
 mongoose().catch(err => {
