@@ -15,13 +15,13 @@
                 <img src="/uploads/<%= product.image[0] %>" alt="<%= product.name %>" class="product-image">
                 <h2 class="product-name"><%= product.name %></h2>
                 <p class="product-price">₹<%= product.price %></p>
-                <p class="product-rating">⭐⭐⭐⭐⭐ (<%= product.rating %>)</p>
+              <%  if(product.inStocks == true){ %>
+                  <h2 class="product-name" style="color: green; font-size: medium;">Published</h2>
+             <% }else{  %>
+                  <h2 class="product-name" style="color: red; font-size: medium;">Not Published</h2>
+            <%  } %>
                 <div class="edsp">
                     <button class="edit-btn" onclick="editproduct('<%= product._id %>')">Edit Product</button>
-                    <img onclick="deleteproduct('<%= product._id %>')" 
-                         style="margin-top: 25px; width: 20px; height: 20px;" 
-                         src="/images/fi-sr-trash.png" 
-                         alt="trash">
                 </div>
             </div>
         <% }) %>

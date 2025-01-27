@@ -174,7 +174,6 @@ const description = document.getElementById('description').value.trim();
 const category = document.getElementById('category').value;
 const price = document.getElementById('price').value.trim();
 const brand = document.getElementById('brand').value.trim();
-
 if(productName == ""||description==""||category==""||price==""||brand==""){
    Swal.fire({
 icon: 'warning',
@@ -208,6 +207,7 @@ text: 'Please select at least one image to proceed.',
     formData.append('price', document.getElementById('price').value);
     formData.append('brand', document.getElementById('brand').value);
     formData.append('offer', document.getElementById('offers').value);
+    formData.append('inStocks', document.getElementById('stock-status').value)
 
 const variants = [];
 document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {

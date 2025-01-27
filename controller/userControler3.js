@@ -153,7 +153,10 @@ const verifyPayment = async (req, res) => {
     const variant = item.variant;
     const color = item.color
     const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
-
+    const inStocks = productDetails.inStocks == true
+    if(!inStocks){
+      return res.status(400).json({message:`Your Choosed ${item.productName} Not Available Now`})
+    }
     if(!colorVariant){
       return res.status(400).json({message:`Your Choosed ${item.productName} ${item.variant} Variant Not Available`})
     }        

@@ -107,6 +107,9 @@ WishListVerification:{
   type:[String],
   default:[],
 },
+inStocks:{
+type:Boolean
+},
   createdAt: {
     type: Date,
     default: Date.now,  

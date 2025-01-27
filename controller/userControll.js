@@ -29,15 +29,32 @@ let forget = async (req,res)=>{
         // Fetch only the listed categories
         const categories = await Category.find({ is_listed: true });
         const listedCategoryNames = categories.map(category => category.name);
-        const products = await Product.find({ category: { $in: listedCategoryNames } }).limit(4);
+
+        const products =  await Product.find({ 
+          category: { $in: listedCategoryNames }, 
+          inStocks: true 
+        }).limit(4);
+
         const productMonth = await Product.aggregate([
-          { $match: { category: { $in: listedCategoryNames } } }, 
+          { 
+            $match: { 
+              category: { $in: listedCategoryNames }, 
+              inStocks: true 
+            } 
+          }, 
           { $sample: { size: 4 } }
-        ]);    
-        const productYear = await Product.aggregate([
-          { $match: { category: { $in: listedCategoryNames } } }, 
-          { $sample: { size: 8 } } 
         ]);
+          
+        const productYear = await Product.aggregate([
+          { 
+            $match: { 
+              category: { $in: listedCategoryNames }, 
+              inStocks: true 
+            } 
+          }, 
+          { $sample: { size: 8 } }
+        ]);
+
         const userId = req.session.userId
         res.render("users/home", { products, categories, productMonth ,productYear,userId});
       } catch (error) {
@@ -345,8 +362,11 @@ let postlogin = async (req,res)=>{
             const productId = req.params.productId;
             const categoryid = req.params.category;
             const products = await Product.findById(productId).populate("offerId").populate({path: 'categoryId', populate: {path: 'offerId',},})
-            const category = await Product.find({category:categoryid}).limit(4)
-            res.render("users/productdeatails",{products,category,userId:req.session.userId})
+            const category = await Product.find({
+              category: categoryid, // Filter by category ID
+              inStocks: true         // Ensure the product is in stock
+          }).limit(4);
+                      res.render("users/productdeatails",{products,category,userId:req.session.userId})
         } catch (error) {
             console.log(error);
             
@@ -496,7 +516,10 @@ let postlogin = async (req,res)=>{
             variantQuery = { "variants.variant": variant };
         }
 
-        const products = await Product.find({ ...searchQuery, ...categoryQuery, ...priceQuery ,...variantQuery})
+        let stockQueryy = {};
+        stockQueryy = { inStocks: true };
+
+        const products = await Product.find({ ...searchQuery, ...categoryQuery, ...priceQuery ,...variantQuery,...stockQueryy})
             .populate({
                 path: 'categoryId',
                 match: { is_listed: true } 
@@ -523,8 +546,11 @@ let postlogin = async (req,res)=>{
       const category = await Category.findById(categoryId)
       const name = category.name;
       
-      const products = await Product.find({categoryId:categoryId})
-      
+      const products = await Product.find({ 
+        categoryId: categoryId,  // Matches the specific categoryId
+        inStocks: true            // Ensures the product is in stock
+      });
+
       res.render("users/categoryshop", { products,name,userId:req.session.userId }); 
     } catch (error) {
       console.error("Error deleting Offer:", error);

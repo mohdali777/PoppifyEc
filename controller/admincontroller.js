@@ -352,7 +352,7 @@ const addproductpost = async (req, res) => {
   console.log(req.body);
   
   try {
-    const { name, description, category, price, quantity, brand, variants, colors,offer } = req.body;
+    const { name, description, category, price, quantity, brand, variants, colors,offer,inStocks } = req.body;
     
     const image = req.files.map(file => file.filename);
     const parsevariants = JSON.parse(variants)
@@ -377,8 +377,8 @@ const addproductpost = async (req, res) => {
       variants: parsevariants, // Default to empty array if not provided
       colors: Array.isArray(colors) ? colors : [],
       image,  
-      offerId
-      
+      offerId,
+      inStocks
     });
 
     // Save the new product to the database
@@ -440,7 +440,7 @@ const updateproduct = async (req, res) => {
   try {
     console.log(req.body);
     
-    const { name, description, category, price,  brand, variants, id,offer } = req.body;
+    const { name, description, category, price,  brand, variants, id,offer,inStocks } = req.body;
 
     const existingProduct = await Product.findById(id);
     if (!existingProduct) {
@@ -470,7 +470,8 @@ const updateproduct = async (req, res) => {
       brand: brand || existingProduct.brand,
       variants: parsevariants || existingProduct.variants,
       categoryId:categoryId ||  existingProduct.categoryId,
-      offerId:offerId 
+      offerId:offerId,
+      inStocks
     };
     await Product.updateOne({ _id: id }, { $set: updatedProduct,$push: { image: { $each: images } } });
     const products = await Product.find({});

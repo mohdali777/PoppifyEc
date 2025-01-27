@@ -51,9 +51,7 @@
             <a href="/admin/edit-Offer/<%= offer._id %>" style="text-decoration: none;">
               <i>&#9998;</i>
             </a>
-            <a  onclick="deleteOffer('<%= offer._id %>')" href=""  style="text-decoration: none;">
-              <i>&#128465;</i>
-            </a>
+           
         </td>
         </tr>
       </tbody>
@@ -74,23 +72,5 @@
 
   </div>
 
-
-  <script>
-    function deleteOffer(offerid){
-   fetch(`/admin/delete-Offer/${offerid}`,{method:"POST"}).then((response)=>{
-    return response.json()
-   }).then((data)=>{
-   if(data.success){
-    alert(data.message)
-    window.location.reload()
-   }else{
-    alert(data.message)
-   }
-   }).catch(()=>{
-    console.log(error);
-    
-   })
-    }
-  </script>
 
 <%- include('../partials/admin/footer') %>

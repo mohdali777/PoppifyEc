@@ -22,7 +22,6 @@
                 <th>Expiry Date</th>
                 <th>Status</th>
                 <th>Usage Count</th>
-                <th>Action</th>
             </tr>
         </thead>
         <% coupens.forEach(coupen=> { %>
@@ -56,9 +55,6 @@
                   
                 <td><span class="status active" style="background-color: #28a745; color: white;"><%=coupen.status %></span></td>
                 <td><%=coupen.count %></td>
-                <td class="action-icons">
-                    <i onclick="deleteCoupen('<%=coupen._id %>')">&#128465;</i>
-                </td>
             </tr>
             <!-- Dummy Data Example 2 -->
         </tbody>
@@ -78,20 +74,4 @@
         <% } %>
       </div>
 </div>
-<script>
-    function deleteCoupen(coupenId){
-        fetch(`/admin/deletecoupen/${coupenId}`,{method:"DELETE"}).then((response)=>  response.json() ).then((data)=>{
-            if(data.success){
-                alert(data.message)
-                window.location.reload();
-            }else{
-                alert(data.message)
-            }
-        }).catch((error)=>{
-            console.log(error);
-            alert("something went wrong while delete")
-        })
-    }
-</script>
-
 <%- include('../partials/admin/footer') %>

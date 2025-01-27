@@ -224,6 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('brand', document.getElementById('brand').value);
         formData.append('offer', document.getElementById('offers').value);
         formData.append('id', productIdd);
+        formData.append('inStocks', document.getElementById('stock-status').value)
+
 
 
         

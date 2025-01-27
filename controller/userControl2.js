@@ -1,4 +1,4 @@
-const {OTP,User,Address,Cart,Order,Wishlist,Return,Wallet} = require("../model/user/usermodel")
+const {OTP,User,Address,Cart,Order,Wishlist,Return,Wallet,Offer} = require("../model/user/usermodel")
 const{Product, Coupen, Category} = require("../model/admin/adminmodel")
 
 const bcrypt = require("bcrypt")
@@ -7,6 +7,7 @@ const env = require("dotenv");
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const { v4: uuidv4 } = require('uuid');
+const { category } = require("./admincontroller");
 
 
 
@@ -170,16 +171,18 @@ const getCart = async (req, res) => {
         return res.redirect('/login');
       }
       const cart = await Cart.findOne({ userId }).populate('items.productId');
-    if (!cart) {
+    if (!cart) {      
       return res.json({ cart: { items: [], totalPrice: 0, totalQuantity: 0 }, success: true });
     }
+
     for (const item of cart.items) {
+      
       const productDetails = await Product.findById(item.productId);
       const variant = item.variant;
       const color = item.color
       const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
       let colorName;
-      if(colorVariant){
+      if(colorVariant &&  productDetails.inStocks == true){
          colorName = colorVariant.colors.find((pr)=> pr.color == color)
       }else{
         colorName = null;
@@ -191,13 +194,54 @@ const getCart = async (req, res) => {
         colorquantity = 0
       }
       item.colorQuantity = colorquantity;
+      const categoryCheck = await Category.findById(productDetails.categoryId)
+
+       if(!item.productId.offerId && !categoryCheck.offerId){
+        item.price = colorVariant ? colorVariant.price : item.price
+        item.total = item.price * item.quantity;
+       }else{
+        let productOffer = await Offer.findById(item.productId.offerId)
+        let categotyoffer = await Offer.findById(categoryCheck.offerId)
+        item.price = colorVariant ? colorVariant.price : item.price;
+        let ogValue = item.price;
+        if(categotyoffer && productOffer){
+          let offerValueBoth = categotyoffer.discountValue + productOffer.discountValue
+          item.price = item.price - (item.price * offerValueBoth / 100)
+          item.total = item.price * item.quantity;
+          let discoundGet =  ogValue - item.price
+          item.discoundOfferPricePer = discoundGet;
+          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer;
+        }else if(productOffer){
+           item.price = item.price - (item.price * productOffer.discountValue / 100)
+           item.total = item.price * item.quantity;
+           let discoundGet =  ogValue - item.price
+           item.discoundOfferPricePer = discoundGet
+           item.totalOfferPrice = item.quantity * item.discoundOfferPricePer;
+          }else if(categotyoffer){
+          item.price = item.price - (item.price * categotyoffer.discountValue / 100)
+          item.total = item.price * item.quantity;
+          let discoundGet =  ogValue - item.price
+          item.discoundOfferPricePer = discoundGet
+          item.totalOfferPrice = item.quantity * item.discoundOfferPricePer;
+        } 
+
+       }
+
       if(item.quantity == 0 || item.quantity > colorquantity){
         item.quantity = colorquantity
         item.total = item.price * item.quantity;
         item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
       }
+      if(categoryCheck.is_listed === false){
+        await Cart.updateOne(
+          { userId }, 
+          { $pull: { items: { _id: item._id } } } 
+        );
+        
+     } 
       await cart.save();
     }
+
     res.json({
       cart: {
         items: cart.items,
@@ -407,7 +451,7 @@ const checkOut = async (req, res) => {
           colorName = null;
         }        
         let colorquantity;
-        if(colorName){
+        if(colorName && productDetails.inStocks == true){
           colorquantity = colorName.quantity
         }else{
           colorquantity = 0

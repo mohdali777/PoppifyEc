@@ -34,7 +34,9 @@
                 <td><span class="status in-progress" style="background-color: #e84a00; color: white;"><%= order.orderStatus %></span></td>
               <% }else if (order.orderStatus === "Delivered"){ %>
                 <td><span class="status in-progress" style="background-color: #00e842; color: white;"><%= order.orderStatus %></span></td>
-                <% } %>
+                <% }else if (order.orderStatus === "Returned"){ %>
+                  <td><span class="status in-progress" style="background-color: #f1f50a; color: white;"><%= order.orderStatus %></span></td>
+                  <% } %> %>
                 <td class="action-icons">
                     <a href="/admin/order-deatails/<%= order._id%>" style="text-decoration: none;"><i >&#9998;</i></a>
                 </td>
