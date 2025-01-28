@@ -182,7 +182,8 @@ const getCart = async (req, res) => {
       const color = item.color
       const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
       let colorName;
-      if(colorVariant &&  productDetails.inStocks == true){
+      const categoryCheck = await Category.findById(productDetails.categoryId)
+      if(colorVariant &&  productDetails.inStocks == true && categoryCheck.is_listed === true){
          colorName = colorVariant.colors.find((pr)=> pr.color == color)
       }else{
         colorName = null;
@@ -194,8 +195,6 @@ const getCart = async (req, res) => {
         colorquantity = 0
       }
       item.colorQuantity = colorquantity;
-      const categoryCheck = await Category.findById(productDetails.categoryId)
-
        if(!item.productId.offerId && !categoryCheck.offerId){
         item.price = colorVariant ? colorVariant.price : item.price
         item.total = item.price * item.quantity;
@@ -232,13 +231,7 @@ const getCart = async (req, res) => {
         item.total = item.price * item.quantity;
         item.totalOfferPrice = item.quantity * item.discoundOfferPricePer
       }
-      if(categoryCheck.is_listed === false){
-        await Cart.updateOne(
-          { userId }, 
-          { $pull: { items: { _id: item._id } } } 
-        );
-        
-     } 
+      
       await cart.save();
     }
 
@@ -445,7 +438,8 @@ const checkOut = async (req, res) => {
         const color = item.color
         const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
         let colorName;
-        if(colorVariant){
+        const categoryCheck = await Category.findById(productDetails.categoryId)
+        if(colorVariant &&  productDetails.inStocks == true && categoryCheck.is_listed === true){
            colorName = colorVariant.colors.find((pr)=> pr.color == color)
         }else{
           colorName = null;

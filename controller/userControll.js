@@ -139,9 +139,8 @@ async function otpTransport(email,otp) {
   
 // siginup post
 let postsignup = async (req,res)=>{
-    try{
-      console.log(req.body);
-      
+  
+    try{      
         const {username,email,password,phone,referralCode} = req.body;
         let user = await User.findOne({email})
         let name = await User.findOne({username})

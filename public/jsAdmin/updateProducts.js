@@ -2,7 +2,7 @@ let imageFiles = [];
 let cropper; 
 let croppedImages = []; 
 
-let variantCount = 0;
+let variantCount = 1;
 
 function addVariant() {
     const container = document.getElementById('variant-container');
@@ -234,7 +234,6 @@ document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
     const variant = row.querySelector('input[name="variant"]').value;
     const price = row.querySelector('input[name="price"]').value;
     const quantity = row.querySelector(`input[name="quantity"]`).value;
-
     if (!variant) {
         Swal.fire({
     icon: 'warning',
@@ -299,6 +298,7 @@ let totalColorquantity = colors.reduce((acc,colo)=>{
         return  acc+= colo.quantity
     },0)
     
+
     if (totalColorquantity != quantity) {
         iziToast.warning({
             title: 'Quantity Mismatch',
@@ -307,7 +307,7 @@ let totalColorquantity = colors.reduce((acc,colo)=>{
             timeout: 5000, // Duration for which the toast remains visible (in ms)
         });
         variants.length = 0
-        return;
+     return;
     }
 
 
@@ -322,10 +322,9 @@ let totalColorquantity = colors.reduce((acc,colo)=>{
 });
 
 // Output variants for testing
-console.log(variants);
 
 
-if (variants.length === 0) {
+if (variants.length === 0 ) {
     return iziToast.warning({
         title: 'No Valid Variants Found',
         message: 'Please check your inputs and try again.',

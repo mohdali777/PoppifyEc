@@ -55,7 +55,7 @@ function formvalidation(e) {
 }
 
 // Add event listener to the form
-document.getElementById("formsignup").addEventListener("submit", formvalidation);
+document.getElementById("formsignupp").addEventListener("submit", formvalidation);
 
 
 function togglePassword() {

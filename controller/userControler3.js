@@ -154,6 +154,11 @@ const verifyPayment = async (req, res) => {
     const color = item.color
     const colorVariant = productDetails.variants.find((pr) => pr.variant == variant)
     const inStocks = productDetails.inStocks == true
+    const categoryCheck = await Category.findById(productDetails.categoryId)
+    
+    if(categoryCheck.is_listed === false){
+      return res.status(400).json({message:`Your Choosed ${item.productName} Not Available Now`})      
+   }
     if(!inStocks){
       return res.status(400).json({message:`Your Choosed ${item.productName} Not Available Now`})
     }
