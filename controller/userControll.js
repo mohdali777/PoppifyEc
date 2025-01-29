@@ -454,6 +454,8 @@ let postlogin = async (req,res)=>{
     }
 
     const newpassword = async (req,res)=>{
+      console.log(req.body);
+      
         try {
             const {password,email} = req.body;
  const saltRounds = 10;
