@@ -175,7 +175,9 @@ function displayImagePreview(file) {
 function removeImage(image, productid) {
     fetch(`/admin/removeimage/${image}/${productid}`, { method: "POST" })
         .then((response) => {
-            if (response.ok) window.location.reload();
+            if (response.ok){
+                window.location.reload();
+            } 
         })
         .catch((err) => {
             console.log(err);
@@ -205,16 +207,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
 
 
+const imagePreview = document.getElementById("image-preview");
+const imageCount = imagePreview.getAttribute("data-images");
+const imageCountNumber = parseInt(imageCount, 10);
+
+    if (croppedImages.length === 0 && imageCountNumber === 0 ) {
+        Swal.fire({
+    icon: 'warning',
+    title: 'No Images Selected',
+    text: 'Please select at least one image to proceed.',
+    });
     
+        return false;
+    }
 
 
 
         const formData = new FormData();
         const productIdd = document.getElementById('productId')?.value || '';
-        if (!productIdd) {
-            alert('Product ID is missing');
-            return;
-        }
+        
 
         
         formData.append('name', document.getElementById('product-name').value);

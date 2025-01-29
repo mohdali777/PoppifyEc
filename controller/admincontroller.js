@@ -427,8 +427,9 @@ const removeimage = async(req,res) =>{
     const productId = req.params.productid;
     const imageid = req.params.image;
      await Product.updateOne({_id:productId},{$pull:{image:imageid}})
+     res.status(200).json({message:"image Deleted Succesfully"})
   } catch (error) {
-    
+    res.status(500).send('Server Error');
     console.log(error);
     
   }

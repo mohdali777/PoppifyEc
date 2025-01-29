@@ -28,7 +28,7 @@
         <button onclick="closeCropper()">Cancel</button>
     </div>
 
-    <div id="image-preview" class="image-preview-container">
+    <div id="image-preview" class="image-preview-container" data-images="<%= product.image.length %>">
         <% product.image.forEach((image) => { %>
             <div class="image-wrapper">
                 <img id="imgsrc" src="/uploads/<%= image %>" class="preview-image" />
