@@ -208,7 +208,6 @@ function placeorder(orderId, totalPrice) {
         })
         .then((data) => {
           if (orderDetails.paymentMethod === "RazorPay" && data.razorpayOrderId) {
-                  console.log('enterrazorpay');    
             initializeRazorpay(data.razorpayOrderId, orderDetails.totalPrice, data.keyId,orderDetails);
           }else{
             swal("Success", "Order placed successfully!", "success")
@@ -226,9 +225,7 @@ function placeorder(orderId, totalPrice) {
 }
 
 function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
-    console.log("Initializing Razorpay...");
-    console.log("Razorpay Order ID:", razorpayOrderId);
-    console.log("Order Details:", orderDetails);
+
 
     const options = {
         key: keyId, 
@@ -238,7 +235,6 @@ function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
         description: "Order Payment",
         order_id: razorpayOrderId,
         handler: function (response) {
-            console.log("Payment successful response:", response);
             verifyPayment(response, razorpayOrderId, orderDetails);
         },
         prefill: {
@@ -256,8 +252,7 @@ function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
 }
 
 function verifyPayment(response, razorpayOrderId, orderDetails) {
-    console.log("Verifying Payment...");
-    console.log("Response:", response);
+
 
     fetch('/verify-payment', {
         method: 'POST',
@@ -273,7 +268,6 @@ function verifyPayment(response, razorpayOrderId, orderDetails) {
     })
         .then(res => res.json())
         .then(data => {
-            console.log("Payment verification data:", data);
             if (data.success) {
                 swal({
                     title: "Payment Successful",

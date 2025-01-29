@@ -84,7 +84,6 @@ function renderRatingStars(rating) {
 
 // Function to navigate to product details page
 function productDetails(productId, category) {
-    console.log("Redirecting to product details...");
     fetch(`/productdeatails/${productId}/${category}`, { method: "GET" })
         .then((response) => {
             if (response.ok) window.location.href = `/productdeatails/${productId}/${category}`;

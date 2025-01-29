@@ -47,7 +47,6 @@ function addmoney(){
                 `;
                 tableBody.appendChild(row);
             });
-            console.log(balance);
             
             balance.textContent = Cardbalance;
     
@@ -115,7 +114,6 @@ function addmoney(){
         })
         .then(data => {
             if (data.razorpayOrderId) {
-                      console.log('enterrazorpay');    
                 initializeRazorpay(data.razorpayOrderId, requestBody.amount, data.keyId);
                 
             }else{
@@ -129,8 +127,7 @@ function addmoney(){
     }
     
     function initializeRazorpay(razorpayOrderId, amount, keyId) {
-        console.log("Initializing Razorpay...");
-        console.log("Razorpay Order ID:", razorpayOrderId);
+
     
         const options = {
             key: keyId, 
@@ -140,7 +137,6 @@ function addmoney(){
             description: "Add money to Wallet",
             order_id: razorpayOrderId,
             handler: function (response) {
-                console.log("Payment successful response:", response);
                 verifyPayment(response, razorpayOrderId);
             },
             prefill: {
@@ -158,8 +154,7 @@ function addmoney(){
     }
     
     function verifyPayment(response, razorpayOrderId) {
-        console.log("Verifying Payment...");
-        console.log("Response:", response);
+
     
         fetch('/verify-payment', {
             method: 'POST',
@@ -175,7 +170,6 @@ function addmoney(){
         })
             .then(res => res.json())
             .then(data => {
-                console.log("Payment verification data:", data);
                 if (data.success) {
                     swal({
                         title: "Payment Successful",

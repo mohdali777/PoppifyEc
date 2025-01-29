@@ -187,7 +187,6 @@ const verifyPayment = async (req, res) => {
       }else{
           finalAddress = newAddress;     
       }
-      console.log(finalAddress);
       if(!finalAddress){
         return res.status(400).json({ message: "please Add Address" });
       }
@@ -258,7 +257,8 @@ const verifyPayment = async (req, res) => {
         paymentStatus,
         coupenId:coupenId,
         coupenDiscountAmount:coupenDiscountAmount,
-        CartTotalOffer:cartDiscount
+        CartTotalOffer:cartDiscount,
+        income:totalPrice
       })
     for (let item of cartItems) {
       const product = await Product.findById(item.productId);
@@ -314,7 +314,13 @@ const verifyPayment = async (req, res) => {
         .sort({ createdAt: -1 }) 
         .skip(skip)   
         .limit(limit) 
-        .populate("cartItems.productId");
+        .populate({
+          path: 'cartItems.productId', 
+          populate: {
+              path: 'categoryId', 
+          },
+      })
+
       const totalOrders = await Order.countDocuments({ userId: userId });
       const totalPages = Math.ceil(totalOrders / limit); 
       res.render("users/myorders", {
@@ -343,6 +349,9 @@ const verifyPayment = async (req, res) => {
         if (order.orderStatus === "Cancelled") {
             return res.status(400).json({ message: "Order has already been cancelled" });
         }
+        if (order.orderStatus === "Delivered") {
+          return res.status(400).json({ message: "Order has already been Delivered" });
+      }
         order.orderStatus = "Cancelled";
         for (let item of order.cartItems) {
             const product = await Product.findById(item.productId);

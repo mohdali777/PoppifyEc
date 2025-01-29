@@ -3,7 +3,6 @@ function downloadInvoice(orderId){
        return response.json()
     }).then((data)=>{
 if(data.ok){
-console.log(data.message);
 const orderDetails = {
     orderId: data.order.orderId,
     date: new Date(data.order.createdAt).toLocaleDateString(),
@@ -28,7 +27,6 @@ const orderDetails = {
 }
 
 function DownloadPdf(orderDetails) {
-    console.log(orderDetails);
     
 const { orderId, date, customer, items, total, paymentMethod } = orderDetails;
 

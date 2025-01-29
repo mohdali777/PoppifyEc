@@ -203,20 +203,20 @@ const getCart = async (req, res) => {
         let categotyoffer = await Offer.findById(categoryCheck.offerId)
         item.price = colorVariant ? colorVariant.price : item.price;
         let ogValue = item.price;
-        if(categotyoffer && productOffer){
+        if(categotyoffer && productOffer &&  item.price >= categotyoffer.minimumOrderValue  && item.price >= productOffer.minimumOrderValue && productOffer.isActive === true && categotyoffer.isActive === true ){
           let offerValueBoth = categotyoffer.discountValue + productOffer.discountValue
           item.price = item.price - (item.price * offerValueBoth / 100)
           item.total = item.price * item.quantity;
           let discoundGet =  ogValue - item.price
           item.discoundOfferPricePer = discoundGet;
           item.totalOfferPrice = item.quantity * item.discoundOfferPricePer;
-        }else if(productOffer){
+        }else if(productOffer && item.price >= productOffer.minimumOrderValue && productOffer.isActive === true){
            item.price = item.price - (item.price * productOffer.discountValue / 100)
            item.total = item.price * item.quantity;
            let discoundGet =  ogValue - item.price
            item.discoundOfferPricePer = discoundGet
            item.totalOfferPrice = item.quantity * item.discoundOfferPricePer;
-          }else if(categotyoffer){
+          }else if(categotyoffer && item.price >= categotyoffer.minimumOrderValue && categotyoffer.isActive === true){
           item.price = item.price - (item.price * categotyoffer.discountValue / 100)
           item.total = item.price * item.quantity;
           let discoundGet =  ogValue - item.price
@@ -262,6 +262,15 @@ const getCart = async (req, res) => {
         if (!userId) {
           return res.status(401).json({ success: false, message: 'Please Login Or Signup' });
       }
+      const productIslist = await Product.findById(productId)
+      if(productIslist.inStocks === false){
+        return res.status(401).json({ success: false, message: 'Product Not Available' });
+      }
+      const CateogerIslist = await Category.findById(productIslist.categoryId)  
+      if(CateogerIslist.is_listed === false){
+        return res.status(401).json({ success: false, message: 'Product Not Available' });
+      }    
+    
         let cart = await Cart.findOne({ userId });
     
         if (!cart) {
@@ -283,7 +292,13 @@ const getCart = async (req, res) => {
           const totalQuantityAfterAddition = existingItem.quantity + parseInt(quantity);
           let ProductDeatailS = await Product.findById(productId)
           const colorVariant = ProductDeatailS.variants.find((pr) => pr.variant == variant)
+          if(!colorVariant){
+            return res.status(400).json({message:`Your Choosed Variant Not Available`})
+          } 
           const colorName = colorVariant.colors.find((pr)=> pr.color == color)
+          if(!colorName){
+            return res.status(400).json({message:`Your Choosed Color Not Available`})
+          } 
           const colorquantity = colorName.quantity
           existingItem.colorQuantity = colorquantity;
           if(totalQuantityAfterAddition > colorquantity){
@@ -300,7 +315,13 @@ const getCart = async (req, res) => {
           const productCategory = ProductDeat.category
           const productBrand = ProductDeat.brand
           const colorVariant = ProductDeat.variants.find((pr) => pr.variant == variant)
+          if(!colorVariant){
+            return res.status(400).json({message:`Your Choosed Variant Not Available`})
+          } 
           const colorName = colorVariant.colors.find((pr)=> pr.color == color)
+          if(!colorName){
+            return res.status(400).json({message:`Your Choosed Color Not Available`})
+          } 
           const colorquantityFind = colorName.quantity
           cart.items.push({
             productId,
@@ -346,7 +367,6 @@ const getCart = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Cart not found' });
       }
       const item = cart.items.find(item => item._id.toString() === id && item.variant === variant && item.color === color) ;
-  console.log(item);
   
       if (!item) {
         return res.status(404).json({ success: false, message: 'Product not found in cart' });
@@ -358,7 +378,6 @@ const getCart = async (req, res) => {
       });
      }
       const colorName = colorVariant.colors.find((pr)=> pr.color == color)
-      console.log(colorName);
       
       if(!colorName){
         item.colorQuantity = 0;
@@ -375,7 +394,6 @@ const getCart = async (req, res) => {
         await cart.save()
         return res.status(400 ).json({success:false,message:`You can only add up to ${colorquantity} items`,colorquantity})
       }
-      console.log(ProductDeat,colorVariant,colorName);
        
       item.quantity = quantity;
       item.total = item.price * quantity;
@@ -428,7 +446,6 @@ const checkOut = async (req, res) => {
       }
       const cart = await Cart.findOne({ userId: userId}).populate("items.productId");
       if (!cart) {
-          console.log("Cart not found for user", userId);
           return res.status(404).json({ success: false, message: 'Cart not found' });
       }
       
@@ -484,8 +501,13 @@ const getwishlist = async (req,res) => {
     try {
       const userId = req.session.userId;
       const wishlist = await Wishlist.find({ userId })
-        .populate('items.productId') // Populate the product details
-        .exec(); // Using exec with await to get the result
+      .populate({
+          path: 'items.productId', // Populate the product details
+          populate: {
+              path: 'categoryId', // Populate the category inside the product
+          },
+      })
+      .exec();
   
       res.json({ success: true, items: wishlist[0]?.items || [] }); // Return items if present, else empty array
     } catch (err) {

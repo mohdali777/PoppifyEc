@@ -120,12 +120,10 @@ document.getElementById("downloadReportBtn").addEventListener("click", () => {
   // Get the table rows
   const tbody = document.querySelector('tbody');
   const rows = tbody.querySelectorAll('tr');
-  console.log(rows);
   
   // Iterate through each row and extract data
   rows.forEach(row => {
       const cells = row.querySelectorAll('td');
-      console.log(cells);
       
       const rowData = [
           cells[0].innerText, // Date
@@ -169,11 +167,9 @@ function downloadExel(orders ){
 
   const tbody = document.querySelector('tbody');
   const rows = tbody.querySelectorAll('tr');
-  console.log(rows);
   let rowData = [];
   rows.forEach(row => {
     const cells = row.querySelectorAll('td');
-    console.log(cells);
      rowData .push({ 
      date        : cells[0].innerText, // Date
      orderId     : cells[1].innerText, // Order ID
@@ -183,10 +179,7 @@ function downloadExel(orders ){
      netSale     : cells[5].innerText,}) 
 });
 
-console.log(rowData);
 
-  
-console.log('Orders:', orders);
 
 fetch('/admin/download-report/excel', {
   method: 'POST',

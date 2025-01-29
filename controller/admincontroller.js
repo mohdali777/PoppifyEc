@@ -349,7 +349,6 @@ const addproductsget = async (req,res)=> {
 }
 
 const addproductpost = async (req, res) => {
-  console.log(req.body);
   
   try {
     const { name, description, category, price, quantity, brand, variants, colors,offer,inStocks } = req.body;
@@ -438,7 +437,6 @@ const removeimage = async(req,res) =>{
 }
 const updateproduct = async (req, res) => {
   try {
-    console.log(req.body);
     
     const { name, description, category, price,  brand, variants, id,offer,inStocks } = req.body;
 
@@ -523,7 +521,7 @@ const renderChart = async (req, res) => {
       { $match: matchCondition }, // Apply the date filter (e.g., only for current month/year)
       { $group: { 
           _id: groupBy, 
-          totalRevenue: { $sum: "$totalPrice" }, // Calculate total revenue
+          totalRevenue: { $sum: "$income" }, // Calculate total revenue
           count: { $sum: 1 } // Count orders
         }
       },

@@ -58,8 +58,13 @@ sizeSelect.addEventListener('change', function () {
   }
 
   
-  if (discountperCategory > 0 && finalPrice >= discountminiCategory) {
-    finalPrice = finalPrice - (finalPrice * discountperCategory / 100);
+  if (discountperCategory > 0 && price >= discountminiCategory) {
+    finalPrice = price - (price * discountperCategory / 100);
+  }
+
+  if(discountper > 0 && price >= discountmini && discountperCategory > 0 && price >= discountminiCategory ){
+    let bothDiscount = discountper + discountperCategory
+    finalPrice = price - (price * bothDiscount / 100);
   }
 
  
@@ -94,14 +99,10 @@ sizeSelect.addEventListener('change', function () {
 
   document.querySelectorAll('input[name="color"]').forEach(input => {
   input.addEventListener("change", () => {
-    console.log("s");
     if (input.checked) {
-      console.log(input.value);  // Logs the value of the selected radio button
-      console.log(input.getAttribute('data-quantity'));
       const colorQuantity = input.getAttribute('data-quantity')
       quantityElement.textContent = `${colorQuantity} Products Left`;
       SelectColor = input.value
-      console.log(SelectColor);
       SelectColorQuantity = (colorQuantity)
     
       
@@ -223,8 +224,7 @@ document.getElementById("quantity").addEventListener('input', function () {
     }
     const offerprice = document.getElementById("price");
     const ogprice = document.getElementById("originalprice");
-    console.log(offerprice);
-    console.log(ogprice);
+   
     
     
     if (!offerprice && !ogprice) {
@@ -235,7 +235,6 @@ document.getElementById("quantity").addEventListener('input', function () {
   
     const price = parseFloat(priceText.replace('₹', '').trim());
 
-    console.log("Price:", price);
 
 
     // Check if price is valid
@@ -244,7 +243,6 @@ document.getElementById("quantity").addEventListener('input', function () {
         return;
     }
  
-    console.log(price);
 
     const offerPriceText = offerprice ? offerprice.textContent : null;
 const originalPriceText = ogprice ? ogprice.textContent : null;
@@ -253,8 +251,7 @@ const originalPriceText = ogprice ? ogprice.textContent : null;
 const offerPriceValue = offerPriceText ? parseFloat(offerPriceText.replace('₹', '').trim()) : null;
 const originalPriceValue = originalPriceText ? parseFloat(originalPriceText.replace('₹', '').trim()) : null;
 
-console.log("Offer Price:", offerPriceValue);
-console.log("Original Price:", originalPriceValue);
+
 
 // Validate prices
 if ((offerPriceValue === null && originalPriceValue === null) || 
@@ -267,10 +264,7 @@ if ((offerPriceValue === null && originalPriceValue === null) ||
 // Calculate the offer amount (discount)
 const offerAmount = (originalPriceValue && offerPriceValue) ? (originalPriceValue - offerPriceValue) : 0;
 
-console.log("Offer Amount:", offerAmount);
 
-console.log(SelectColorQuantity)
-console.log(SelectColor);
 
 
   const selectedQuantity = document.getElementById("quantity").value;
@@ -370,9 +364,7 @@ if(selectedQuantity == 0 || selectedQuantity < 0){
 }
 
 function productdeatails (productId,category){
-        console.log("............");
-        console.log(productId);
-        console.log("............");
+
         
   fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
  if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`

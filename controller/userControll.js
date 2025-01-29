@@ -69,7 +69,7 @@ let forget = async (req,res)=>{
         const listedCategoryNames = categorieS.map(category => category.name);
         const products = await Product.find({ category: { $in: listedCategoryNames } })
         const categories = await Category.find({is_listed: true})
-        res.render("users/shop", { products ,categories});
+        res.render("users/shop", { products ,categories,userId:req.session.userId});
     } catch (error) {
       console.log(error);
       
@@ -80,7 +80,6 @@ let forget = async (req,res)=>{
    res.redirect("/signup")
    }
    let signlogin = async(req,res)=>{
-    console.log(req.session.username);
    res.redirect("/login")
    }
    const forgetPass = async (req,res)=>{
@@ -349,7 +348,6 @@ let postlogin = async (req,res)=>{
         const userId = await User.findOne({username})
         req.session.userId = userId._id;
         res.status(200).json({ message: "Login successful", redirectUrl: "/" });
-            console.log(req.session.username);
             
         }catch(err){
             res.status(500).send(`${err} error found`)
@@ -475,7 +473,6 @@ let postlogin = async (req,res)=>{
   }
 
   const sort = async (req, res) => {
-    console.log(req.query);
     
     const { sort, search, category, variant,price } = req.query;
 

@@ -40,7 +40,7 @@
     <select id="offers" name="offer">
       <option value="">selectOffer</option>
       <% offers.forEach(offer => { %>
-        <option value="<%= offer.offerName %>">
+        <option value="<%= offer.offerName %>"  <%= offer._id.toString() == category.offerId ? 'selected' : '' %>>
           <%= offer.offerName %>
         </option>
       <% }) %>

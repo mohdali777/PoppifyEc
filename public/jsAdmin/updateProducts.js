@@ -228,19 +228,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-        
         const variants = [];
+        let variantflag = true;
+
 document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
     const variant = row.querySelector('input[name="variant"]').value;
     const price = row.querySelector('input[name="price"]').value;
     const quantity = row.querySelector(`input[name="quantity"]`).value;
+
     if (!variant) {
         Swal.fire({
     icon: 'warning',
     title: 'Missing Variant Name',
     text: `Variant name is missing for row ${variantIndex + 1}`,
   });
-        variants.length = 0
+     variants.length = 0
+     variantflag = false;
         return; 
     }
 
@@ -251,6 +254,7 @@ document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
   text: `Invalid price for row ${variantIndex + 1}`,
       });
         variants.length = 0
+        variantflag = false;
         return; 
     }
     
@@ -261,6 +265,7 @@ document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
      text: `Invalid quantity for row ${variantIndex + 1}`,
    });
         variants.length = 0
+        variantflag = false;
         return; 
     }
 
@@ -289,6 +294,7 @@ document.querySelectorAll('.variant-row').forEach((row, variantIndex) => {
   title: 'No Valid Colors Selected',
   text: `No valid colors selected for row ${variantIndex + 1}.`,
 });
+        variantflag = false;
         variants.length = 0
         return;
     }
@@ -306,12 +312,13 @@ let totalColorquantity = colors.reduce((acc,colo)=>{
             position: 'topRight', // Customize position as needed (e.g., 'topRight', 'bottomLeft', etc.)
             timeout: 5000, // Duration for which the toast remains visible (in ms)
         });
+        variantflag = false;
         variants.length = 0
      return;
     }
 
 
-    if (variant && price && quantity && colors.length > 0 && colors !== null) {
+    if (variant && price && quantity && colors.length > 0 && colors !== null ) {
         variants.push({ 
             variant, 
             price: parseFloat(price), 
@@ -324,7 +331,7 @@ let totalColorquantity = colors.reduce((acc,colo)=>{
 // Output variants for testing
 
 
-if (variants.length === 0 ) {
+if (variants.length === 0 || variantflag === false ) {
     return iziToast.warning({
         title: 'No Valid Variants Found',
         message: 'Please check your inputs and try again.',

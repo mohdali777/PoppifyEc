@@ -44,7 +44,6 @@ function fetchData () {
               const quantity = data.cart.items.map((pr)=>{
               return pr.colorQuantity == 0;
               })
-              console.log(quantity);
               
               if(quantity.includes(true)){
                 document.getElementById("proceedButton").setAttribute("onclick","removeStock()")

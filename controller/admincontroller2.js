@@ -44,9 +44,32 @@ const orderManagment = async (req,res) => {
           }
           if(status == "Cancelled" && order.paymentMethod === "RazorPay" && order.paymentStatus == "Paid" ||status == "Cancelled" && order.paymentMethod === "Wallet" && order.paymentStatus == "Paid"){
             const userId = order.userId;
-            const wallet = await Wallet.findOne({ userId }); 
-            if (wallet) {
-                console.log(wallet);
+            let wallet = await Wallet.findOne({ userId }); 
+
+            if(!wallet){
+              const expiryDate = new Date();
+              expiryDate.setFullYear(expiryDate.getFullYear() + 5);  // Set expiry to 5 years from now
+              const cardExpiry = `${("0" + (expiryDate.getMonth() + 1)).slice(-2)}/${expiryDate.getFullYear().toString().slice(-2)}`;
+
+              function generateCardNumber() {
+                const prefix = Math.floor(Math.random() * 5) + 51;  // Generates a number between 51 and 55
+                const cardNumber = `${prefix}${Math.floor(Math.random() * 1000000000000000)}`.slice(0, 16);
+                return cardNumber;
+              }
+
+              const user = await User.findById(userId)
+
+                wallet = new Wallet({
+                  userId: userId,
+                  cardNumber: generateCardNumber(), 
+                  balance: 0.0,   
+                  cardExpiry: cardExpiry,
+                  cardHolderName: user.username, 
+                  cardType: 'MasterCard', 
+                  transactions: []  
+                })
+            }
+
                 wallet.balance += order.totalPrice;
                 wallet.transactions.push({
                     transactionId: `Refund-${order._id}`,
@@ -57,9 +80,7 @@ const orderManagment = async (req,res) => {
                 });
                 order.paymentStatus = "Refunded"
                 await wallet.save();
-            } else {
-                console.log("Wallet not found for user:", userId);
-            }
+           
         }
          
         if(status == "Cancelled" && order.paymentMethod === "COD"){
@@ -88,16 +109,36 @@ const orderManagment = async (req,res) => {
         }
   
   
-    
-          const wallet = await Wallet.findOne({ userId });
+        let walletbalance;
+          let wallet = await Wallet.findOne({ userId });
         if(!wallet){
-            return res.status(404).json({ message: "Wallet not found for the user." });
-        }
+          const expiryDate = new Date();
+          expiryDate.setFullYear(expiryDate.getFullYear() + 5);  // Set expiry to 5 years from now
+          const cardExpiry = `${("0" + (expiryDate.getMonth() + 1)).slice(-2)}/${expiryDate.getFullYear().toString().slice(-2)}`;
+
+          function generateCardNumber() {
+            const prefix = Math.floor(Math.random() * 5) + 51;  // Generates a number between 51 and 55
+            const cardNumber = `${prefix}${Math.floor(Math.random() * 1000000000000000)}`.slice(0, 16);
+            return cardNumber;
+          }
+
+          const user = await User.findById(userId)
+
+            wallet = new Wallet({
+              userId: userId,
+              cardNumber: generateCardNumber(), 
+              balance: 0.0,   
+              cardExpiry: cardExpiry,
+              cardHolderName: user.username, 
+              cardType: 'MasterCard', 
+              transactions: []  
+            })       
+          
+          }
           if (wallet) {
               if (typeof item.total !== 'number' || isNaN(item.total)) {
                   throw new Error(`Invalid totalAmount: ${item.total}`);
               }
-              let walletbalance;
               if(order.coupenId != null){
                 const coupenId = order.coupenId;
                 const coupen = await Coupen.findById(coupenId)
@@ -124,8 +165,24 @@ const orderManagment = async (req,res) => {
               return res.status(404).json({ message: "User wallet not found" });
           }
       
+          
         item.status = "Accepted";
-        order.orderStatus = "Returned"
+        order.income -= walletbalance;
+
+        let count = 0;
+        for(let item of order.cartItems){
+           if(item.status == "Accepted"){
+             count++;
+           }
+        }
+        
+        if( count == order.cartItems.length){
+            order.orderStatus = "Returned"
+        }
+        
+        
+         
+        
         await order.save();
         return res.status(200).json({ success: true, message: "Return request accepted successfully." });
       } catch (error) {
@@ -181,7 +238,6 @@ const orderManagment = async (req,res) => {
   
   
   const createCoupen = async (req,res) => {
-    console.log(req.body);
     
     try {
       const {couponCode,discount,expiryDate,description} = req.body;
@@ -318,7 +374,6 @@ const orderManagment = async (req,res) => {
   
   const createOffer = async (req,res) => {
     try {
-      console.log(req.body);
       
       const { offerName,offerType, discountType, discountValue, minimumOrderValue, expiryDate,StartingDate, isActive } = req.body;
       
@@ -366,7 +421,7 @@ const orderManagment = async (req,res) => {
         {
           $group: {
             _id: null,
-            totalSales: { $sum: "$totalPrice" },
+            totalSales: { $sum: "$income" },
           },
         },
       ]);
@@ -437,7 +492,7 @@ const orderManagment = async (req,res) => {
       const orders = await Order.find(filters).sort({ createdAt: 1 });
   
   
-      const totalSales = orders.reduce((sum, order) => sum + order.totalPrice, 0);
+      const totalSales = orders.reduce((sum, order) => sum + order.income, 0);
       const totalOffers = orders.reduce((sum, order) => sum + (order.CartTotalOffer || 0) + (order.coupenDiscountAmount || 0), 0);
   
       res.json({ orders, totalSales, totalOffers });
@@ -448,10 +503,8 @@ const orderManagment = async (req,res) => {
   };
   
   const downloadExcel = async (req, res) => {
-    console.log(req.body);
     
     const { rowData } = req.body;
-    console.log(rowData);
     
     try {
       // Create workbook and worksheet

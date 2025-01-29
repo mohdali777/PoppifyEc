@@ -130,7 +130,6 @@ return swal({
 
 }
 
-      console.log("Order Details:", orderDetails);
 
       fetch('/place-order', {
           method: 'POST',
@@ -141,12 +140,9 @@ return swal({
       })
           .then(response => response.json())
           .then(data => {
-              console.log("Order placed successfully:", data);
               if (orderDetails.paymentMethod === "RazorPay" && data.razorpayOrderId) {
-                console.log('enterrazorpay');
                 
           initializeRazorpay(data.razorpayOrderId, orderDetails.totalPrice, data.keyId,orderDetails);
-          console.log('enterrazorpay');
       } else {
           swal({
               title: "Notification",
@@ -173,9 +169,7 @@ return swal({
 
 
   function initializeRazorpay(razorpayOrderId, amount, keyId, orderDetails) {
-  console.log("Initializing Razorpay...");
-  console.log("Razorpay Order ID:", razorpayOrderId);
-  console.log("Order Details:", orderDetails);
+
 
   const options = {
       key: keyId, 
@@ -185,7 +179,6 @@ return swal({
       description: "Order Payment",
       order_id: razorpayOrderId,
       handler: function (response) {
-          console.log("Payment successful response:", response);
           verifyPayment(response, razorpayOrderId, orderDetails);
       },
       prefill: {
@@ -203,8 +196,7 @@ return swal({
 }
 
 function verifyPayment(response, razorpayOrderId, orderDetails) {
-  console.log("Verifying Payment...");
-  console.log("Response:", response);
+
 
   fetch('/verify-payment', {
       method: 'POST',
@@ -219,7 +211,6 @@ function verifyPayment(response, razorpayOrderId, orderDetails) {
   })
       .then(res => res.json())
       .then(data => {
-          console.log("Payment verification data:", data);
           if (data.success) {
               swal({
                   title: "Payment Successful",
@@ -254,10 +245,8 @@ function verifyPayment(response, razorpayOrderId, orderDetails) {
 
 
 function coupenApply(totalPrice){
-  console.log(totalPrice);
   const Price = document.getElementById("totalPrice1");
   const TotalPrice =  parseFloat(Price.textContent.trim().replace(/[^0-9.]/g, ""))
-  console.log(TotalPrice);
   const couponCode = document.getElementById('coupen-code').value;
 if (!couponCode) {
   document.getElementById('couponMessage').innerText = "Please enter a coupon code.";

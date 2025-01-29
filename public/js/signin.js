@@ -4,7 +4,6 @@ async function formvalidationsignin(e){
     let username = document.getElementById("username_signin").value;
     let password = document.getElementById("password_signin").value;
     
-    console.log(username, password);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

@@ -49,7 +49,7 @@
     <select id="offers" class="custom-width" name="offer" >
         <option value="">Choose offer</option>
         <% offers.forEach(offer => { %>
-        <option value="<%= offer.offerName %>"><%= offer.offerName %></option>
+        <option value="<%= offer.offerName %>" <%= offer._id.toString() == product.offerId ? 'selected' : '' %>><%= offer.offerName %></option>
             <% }) %>
     </select>
 

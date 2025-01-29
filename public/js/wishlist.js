@@ -34,7 +34,10 @@ function renderWishlist(items) {
       <div class="col" id="wishlist-item-${item.productId._id}">
         <div class="card shadow-sm position-relative" style="width: 270px; height: 350px; border-radius: 10px;">
           <div class="p-3" style="background-color: #F5F5F5; display: flex; justify-content: center; align-items: center; height: 240px;">
-            <img class="card-img-top" src="/uploads/${item.productId.image[0]}" alt="${item.productId.name}" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('${item.productId._id}', '${item.productId.category}')">
+           ${item.productId.inStocks === true  && item.productId.categoryId.is_listed === true ?  `<img class="card-img-top" src="/uploads/${item.productId.image[0]}" alt="${item.productId.name}" style="width: 172px; height: 152px; object-fit: contain;" onclick="productdeatails('${item.productId._id}', '${item.productId.category}')">
+              `:  ` <p style="font-size: medium;">Product Not Available Now</p> `
+             }
+            
           </div>
           <div class="position-absolute top-0 end-0 m-2 d-flex flex-column gap-2">
             <button class="btn btn-light btn-sm rounded-circle shadow-sm" style="width: 34px; height: 34px; background-color: red;" onclick="removeWishlist('${item.productId._id}')">
@@ -50,7 +53,9 @@ function renderWishlist(items) {
             </p>
             <h5 class="card-title fw-bold" style="font-size: 18px; font-weight: bold; color: #000;">₹${item.productId.variants[0].price}</h5>
             <div class="text-warning">
-              <button type="button" onclick="productdeatails('${item.productId._id}', '${item.productId.category}')" class="btn btn-danger btn-lg">View Product</button>
+            ${item.productId.inStocks === true && item.productId.categoryId.is_listed === true ?  `              <button type="button" onclick="productdeatails('${item.productId._id}', '${item.productId.category}')" class="btn btn-danger btn-lg">View Product</button>
+              `:  ` <p style="font-size: medium;">Product Not Available Now</p> `
+             }
             </div>
           </div>
         </div>
@@ -64,9 +69,7 @@ function renderWishlist(items) {
 
 // Function to view product details
 function productdeatails (productId,category){
-      console.log("............");
-      console.log(productId);
-      console.log("............");
+
       
 fetch(`/productdeatails/${productId}/${category}`,{method:"GET"}).then((response)=>{
 if(response.ok) window.location.href = `/productdeatails/${productId}/${category}`
@@ -78,7 +81,6 @@ console.log(err);
 
 // Function to remove an item from the wishlist
 function removeWishlist(productId) {
-  console.log(productId);
   
   fetch(`/removewishlis/${productId}`, { method: "POST" })
   .then((response) => {

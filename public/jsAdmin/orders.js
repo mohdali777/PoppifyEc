@@ -42,13 +42,23 @@ function acceptReturn(itemId,orderId,userId){
    body: JSON.stringify({ itemId, orderId,userId })
 }).then((response)=> response.json()).then((data)=>{
 if(data.success){
-   alert(data.message),
-   window.location.reload();
-   console.log(data.message);  
+    Swal.fire({
+        icon: "success",
+        title: "Success",
+        text: data.message,
+        confirmButtonText: "OK",
+      }).then(() => {
+        window.location.reload();
+      });
 }else{
-   alert(data.message)
-   window.location.reload();
-   console.log(data.message);  
+    Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: data.message,
+        confirmButtonText: "OK",
+      }).then(() => {
+        window.location.reload();
+      });  
 }
 }).catch((error)=>{
    console.log(error);
@@ -63,13 +73,23 @@ function rejectReturn(itemId,orderId){
    body: JSON.stringify({ itemId, orderId })
 }).then((response)=> response.json()).then((data)=>{
 if(data.success){
-   alert(data.message),
-   window.location.reload();
-   console.log(data.message);  
+    Swal.fire({
+        icon: "success",
+        title: "Rejected Successfully",
+        text: data.message,
+        confirmButtonText: "OK",
+      }).then(() => {
+        window.location.reload();
+      }); 
 }else{
-   alert(data.message)
-   window.location.reload();
-   console.log(data.message);  
+    Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: data.message,
+        confirmButtonText: "OK",
+      }).then(() => {
+        window.location.reload();
+      });  
 }
 }).catch((error)=>{
    console.log(error);
