@@ -17,7 +17,7 @@ document.getElementById("offer-create-btn").addEventListener("click", async func
       !discountType ||
       !discountValue ||
       discountValue <= 0 ||
-      discountValue > 100 ||
+      discountValue > 40 ||
       (minimumOrderValue && minimumOrderValue < 0) ||
       !expiryDate ||
       !StartingDate ||

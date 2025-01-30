@@ -53,7 +53,6 @@ function updateTable(orders) {
         <td>₹${order.totalPrice}</td>
         <td>₹${order.CartTotalOffer || '0'}</td>
         <td>₹${order.coupenDiscountAmount || '0'}</td>
-        <td>₹${order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0)}</td>
       </tr>`;
     tableBody.insertAdjacentHTML('beforeend', row);
   });
@@ -111,7 +110,7 @@ document.getElementById("downloadReportBtn").addEventListener("click", () => {
   doc.setFontSize(18);
   doc.text('Sales Report', 14, 20);
 
-  const headers = ['Date', 'Order ID', 'Total Amount', 'Discount', 'Coupon', 'Net Sales'];
+  const headers = ['Date', 'Order ID', 'Total Amount', 'Discount', 'Coupon'];
   const data = [];
   let totalPrice = 0;
   let totalOfferPrice = 0;
@@ -131,7 +130,6 @@ document.getElementById("downloadReportBtn").addEventListener("click", () => {
           cells[2].innerText, // Total Amount
           cells[3].innerText, // Discount
           cells[4].innerText, // Coupon
-          cells[5].innerText, // Net Sales
       ];
       data.push(rowData);
       
@@ -176,7 +174,7 @@ function downloadExel(orders ){
      totalAmount : cells[2].innerText, // Total Amount
      discount    : cells[3].innerText, // Discount
      Coupon      : cells[4].innerText, // Coupon
-     netSale     : cells[5].innerText,}) 
+     }) 
 });
 
 

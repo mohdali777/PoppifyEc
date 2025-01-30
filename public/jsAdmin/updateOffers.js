@@ -19,7 +19,7 @@ document.getElementById("offer-create-btn").addEventListener("click", async func
       !formData.discountType ||
       !formData.discountValue ||
       formData.discountValue <= 0 ||
-      formData.discountValue > 100 ||
+      formData.discountValue > 40 ||
       (formData.minimumOrderValue && formData.minimumOrderValue < 0) ||
       !formData.expiryDate ||
       !formData.StartingDate ||

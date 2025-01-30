@@ -84,7 +84,6 @@
               <th>Total Amount</th>
               <th>Discount</th>
               <th>Coupon</th>
-              <th>Net Sales</th>
             </tr>
           </thead>
           <tbody id="productTableBody">
@@ -103,7 +102,6 @@
               <td><%= order.totalPrice %></td>
               <td><%= order.CartTotalOffer || '0' %></td>
               <td><%= order.coupenDiscountAmount || '0' %></td>
-              <td><%= order.totalPrice - (order.CartTotalOffer || 0) - (order.coupenDiscountAmount || 0) %></td>
             </tr>
             <% }) %>
           </tbody>

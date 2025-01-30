@@ -518,7 +518,6 @@ const orderManagment = async (req,res) => {
         { header: 'Total Amount', key: 'totalPrice', width: 15 },
         { header: 'Discount', key: 'CartTotalOffer', width: 15 },
         { header: 'Coupon Discount', key: 'coupenDiscountAmount', width: 20 },
-        { header: 'Net Sales', key: 'netSales', width: 15 },
       ];
   
       // Add data rows
